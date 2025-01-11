@@ -46,17 +46,17 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+                drive.withVelocityX(joystick.getLeftY() * Math.abs(joystick.getLeftY()) * MaxSpeed) // Drive forward with negative Y (forward)
+                    .withVelocityY(joystick.getLeftX() * Math.abs(joystick.getLeftX()) * MaxSpeed) // Drive left with negative X (left)
+                    .withRotationalRate(-(joystick.getRightX() * Math.abs(joystick.getRightX()) * MaxAngularRate)) // Drive counterclockwise with negative X (left)
             )
         );
         
       
         joystick.rightBumper().whileTrue(drivetrain.applyRequest(() ->
-        drive.withVelocityX(joystick.getLeftY() * HalfSpeed) // Drive forward with negative Y (forward)
-            .withVelocityY(joystick.getLeftX() * HalfSpeed) // Drive left with negative X (left)
-            .withRotationalRate(-joystick.getRightX() * HalfAngularRate) // Drive counterclockwise with negative X (left)
+        drive.withVelocityX(joystick.getLeftY() * Math.abs(joystick.getLeftY()) * HalfSpeed) // Drive forward with negative Y (forward)
+            .withVelocityY(joystick.getLeftX() * Math.abs(joystick.getLeftX()) * HalfSpeed) // Drive left with negative X (left)
+            .withRotationalRate(-(joystick.getRightX() * Math.abs(joystick.getRightX()) * HalfAngularRate)) // Drive counterclockwise with negative X (left)
     ));
     
         joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
