@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.*;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -45,18 +46,39 @@ public class RobotContainer {
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
-            drivetrain.applyRequest(() ->
-                drive.withVelocityX(joystick.getLeftY() * Math.abs(joystick.getLeftY()) * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(joystick.getLeftX() * Math.abs(joystick.getLeftX()) * MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(-(joystick.getRightX() * Math.abs(joystick.getRightX()) * MaxAngularRate)) // Drive counterclockwise with negative X (left)
+            drivetrain.applyRequest(() ->{
+                SlewRateLimiter slewRateLimiterX = new SlewRateLimiter(MaxSpeed);
+                double xSpeed = slewRateLimiterX.calculate(joystick.getLeftY()* MaxSpeed);
+                
+                SlewRateLimiter slewRateLimiterY = new SlewRateLimiter(MaxSpeed);
+                double ySpeed = slewRateLimiterY.calculate(joystick.getLeftX()* MaxSpeed);
+                
+                SlewRateLimiter slewRateLimiterTurnX = new SlewRateLimiter(MaxSpeed);
+                double yTurnSpeed = slewRateLimiterTurnX.calculate(joystick.getRightX()* MaxSpeed);
+
+                return drive.withVelocityX(xSpeed * Math.abs(xSpeed)) // Drive forward with negative Y (forward)
+                    .withVelocityY(ySpeed * Math.abs(ySpeed)) // Drive left with negative X (left)
+                    .withRotationalRate(-(yTurnSpeed * Math.abs(yTurnSpeed))); // Drive counterclockwise with negative X (left)
+            }
             )
         );
+    
         
       
-        joystick.rightBumper().whileTrue(drivetrain.applyRequest(() ->
-        drive.withVelocityX(joystick.getLeftY() * Math.abs(joystick.getLeftY()) * HalfSpeed) // Drive forward with negative Y (forward)
-            .withVelocityY(joystick.getLeftX() * Math.abs(joystick.getLeftX()) * HalfSpeed) // Drive left with negative X (left)
-            .withRotationalRate(-(joystick.getRightX() * Math.abs(joystick.getRightX()) * HalfAngularRate)) // Drive counterclockwise with negative X (left)
+        joystick.rightBumper().whileTrue(drivetrain.applyRequest(() ->{
+            SlewRateLimiter slewRateLimiterX = new SlewRateLimiter(HalfSpeed);
+                double xSpeed = slewRateLimiterX.calculate(joystick.getLeftY()* HalfSpeed);
+                
+                SlewRateLimiter slewRateLimiterY = new SlewRateLimiter(HalfSpeed);
+                double ySpeed = slewRateLimiterY.calculate(joystick.getLeftX()* HalfSpeed);
+                
+                SlewRateLimiter slewRateLimiterTurnX = new SlewRateLimiter(HalfSpeed);
+                double yTurnSpeed = slewRateLimiterTurnX.calculate(joystick.getRightX()* HalfAngularRate);
+
+        return drive.withVelocityX(xSpeed * Math.abs(xSpeed)) // Drive forward with negative Y (forward)
+            .withVelocityY(ySpeed * Math.abs(ySpeed)) // Drive left with negative X (left)
+            .withRotationalRate(-(yTurnSpeed * Math.abs(yTurnSpeed) ));
+        } // Drive counterclockwise with negative X (left)
     ));
     
         joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
