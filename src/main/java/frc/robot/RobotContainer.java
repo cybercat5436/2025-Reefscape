@@ -8,8 +8,11 @@ import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -35,9 +38,14 @@ public class RobotContainer {
     private final CommandXboxController joystick = new CommandXboxController(0);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    private SendableChooser<Command> autonChooser;
+      
+    public RobotContainer(){
+        autonChooser = AutoBuilder.buildAutoChooser("Test auton 2");
+       SmartDashboard.putData("Auton Chooser", autonChooser);
+    // autonChooser.addOption("Complex Auto", m_complexAuto);
 
-    public RobotContainer() {
-        configureBindings();
+    configureBindings();
     }
 
     private void configureBindings() {
@@ -78,6 +86,9 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return Commands.print("No autonomous command configured");
+        //return Commands.print("No autonomous command configured");
+        System.out.println(autonChooser.getSelected().getName());
+        return autonChooser.getSelected();
+        
     }
 }
