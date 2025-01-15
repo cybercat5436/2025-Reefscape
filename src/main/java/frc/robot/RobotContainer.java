@@ -15,10 +15,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class RobotContainer {
@@ -39,7 +41,8 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private SendableChooser<Command> autonChooser;
-      
+    public final Climber climber = new Climber();
+
     public RobotContainer(){
         autonChooser = AutoBuilder.buildAutoChooser("Test auton 2");
        SmartDashboard.putData("Auton Chooser", autonChooser);
@@ -81,6 +84,13 @@ public class RobotContainer {
 
         // reset the field-centric heading on left bumper press
         joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        // climber commands
+        joystick.y()
+            .whileTrue(new InstantCommand(()->climber.climb(0.03)).repeatedly())
+            .onFalse(new InstantCommand(()-> climber.stopClimb()));
+        joystick.a()
+            .whileTrue(new InstantCommand(()->climber.climb(-0.15)).repeatedly())
+            .onFalse(new InstantCommand(()-> climber.stopClimb()));
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }
