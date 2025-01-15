@@ -36,6 +36,8 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CoralSensor;
 import frc.robot.subsystems.CANdleSystem.AnimationTypes;
 import frc.robot.subsystems.CANdleSystem.AvailableColors;
+import frc.robot.subsystems.LimeLight;
+import frc.robot.subsystems.PoseUpdater;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.5; // kSpeedAt12Volts desired top speed
@@ -55,6 +57,8 @@ public class RobotContainer {
     private final CommandXboxController joystick = new CommandXboxController(0);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    private final LimeLight limeLightFront = new LimeLight("limelight-front");
+     private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, drivetrain);
     private SendableChooser<Command> autonChooser;
     public final Climber climber = new Climber();
     public final Climber2 climber2 = new Climber2();
@@ -205,3 +209,4 @@ public class RobotContainer {
 
    
 }
+
