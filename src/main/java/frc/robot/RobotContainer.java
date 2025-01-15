@@ -52,17 +52,21 @@ public class RobotContainer {
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
+        SlewRateLimiter slewRateLimiterX = new SlewRateLimiter(MaxSpeed);
+        SlewRateLimiter slewRateLimiterY = new SlewRateLimiter(MaxSpeed);
+        SlewRateLimiter slewRateLimiterTurnX = new SlewRateLimiter(MaxSpeed);
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->{
-                SlewRateLimiter slewRateLimiterX = new SlewRateLimiter(MaxSpeed);
                 double xSpeed = slewRateLimiterX.calculate(joystick.getLeftY()* MaxSpeed);
                 
-                SlewRateLimiter slewRateLimiterY = new SlewRateLimiter(MaxSpeed);
                 double ySpeed = slewRateLimiterY.calculate(joystick.getLeftX()* MaxSpeed);
                 
-                SlewRateLimiter slewRateLimiterTurnX = new SlewRateLimiter(MaxSpeed);
-                double yTurnSpeed = slewRateLimiterTurnX.calculate(joystick.getRightX()* MaxSpeed);
+                double yTurnSpeed = slewRateLimiterTurnX.calculate(joystick.getRightX()* MaxAngularRate);
+
+                SmartDashboard.putNumber("xSpeed",xSpeed);
+                SmartDashboard.putNumber("ySpeed",ySpeed);
+                SmartDashboard.putNumber("yTurnSpeed",yTurnSpeed);
 
                 return drive.withVelocityX(xSpeed * Math.abs(xSpeed)) // Drive forward with negative Y (forward)
                     .withVelocityY(ySpeed * Math.abs(ySpeed)) // Drive left with negative X (left)
@@ -74,14 +78,18 @@ public class RobotContainer {
         
       
         joystick.rightBumper().whileTrue(drivetrain.applyRequest(() ->{
-            SlewRateLimiter slewRateLimiterX = new SlewRateLimiter(HalfSpeed);
+            
                 double xSpeed = slewRateLimiterX.calculate(joystick.getLeftY()* HalfSpeed);
                 
-                SlewRateLimiter slewRateLimiterY = new SlewRateLimiter(HalfSpeed);
+                
                 double ySpeed = slewRateLimiterY.calculate(joystick.getLeftX()* HalfSpeed);
                 
-                SlewRateLimiter slewRateLimiterTurnX = new SlewRateLimiter(HalfSpeed);
+                
                 double yTurnSpeed = slewRateLimiterTurnX.calculate(joystick.getRightX()* HalfAngularRate);
+                SmartDashboard.putNumber("RBySpeed",ySpeed);
+                SmartDashboard.putNumber("RBxSpeed",xSpeed);
+                SmartDashboard.putNumber("RByTurnSpeed",yTurnSpeed);
+
 
         return drive.withVelocityX(xSpeed * Math.abs(xSpeed)) // Drive forward with negative Y (forward)
             .withVelocityY(ySpeed * Math.abs(ySpeed)) // Drive left with negative X (left)
