@@ -100,25 +100,25 @@ public class RobotContainer {
 
         // new Trigger(() -> (joystick.getRightY() > -0.2))
         joystick.y()
-            .whileTrue(new InstantCommand(() -> climber2.rightClimb(-0.4)).repeatedly())
+            .whileTrue(new InstantCommand(() -> climber2.rightClimb(-0.2)).repeatedly())
             .onFalse(new InstantCommand(() -> climber2.stopClimb()));
         
 
         // new Trigger(() -> (joystick.getRightY() < 0.2))
         joystick.x()
-            .whileTrue(new InstantCommand(() -> climber2.rightClimb(0.4)).repeatedly())
+            .whileTrue(new InstantCommand(() -> climber2.rightClimb(0.2)).repeatedly())
             .onFalse(new InstantCommand(() -> climber2.stopClimb()));
             
 
         // new Trigger(() -> (joystick.getLeftY() > -0.2))
         joystick.b()
-            .whileTrue(new InstantCommand(() -> climber2.leftClimb(-0.4)).repeatedly())
+            .whileTrue(new InstantCommand(() -> climber2.leftClimb(-0.2)).repeatedly())
             .onFalse(new InstantCommand(() -> climber2.stopClimb()));
             
 
         // new Trigger(() -> (joystick.getLeftY() < 0.2))
         joystick.a()
-            .whileTrue(new InstantCommand(() -> climber2.leftClimb(0.4)).repeatedly())
+            .whileTrue(new InstantCommand(() -> climber2.leftClimb(0.2)).repeatedly())
             .onFalse(new InstantCommand(() -> climber2.stopClimb()));
     }
 
