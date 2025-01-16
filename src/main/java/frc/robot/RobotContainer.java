@@ -6,6 +6,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -19,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.CANdleSystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class RobotContainer {
@@ -39,12 +41,11 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private SendableChooser<Command> autonChooser;
-      
+    public CANdleSystem candleSystem = new CANdleSystem(joystick.getHID());
     public RobotContainer(){
         autonChooser = AutoBuilder.buildAutoChooser("Test auton 2");
        SmartDashboard.putData("Auton Chooser", autonChooser);
     // autonChooser.addOption("Complex Auto", m_complexAuto);
-
     configureBindings();
     }
 
