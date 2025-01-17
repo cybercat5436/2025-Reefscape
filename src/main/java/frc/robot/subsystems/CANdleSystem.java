@@ -35,6 +35,14 @@ public class CANdleSystem extends SubsystemBase {
         TwinkleOff,
         SetAll
     }
+
+
+    public enum AvailableColors{
+        TeamColors,
+        Red,
+        Yellow,
+        Green
+    }
     private AnimationTypes m_currentAnimation;
 
     public CANdleSystem(XboxController joy) {
@@ -48,6 +56,40 @@ public class CANdleSystem extends SubsystemBase {
         configAll.vBatOutputMode = VBatOutputMode.Modulated;
         m_candle.configAllSettings(configAll, 100);
     }
+
+
+    public void flashColor(AvailableColors color){
+        switch (color){
+            case TeamColors: showTeamColors(); break;
+            case Red: showRed(); break;
+            case Yellow: showYellow(); break;
+            case Green: showGreen(); break;
+
+        }
+    }
+
+    public void showTeamColors(){
+
+        m_candle.setLEDs(0,0,225,0,0,2);
+        m_candle.setLEDs(0,0,225,0,6,2);
+    
+        m_candle.setLEDs(225,215,0,0,2,2);
+        m_candle.setLEDs(225,215,0,0,4,2);
+    }
+    public void showRed() {
+        m_candle.setLEDs(255, 0, 0, 0, 0, 8);
+    }
+    public void showYellow() {
+        m_candle.setLEDs(255,255,0);
+    }
+    public void showGreen() {
+        m_candle.setLEDs(0,128,0);
+    }
+    public void turnOffColors() {
+        m_candle.setLEDs(0,0,0,0,0,8);
+        
+    }
+
 
     public void incrementAnimation() {
         switch(m_currentAnimation) {
@@ -130,17 +172,19 @@ public class CANdleSystem extends SubsystemBase {
         System.out.println("Changed to " + m_currentAnimation.toString());
     }
 
+
+
     @Override
     public void periodic() {
         // This method will be called once per scheduler run
-        if(m_toAnimate == null) {
+        /*if(m_toAnimate == null) {
             m_candle.setLEDs((int)(joystick.getLeftTriggerAxis() * 255), 
                               (int)(joystick.getRightTriggerAxis() * 255), 
                               (int)(joystick.getLeftX() * 255));
         } else {
             m_candle.animate(m_toAnimate);
         }
-        m_candle.modulateVBatOutput(joystick.getRightY());
+        m_candle.modulateVBatOutput(joystick.getRightY());*/
     }
 
     @Override
