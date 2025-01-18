@@ -20,12 +20,16 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.ColorBlinkCommand;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.Climber;
+import frc.robot.subsystems.Climber2;
 import frc.robot.subsystems.CANdleSystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CANdleSystem.AnimationTypes;
@@ -50,6 +54,9 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private SendableChooser<Command> autonChooser;
+    public final Climber climber = new Climber();
+    public final Climber2 climber2 = new Climber2();
+
     public CANdleSystem candleSystem = new CANdleSystem(joystick.getHID());
     public RobotContainer(){
         autonChooser = AutoBuilder.buildAutoChooser("Test auton 2");
@@ -121,8 +128,38 @@ public class RobotContainer {
 
         // reset the field-centric heading on left bumper press
         joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        // climber commands
+        // joystick.y()
+            // .whileTrue(new InstantCommand(() -> climber.climb(0.1)).repeatedly())
+            // .onFalse(new InstantCommand(() -> climber.stopClimb()));
+        // joystick.a()
+        //     .whileTrue(new InstantCommand(() -> climber.climb(-0.7)).repeatedly())
+        //     .onFalse(new InstantCommand(() -> climber.stopClimb()));
 
         drivetrain.registerTelemetry(logger::telemeterize);
+
+        // new Trigger(() -> (joystick.getRightY() > -0.2))
+        joystick.y()
+            .whileTrue(new InstantCommand(() -> climber2.rightClimb(-0.2)).repeatedly())
+            .onFalse(new InstantCommand(() -> climber2.stopClimb()));
+        
+
+        // new Trigger(() -> (joystick.getRightY() < 0.2))
+        joystick.x()
+            .whileTrue(new InstantCommand(() -> climber2.rightClimb(0.2)).repeatedly())
+            .onFalse(new InstantCommand(() -> climber2.stopClimb()));
+            
+
+        // new Trigger(() -> (joystick.getLeftY() > -0.2))
+        joystick.b()
+            .whileTrue(new InstantCommand(() -> climber2.leftClimb(-0.2)).repeatedly())
+            .onFalse(new InstantCommand(() -> climber2.stopClimb()));
+            
+
+        // new Trigger(() -> (joystick.getLeftY() < 0.2))
+        joystick.a()
+            .whileTrue(new InstantCommand(() -> climber2.leftClimb(0.2)).repeatedly())
+            .onFalse(new InstantCommand(() -> climber2.stopClimb()));
 
         joystick.povLeft().onTrue(new InstantCommand(() -> candleSystem.changeAnimation(AnimationTypes.Fire)));
         joystick.povDown().onTrue(new InstantCommand(() -> candleSystem.turnOffColors()));
@@ -152,6 +189,7 @@ public class RobotContainer {
         //joystick.povRight().onTrue(new ParallelRaceGroup(blinkLight, new WaitCommand(2.25)));
         joystick.povRight().onTrue(new ColorBlinkCommand(AvailableColors.Red, candleSystem));
     }
+
 
     public Command getAutonomousCommand() {
         //return Commands.print("No autonomous command configured");
