@@ -291,4 +291,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         });
         m_simNotifier.startPeriodic(kSimLoopPeriod);
     }
+
+
+    public Object resetPose(int i, int j) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'resetPose'");
+    }
 }
