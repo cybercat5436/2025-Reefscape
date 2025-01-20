@@ -94,7 +94,7 @@ public class RobotContainer {
 
         drivetrain.registerTelemetry(logger::telemeterize);
 
-        joystick.povLeft().onTrue(new InstantCommand(() -> candleSystem.changeAnimation(AnimationTypes.Fire)));
+        joystick.povLeft().onTrue(new InstantCommand(() -> candleSystem.showGreen()));
         joystick.povDown().onTrue(new InstantCommand(() -> candleSystem.turnOffColors()));
         joystick.povUp().onTrue(new InstantCommand(() -> candleSystem.showTeamColors()));
         /*joystick.povRight()
