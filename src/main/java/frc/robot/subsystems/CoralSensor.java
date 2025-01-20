@@ -12,7 +12,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class CoralSensor extends SubsystemBase {
   /** Creates a new CoralSensor. */ 
-private CANrange canRange = new CANrange(85);
+private CANrange canRange = new CANrange(49);
+public boolean isCoralClose;
   public CoralSensor() {
     CANrangeConfiguration config = new CANrangeConfiguration();
     canRange.clearStickyFaults();
@@ -23,7 +24,13 @@ private CANrange canRange = new CANrange(85);
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    double distance = canRange.getDistance().getValueAsDouble();
-    System.out.print("distance " + distance);
+    if (canRange.getSignalStrength().getValueAsDouble() >=  3000) {
+      isCoralClose = true;
+    
+    } else {
+      isCoralClose = false;
+    }
+    System.out.println(isCoralClose + " signal: " + canRange.getSignalStrength().getValueAsDouble());
+    
   }
 }
