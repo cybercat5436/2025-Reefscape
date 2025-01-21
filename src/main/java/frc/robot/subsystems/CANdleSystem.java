@@ -18,7 +18,7 @@ import com.ctre.phoenix.led.TwinkleOffAnimation.TwinkleOffPercent;
 
 public class CANdleSystem extends SubsystemBase {
     private final CANdle m_candle = new CANdle(TunerConstants.kCANdleID, "rio");
-    private final int LedCount = 300;
+    private final int LedCount = 512;
     private XboxController joystick;
 
     private Animation m_toAnimate = null;
@@ -33,7 +33,7 @@ public class CANdleSystem extends SubsystemBase {
         Strobe,
         Twinkle,
         TwinkleOff,
-        SetAll
+        SetAll,
     }
 
 
@@ -69,12 +69,13 @@ public class CANdleSystem extends SubsystemBase {
     }
 
     public void showTeamColors(){
-
-        m_candle.setLEDs(0,0,225,0,0,2);
-        m_candle.setLEDs(0,0,225,0,6,2);
-    
-        m_candle.setLEDs(225,215,0,0,2,2);
-        m_candle.setLEDs(225,215,0,0,4,2);
+        //blue
+        m_candle.setLEDs(0,0,225,0,0,128);
+        m_candle.setLEDs(0,0,225,0,256,128);
+        
+        //yellow
+        //m_candle.setLEDs(225,215,0,0,2,2);
+        //m_candle.setLEDs(225,215,0,0,4,2);
     }
     public void showRed() {
         m_candle.setLEDs(255, 0, 0, 0, 0, 8);
@@ -86,7 +87,8 @@ public class CANdleSystem extends SubsystemBase {
         m_candle.setLEDs(0,128,0);
     }
     public void turnOffColors() {
-        m_candle.setLEDs(0,0,0,0,0,8);
+        m_candle.setLEDs(0,0,0);
+        changeAnimation(AnimationTypes.SetAll);
         
     }
 
@@ -143,6 +145,7 @@ public class CANdleSystem extends SubsystemBase {
                 break;
             case Fire:
                 m_toAnimate = new FireAnimation(0.5, 0.7, LedCount, 0.7, 0.5);
+                m_toAnimate = new FireAnimation();
                 break;
             case Larson:
                 m_toAnimate = new LarsonAnimation(0, 255, 46, 0, 1, LedCount, BounceMode.Front, 3);
@@ -169,6 +172,7 @@ public class CANdleSystem extends SubsystemBase {
                 m_toAnimate = null;
                 break;
         }
+        m_candle.animate(m_toAnimate);
         System.out.println("Changed to " + m_currentAnimation.toString());
     }
 

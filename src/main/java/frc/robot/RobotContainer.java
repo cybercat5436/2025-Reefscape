@@ -93,8 +93,10 @@ public class RobotContainer {
         joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         drivetrain.registerTelemetry(logger::telemeterize);
+        
 
         joystick.povLeft().onTrue(new InstantCommand(() -> candleSystem.showGreen()));
+        joystick.povRight().onTrue(new InstantCommand(() -> candleSystem.incrementAnimation()));
         joystick.povDown().onTrue(new InstantCommand(() -> candleSystem.turnOffColors()));
         joystick.povUp().onTrue(new InstantCommand(() -> candleSystem.showTeamColors()));
         /*joystick.povRight()
@@ -120,7 +122,7 @@ public class RobotContainer {
 
 
         //joystick.povRight().onTrue(new ParallelRaceGroup(blinkLight, new WaitCommand(2.25)));
-        joystick.povRight().onTrue(new ColorBlinkCommand(AvailableColors.Red, candleSystem));
+        //joystick.povRight().onTrue(new ColorBlinkCommand(AvailableColors.Red, candleSystem));
     }
 
     public Command getAutonomousCommand() {
