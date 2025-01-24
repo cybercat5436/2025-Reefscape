@@ -26,12 +26,13 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.commands.ColorBlinkCommand;
+//import frc.robot.commands.ColorBlinkCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Climber2;
 import frc.robot.subsystems.CANdleSystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.CoralSensor;
 import frc.robot.subsystems.CANdleSystem.AnimationTypes;
 import frc.robot.subsystems.CANdleSystem.AvailableColors;
 
@@ -56,7 +57,7 @@ public class RobotContainer {
     private SendableChooser<Command> autonChooser;
     public final Climber climber = new Climber();
     public final Climber2 climber2 = new Climber2();
-
+    public final CoralSensor coralSensor = new CoralSensor();
     public CANdleSystem candleSystem = new CANdleSystem(joystick.getHID());
     public RobotContainer(){
         autonChooser = AutoBuilder.buildAutoChooser("Test auton 2");
@@ -199,4 +200,6 @@ public class RobotContainer {
         return autonChooser.getSelected();
         
     }
+
+   
 }
