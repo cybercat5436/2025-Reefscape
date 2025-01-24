@@ -33,6 +33,7 @@ import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Climber2;
 import frc.robot.subsystems.CANdleSystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.Coral;
 import frc.robot.subsystems.CoralSensor;
 import frc.robot.subsystems.CANdleSystem.AnimationTypes;
 import frc.robot.subsystems.CANdleSystem.AvailableColors;
@@ -59,6 +60,7 @@ public class RobotContainer {
     public final Climber climber = new Climber();
     public final Climber2 climber2 = new Climber2();
     public final CoralSensor coralSensor = new CoralSensor();
+    public final Coral coral = new Coral();
     public CANdleSystem candleSystem = new CANdleSystem(joystick.getHID());
     public RobotContainer(){
         autonChooser = AutoBuilder.buildAutoChooser("Test auton 2");
@@ -70,6 +72,13 @@ public class RobotContainer {
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
+        joystick.a()
+          .whileTrue(new InstantCommand(() -> coral.forward(0.3)))
+          .onFalse(new InstantCommand(() -> coral.stopMotor())); 
+
+        joystick.x()
+           .whileTrue(new InstantCommand(() -> coral.backward(0.3)))
+           .onFalse(new InstantCommand(() -> coral.stopMotor())); 
         SlewRateLimiter slewRateLimiterX = new SlewRateLimiter(MaxSpeed);
         SlewRateLimiter slewRateLimiterY = new SlewRateLimiter(MaxSpeed);
         SlewRateLimiter slewRateLimiterTurnX = new SlewRateLimiter(MaxSpeed);

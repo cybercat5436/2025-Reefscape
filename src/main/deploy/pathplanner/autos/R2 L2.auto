@@ -13,13 +13,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "forwards 2m"
+            "pathName": "Right 2m"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "F2 B"
+            "pathName": "Left 2m"
           }
         }
       ]

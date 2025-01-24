@@ -50,7 +50,7 @@
     "rotation": 59.99999999999999
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Center Auton",
   "idealStartingState": {
     "velocity": 0,
     "rotation": -125.00000000000001

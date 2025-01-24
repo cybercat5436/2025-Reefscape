@@ -5,6 +5,18 @@
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "resetDriveEncoders"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "F2 B"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "forwards 2m"
