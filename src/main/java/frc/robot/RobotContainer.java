@@ -137,6 +137,7 @@ public class RobotContainer {
         //     .onFalse(new InstantCommand(() -> climber.stopClimb()));
 
         drivetrain.registerTelemetry(logger::telemeterize);
+        
 
         // new Trigger(() -> (joystick.getRightY() > -0.2))
         joystick.y()
@@ -161,7 +162,8 @@ public class RobotContainer {
             .whileTrue(new InstantCommand(() -> climber2.leftClimb(0.2)).repeatedly())
             .onFalse(new InstantCommand(() -> climber2.stopClimb()));
 
-        joystick.povLeft().onTrue(new InstantCommand(() -> candleSystem.changeAnimation(AnimationTypes.Fire)));
+        joystick.povLeft().onTrue(new InstantCommand(() -> candleSystem.showGreen()));
+        joystick.povRight().onTrue(new InstantCommand(() -> candleSystem.incrementAnimation()));
         joystick.povDown().onTrue(new InstantCommand(() -> candleSystem.turnOffColors()));
         joystick.povUp().onTrue(new InstantCommand(() -> candleSystem.showTeamColors()));
         /*joystick.povRight()
@@ -187,7 +189,7 @@ public class RobotContainer {
 
 
         //joystick.povRight().onTrue(new ParallelRaceGroup(blinkLight, new WaitCommand(2.25)));
-        joystick.povRight().onTrue(new ColorBlinkCommand(AvailableColors.Red, candleSystem));
+        //joystick.povRight().onTrue(new ColorBlinkCommand(AvailableColors.Red, candleSystem));
     }
 
 
