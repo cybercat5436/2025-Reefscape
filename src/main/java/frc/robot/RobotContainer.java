@@ -14,7 +14,6 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -31,12 +30,14 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Climber2;
+import frc.robot.subsystems.Algae;
 import frc.robot.subsystems.CANdleSystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Coral;
 import frc.robot.subsystems.CoralSensor;
 import frc.robot.subsystems.CANdleSystem.AnimationTypes;
 import frc.robot.subsystems.CANdleSystem.AvailableColors;
+import frc.robot.subsystems.Elevator;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.5; // kSpeedAt12Volts desired top speed
@@ -54,13 +55,15 @@ public class RobotContainer {
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
     private final CommandXboxController joystick = new CommandXboxController(0);
-
+    private final CommandXboxController joystick2 = new CommandXboxController(1);
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private SendableChooser<Command> autonChooser;
     public final Climber climber = new Climber();
     public final Climber2 climber2 = new Climber2();
     public final CoralSensor coralSensor = new CoralSensor();
     public final Coral coral = new Coral();
+    public final Algae algae = new Algae();
+    public final Elevator elevator = new Elevator();
     public CANdleSystem candleSystem = new CANdleSystem(joystick.getHID());
     public RobotContainer(){
         autonChooser = AutoBuilder.buildAutoChooser("Test auton 2");
@@ -72,13 +75,44 @@ public class RobotContainer {
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
-        joystick.a()
+        joystick2.a()
           .whileTrue(new InstantCommand(() -> coral.forward(0.3)))
           .onFalse(new InstantCommand(() -> coral.stopMotor())); 
 
-        joystick.x()
+        joystick2.x()
            .whileTrue(new InstantCommand(() -> coral.backward(0.3)))
            .onFalse(new InstantCommand(() -> coral.stopMotor())); 
+
+        joystick2.y()
+           .whileTrue(new InstantCommand(() -> algae.intakeBall(0.3)))
+           .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
+
+        joystick2.b()
+           .whileTrue(new InstantCommand(() -> algae.releaseBall(0.3)))
+           .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
+        joystick2.povUp()
+            .onTrue(new InstantCommand(() -> elevator.raiseLevel1()))
+            .onFalse(new InstantCommand(() -> elevator.stopElevator()));
+        joystick2.povRight()
+            .onTrue(new InstantCommand(() -> elevator.raiseLevel2()))
+            .onFalse(new InstantCommand(() -> elevator.stopElevator()));
+
+        joystick2.povDown()
+            .onTrue(new InstantCommand(() -> elevator.raiseLevel3()))
+            .onFalse(new InstantCommand(() -> elevator.stopElevator()));
+
+        joystick2.povLeft()
+            .onTrue(new InstantCommand(() -> elevator.raiseLevel4()))
+            .onFalse(new InstantCommand(() -> elevator.stopElevator()));
+        joystick2.rightBumper()
+            .onTrue(new InstantCommand(() -> algae.raiseArmHigh()))
+            .onFalse(new InstantCommand(() -> algae.stopArm()));
+        joystick2.leftBumper()
+            .onTrue(new InstantCommand(() -> algae.raiseArmLow()))
+            .onFalse(new InstantCommand(() -> algae.stopArm()));
+        joystick2.leftStick()
+            .onTrue(new InstantCommand(() -> algae.armToProcesser()))
+            .onFalse(new InstantCommand(() -> algae.stopArm()));
         SlewRateLimiter slewRateLimiterX = new SlewRateLimiter(MaxSpeed);
         SlewRateLimiter slewRateLimiterY = new SlewRateLimiter(MaxSpeed);
         SlewRateLimiter slewRateLimiterTurnX = new SlewRateLimiter(MaxSpeed);
@@ -148,8 +182,6 @@ public class RobotContainer {
         //     .onFalse(new InstantCommand(() -> climber.stopClimb()));
 
         drivetrain.registerTelemetry(logger::telemeterize);
-        SmartDashboard.putData("reset odymetry to 0,0",new InstantCommand(() -> drivetrain.resetPose(new Pose2d(0.0,0.0, new Rotation2d()))));
-        
 
         // new Trigger(() -> (joystick.getRightY() > -0.2))
         joystick.y()
@@ -174,8 +206,7 @@ public class RobotContainer {
             .whileTrue(new InstantCommand(() -> climber2.leftClimb(0.2)).repeatedly())
             .onFalse(new InstantCommand(() -> climber2.stopClimb()));
 
-        joystick.povLeft().onTrue(new InstantCommand(() -> candleSystem.showGreen()));
-        joystick.povRight().onTrue(new InstantCommand(() -> candleSystem.incrementAnimation()));
+        joystick.povLeft().onTrue(new InstantCommand(() -> candleSystem.changeAnimation(AnimationTypes.Fire)));
         joystick.povDown().onTrue(new InstantCommand(() -> candleSystem.turnOffColors()));
         joystick.povUp().onTrue(new InstantCommand(() -> candleSystem.showTeamColors()));
         /*joystick.povRight()

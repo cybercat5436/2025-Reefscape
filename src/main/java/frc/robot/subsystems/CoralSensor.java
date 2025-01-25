@@ -30,7 +30,8 @@ public boolean isCoralClose;
     } else {
       isCoralClose = false;
     }
-    System.out.println(isCoralClose + " signal: " + canRange.getSignalStrength().getValueAsDouble());
+    // Was print to much 
+    // System.out.println(isCoralClose + " signal: " + canRange.getSignalStrength().getValueAsDouble());
     
   }
 }
