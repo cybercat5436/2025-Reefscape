@@ -27,7 +27,7 @@ import frc.robot.Telemetry;
 public class PoseUpdater extends SubsystemBase {
   /** Creates a new PoseUpdater. */
   private final LimeLight limeLightFront;
-  private final CommandSwerveDrivetrain swerveSubsystem;
+  private final CommandSwerveDrivetrain commandSwerveDrivetrain;
 
   private double tx;
   private double ta;
@@ -47,7 +47,7 @@ public class PoseUpdater extends SubsystemBase {
 
   public PoseUpdater(LimeLight limeLightFront, CommandSwerveDrivetrain swerveSubsystem) {
     this.limeLightFront = limeLightFront;
-    this.swerveSubsystem = swerveSubsystem;
+    this.commandSwerveDrivetrain = swerveSubsystem;
     txLocal = limeLightFront.txLocal;
     taLocal = limeLightFront.taLocal;
     cyclesSinceLocked = 0;
@@ -172,7 +172,8 @@ public class PoseUpdater extends SubsystemBase {
     // This method will be called once per scheduler run
     isTargetVisible = limeLightFront.getVisionTargetStatus();
     SignalLogger.writeDouble("LimeLight Front/Vision Area", limeLightFront.getVisionArea(), "mm^2");
-
+    
+    commandSwerveDrivetrain.addVisionMeasurement(limeLightFront.getRobotPose(), commandSwerveDrivetrain.getState().Timestamp);
     // Calculate error
     if(isTargetVisible) {
       
@@ -181,6 +182,7 @@ public class PoseUpdater extends SubsystemBase {
       // update pose if active  
       if (isEnabled && !isLockedOut) {
         //updateOdometry(yError);
+        
         // prevent over-eager updating of odometry
         startLockoutPeriod();
       }
