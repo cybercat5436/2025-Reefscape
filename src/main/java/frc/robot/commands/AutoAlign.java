@@ -3,12 +3,14 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.commands;
-
 import javax.sound.sampled.SourceDataLine;
+
+import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LimeLight;
+import edu.wpi.first.wpilibj.Timer;
 
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
@@ -22,7 +24,12 @@ public class AutoAlign extends Command {
   double yError;
   private double targetTx = 1;
   private double horizontalThreshold = 0.5;
-  private double kPHorizontal = 1;
+  private double kP = 0.2;
+  private Timer timer = new Timer();
+  private double robotY;
+  private double robotX;
+  private double maxSpeed = 3;
+  private final SwerveRequest.RobotCentric drive = new SwerveRequest.RobotCentric();
   
 
   public AutoAlign(CommandSwerveDrivetrain commandSwerveDrivetrain, LimeLight limeLight) {
@@ -30,22 +37,25 @@ public class AutoAlign extends Command {
     addRequirements(commandSwerveDrivetrain);
     this.commandSwerveDrivetrain = commandSwerveDrivetrain;
     this.limelight = limeLight;
+    
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    
+    robotY = limelight.getVisionTargetAreaError();
+    robotX = limelight.getVisionTargetHorizontalError();
+    timer.reset();
+    timer.start();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    limelight.getVisionTargetHorizontalError();
-    System.out.println("Limelight Tx value" + limelight.getVisionTargetHorizontalError());
-    yError = limelight.getVisionTargetHorizontalError() - targetTx;
-    ySpeed = yError;
-    System.out.println("y speed" + ySpeed);
+    xSpeed = robotX * kP * maxSpeed;
+    ySpeed = robotY * kP * maxSpeed;
+
+
   }
 
   // Called once the command ends or is interrupted.
