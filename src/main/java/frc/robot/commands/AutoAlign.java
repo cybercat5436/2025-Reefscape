@@ -23,7 +23,7 @@ public class AutoAlign extends Command {
   private double turningSpeed = 0.0;
   double yError;
   private double targetTx = 1;
-  private double horizontalThreshold = 0.5;
+  private double horizontalThreshold = 0.2;
   private double kP = 0.2;
   private Timer timer = new Timer();
   private double robotY;
@@ -65,7 +65,7 @@ public class AutoAlign extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-
-    return false;
+    math.abs(Math.sqrt(Math.pow(robotX,2)),math.pow(robotY)
+    
   }
 }
