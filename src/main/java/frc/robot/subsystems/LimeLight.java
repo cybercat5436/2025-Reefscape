@@ -8,7 +8,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTableValue;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
+import frc.robot.LimelightHelpers;
 public class LimeLight extends SubsystemBase {
   public NetworkTable tableLimelight;
   public NetworkTableEntry txLocal; //horizontal error
@@ -18,7 +18,7 @@ public class LimeLight extends SubsystemBase {
   public NetworkTableEntry tsLocal; //skew error
   public NetworkTableEntry tzLocal;
   public NetworkTableEntry tLongLocal;
-
+  public final String limelightName;
   private double horizontalError = 0.0;
   private double verticalError = 0.0;
   private double area = 0.0;
@@ -39,7 +39,7 @@ public class LimeLight extends SubsystemBase {
     tsLocal = tableLimelight.getEntry("ts"); // communicates skew offset from target
     tzLocal = tableLimelight.getEntry("tz");
     tLongLocal = tableLimelight.getEntry("tlong");
-  
+    limelightName = networkTableName;
 }
 
 @Override
@@ -174,25 +174,6 @@ public double getVisionTargetSkew(){
   return tsLocal.getDouble(0);
 }
 public Pose2d getRobotPose() {
-  Number pose[];
-  NetworkTableEntry botPose = tableLimelight.getEntry("botpose");
-  pose = botPose.getNumberArray(null);
-  double pose2[] = new double[6];
-  for (int i = 0; i < pose.length; i++) {
-    pose2[i] = pose[i].doubleValue();
-  }
-  return new Pose2d(pose2[0], pose2[1], new Rotation2d(Math.toRadians(pose2[5])));
-  //The ordering of the array is forward right up roll pitch yaw
-}
-public double[] poseArray() {
-  Number pose[];
-  NetworkTableEntry botPose = tableLimelight.getEntry("botpose");
-  pose = botPose.getNumberArray(null);
-  double pose2[] = new double[6];
-  for (int i = 0; i < pose.length; i++) {
-    pose2[i] = pose[i].doubleValue();
-  }
-  return pose2;
-  //The ordering of the array is forward right up roll pitch yaw
+  return LimelightHelpers.getBotPose2d(limelightName);
 }
 }
