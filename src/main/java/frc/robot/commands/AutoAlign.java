@@ -29,6 +29,7 @@ public class AutoAlign extends Command {
   private double robotY;
   private double robotX;
   private double maxSpeed = 3;
+  private double timeThreshold = 1.0;
   private final SwerveRequest.RobotCentric drive = new SwerveRequest.RobotCentric();
   
 
@@ -54,18 +55,28 @@ public class AutoAlign extends Command {
   public void execute() {
     xSpeed = robotX * kP * maxSpeed;
     ySpeed = robotY * kP * maxSpeed;
-
+    commandSwerveDrivetrain.applyRequest(() ->
+    drive.withVelocityX(xSpeed) // Drive forward with negative Y (forward)
+        .withVelocityY(ySpeed));
+    
 
   }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    // To-Do May need to switch robot drive from robot centric to field centric, intial setting to fieldcentric 
+    //happens in robotcontainer
+    
+  }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    math.abs(Math.sqrt(Math.pow(robotX,2)),math.pow(robotY)
+    double distanceError = Math.abs(Math.sqrt(Math.pow(robotX,2))+Math.pow(robotY,2));
+    boolean isAlligned = distanceError < horizontalThreshold;
+    boolean timeOut = timer.get() > timeThreshold;
+    return isAlligned || timeOut;
     
   }
 }
