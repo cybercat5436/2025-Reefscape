@@ -31,7 +31,8 @@ public class AutoAlign extends Command {
   private double maxSpeed = 3;
   private double timeThreshold = 1.0;
   private final SwerveRequest.RobotCentric drive = new SwerveRequest.RobotCentric();
-  
+  private boolean isAligned;
+  private boolean isTimedOut;
 
   public AutoAlign(CommandSwerveDrivetrain commandSwerveDrivetrain, LimeLight limeLight) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -44,8 +45,6 @@ public class AutoAlign extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    robotY = limelight.getVisionTargetAreaError();
-    robotX = limelight.getVisionTargetHorizontalError();
     timer.reset();
     timer.start();
   }
@@ -53,11 +52,15 @@ public class AutoAlign extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    robotX = limelight.getVisionArea();
+    robotY = limelight.getVisionTargetHorizontalError();
+
     xSpeed = robotX * kP * maxSpeed;
     ySpeed = robotY * kP * maxSpeed;
     commandSwerveDrivetrain.applyRequest(() ->
-    drive.withVelocityX(xSpeed) // Drive forward with negative Y (forward)
+    drive.withVelocityX(0) // Drive forward with negative Y (forward)
         .withVelocityY(ySpeed));
+    
     
 
   }
@@ -67,16 +70,29 @@ public class AutoAlign extends Command {
   public void end(boolean interrupted) {
     // To-Do May need to switch robot drive from robot centric to field centric, intial setting to fieldcentric 
     //happens in robotcontainer
+    timer.stop();
+    
+    if(isAligned) {
+      System.out.println("Robot Aligned");
+    }else if(isTimedOut){
+      System.out.println("Robot time up");
+    }else if(interrupted){
+      System.out.println("Robot interupted");
+    }
+      
+    
     
   }
+
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    double distanceError = Math.abs(Math.sqrt(Math.pow(robotX,2))+Math.pow(robotY,2));
-    boolean isAlligned = distanceError < horizontalThreshold;
-    boolean timeOut = timer.get() > timeThreshold;
-    return isAlligned || timeOut;
+    // double distanceError = Math.abs(Math.sqrt(Math.pow(robotX,2))+Math.pow(robotY,2));
+    double distanceError = Math.abs(robotY);
+     isAligned = distanceError < horizontalThreshold;
+     isTimedOut = timer.get() > timeThreshold;
+    return isAligned || isTimedOut;
     
   }
 }
