@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LimeLight;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
@@ -24,7 +25,7 @@ public class AutoAlign extends Command {
   double yError;
   private double targetTx = 1;
   private double horizontalThreshold = 0.2;
-  private double kP = 0.2;
+  private double kP = 0.4;
   private Timer timer = new Timer();
   private double robotY;
   private double robotX;
@@ -47,6 +48,7 @@ public class AutoAlign extends Command {
   public void initialize() {
     timer.reset();
     timer.start();
+    System.out.println("starting auto align");
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -61,8 +63,7 @@ public class AutoAlign extends Command {
     drive.withVelocityX(0) // Drive forward with negative Y (forward)
         .withVelocityY(ySpeed));
     
-    
-
+    SmartDashboard.putNumber("Auto align YSpeed", ySpeed);
   }
 
   // Called once the command ends or is interrupted.
