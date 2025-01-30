@@ -34,7 +34,7 @@ import frc.robot.subsystems.Climber2;
 import frc.robot.subsystems.CANdleSystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Coral;
-import frc.robot.subsystems.CoralSensor;
+import frc.robot.subsystems.GamePieceDetector;
 import frc.robot.subsystems.CANdleSystem.AnimationTypes;
 import frc.robot.subsystems.CANdleSystem.AvailableColors;
 
@@ -59,7 +59,8 @@ public class RobotContainer {
     private SendableChooser<Command> autonChooser;
     public final Climber climber = new Climber();
     public final Climber2 climber2 = new Climber2();
-    public final CoralSensor coralSensor = new CoralSensor();
+    public final GamePieceDetector coralSensor = new GamePieceDetector(4000, GamePieceDetector.Sensors.coral);
+    //public final GamePieceDetector algaeSensor = new GamePieceDetector(3000, GamePieceDetector.Sensors.algae);
     public final Coral coral = new Coral();
     public CANdleSystem candleSystem = new CANdleSystem(joystick.getHID());
     public RobotContainer(){
