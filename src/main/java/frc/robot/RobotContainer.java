@@ -151,24 +151,18 @@ public class RobotContainer {
         SmartDashboard.putData("reset odymetry to 0,0",new InstantCommand(() -> drivetrain.resetPose(new Pose2d(0.0,0.0, new Rotation2d()))));
         
 
-        // new Trigger(() -> (joystick.getRightY() > -0.2))
+        // new Trigger(() -> (joystick.getRightY() > -0.2) new InstantCommand(() -> climber.rightClimb(0.2)));
         joystick.y()
             .whileTrue(new InstantCommand(() -> climber2.rightClimb(-0.2)).repeatedly())
             .onFalse(new InstantCommand(() -> climber2.stopClimb()));
-        
-
         // new Trigger(() -> (joystick.getRightY() < 0.2))
         joystick.x()
             .whileTrue(new InstantCommand(() -> climber2.rightClimb(0.2)).repeatedly())
             .onFalse(new InstantCommand(() -> climber2.stopClimb()));
-            
-
         // new Trigger(() -> (joystick.getLeftY() > -0.2))
         joystick.b()
             .whileTrue(new InstantCommand(() -> climber2.leftClimb(-0.2)).repeatedly())
             .onFalse(new InstantCommand(() -> climber2.stopClimb()));
-            
-
         // new Trigger(() -> (joystick.getLeftY() < 0.2))
         joystick.a()
             .whileTrue(new InstantCommand(() -> climber2.leftClimb(0.2)).repeatedly())

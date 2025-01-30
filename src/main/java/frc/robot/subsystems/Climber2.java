@@ -4,11 +4,13 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -26,8 +28,12 @@ public class Climber2 extends SubsystemBase {
   
     leftConfiguration.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     rightConfiguration.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-    
 
+    leftConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    rightConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
+    rightClimber.getConfigurator().apply(rightConfiguration);
+    leftClimber.getConfigurator().apply(leftConfiguration);
   }
 /**
  * This method makes the robot climb and score LOTS of points
