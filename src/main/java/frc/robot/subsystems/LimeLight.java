@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTable;
@@ -7,6 +9,7 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTableValue;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
 public class LimeLight extends SubsystemBase {
@@ -28,6 +31,7 @@ public class LimeLight extends SubsystemBase {
   private double min_aim = -0.1;
   private double visionSpeed;
   private boolean targetInView = false;
+  public boolean isEnabled = true;
   public double spinThreshold = 75;
 
   public LimeLight(String networkTableName) {
@@ -59,14 +63,15 @@ public class LimeLight extends SubsystemBase {
     // System.out.println("This is Tlong:" + tLongLocal.getDouble(0));
     // SmartDashboard.putNumber("tLong", tLongLocal.getDouble(0));
     // SmartDashboard.putBoolean("Is oriented", isOriented());
-    Pose2d p = getRobotPose();
+    if (isEnabled) {Pose2d p = getRobotPose();
     SmartDashboard.putString("Camera Pose2d", p.toString());
+    //System.out.println("Standard deviation of limelight measurement" + LimelightHelpers.);
+    }
   }
   
 
   // This was refactored into SwerveJoystickCommand
   public boolean alignToTarget(boolean targetFound, double xError, double yError, String zone){
-    
     double yOffset = 0;
     boolean targetAligned = false;
     boolean headingAligned = false;
@@ -175,5 +180,21 @@ public double getVisionTargetSkew(){
 }
 public Pose2d getRobotPose() {
   return LimelightHelpers.getBotPose2d(limelightName);
+}
+public void enable() {
+  isEnabled = true;
+}
+public void disable() {
+  isEnabled = false;
+}
+public Color getStatusLed() {
+  int tags = LimelightHelpers.getTargetCount(limelightName);
+  if (tags == 0) {
+    return Color.kRed;
+  } else if (tags == 1) {
+    return Color.kYellow;
+  } else {
+    return Color.kGreen;
+  }
 }
 }
