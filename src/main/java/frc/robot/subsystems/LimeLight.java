@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
+//import frc.robot.LimelightHelpers.LimelightResults;
 public class LimeLight extends SubsystemBase {
   public NetworkTable tableLimelight;
   public NetworkTableEntry txLocal; //horizontal error
@@ -33,7 +34,7 @@ public class LimeLight extends SubsystemBase {
   private boolean targetInView = false;
   public boolean isEnabled = true;
   public double spinThreshold = 75;
-
+  double[] positionStandardDeviations = new double[12];
   public LimeLight(String networkTableName) {
     tableLimelight = NetworkTableInstance.getDefault().getTable(networkTableName);
     txLocal = tableLimelight.getEntry("tx"); // communicates horizontal degree offset from target
@@ -65,7 +66,10 @@ public class LimeLight extends SubsystemBase {
     // SmartDashboard.putBoolean("Is oriented", isOriented());
     if (isEnabled) {Pose2d p = getRobotPose();
     SmartDashboard.putString("Camera Pose2d", p.toString());
-    //System.out.println("Standard deviation of limelight measurement" + LimelightHelpers.);
+    positionStandardDeviations = NetworkTableInstance.getDefault().getTable("limelight").getEntry("<variablename>").getDoubleArray(new double[6]);
+    System.out.println("Standard deviation of limelight measurement (MegaTag2) " + positionStandardDeviations[6]+" "+positionStandardDeviations[7]+" "+positionStandardDeviations[8]);
+    //System.out.println("Time of Limelight publishing measurement: (ms since Limelight boot) " + LimelightHelpers.LimelightResults.timestamp_LIMELIGHT_publish + " Rio receipt time: " + LimelightHelpers.LimelightResults.timestamp_RIOFPGA_capture);
+    System.out.println("Number of tags visible:"+LimelightHelpers.getTargetCount(limelightName));
     }
   }
   

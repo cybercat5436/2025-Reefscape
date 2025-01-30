@@ -365,6 +365,10 @@ public class LimelightHelpers {
         
         public String error;
         
+        public double timestamp()
+        {
+            return timestamp_LIMELIGHT_publish;
+        }
         @JsonProperty("pID")
         public double pipelineID;
 
