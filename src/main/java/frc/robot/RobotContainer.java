@@ -50,6 +50,8 @@ public class RobotContainer {
     // autonChooser.addOption("Complex Auto", m_complexAuto);
 
     configureBindings();
+    poseUpdater.enable();
+    
     }
 
     private void configureBindings() {

@@ -9,6 +9,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.TimestampedDoubleArray;
 import frc.robot.LimelightHelpers.LimelightResults;
 import frc.robot.LimelightHelpers.PoseEstimate;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -362,13 +363,11 @@ public class LimelightHelpers {
      * Limelight Results object, parsed from a Limelight's JSON results output.
      */
     public static class LimelightResults {
-        
+
         public String error;
-        
-        public double timestamp()
-        {
-            return timestamp_LIMELIGHT_publish;
-        }
+        @JsonProperty("stdev_mt2")
+        public double[] standardDeviations;
+
         @JsonProperty("pID")
         public double pipelineID;
 
@@ -452,6 +451,11 @@ public class LimelightHelpers {
 
         @JsonProperty("Barcode")
         public LimelightTarget_Barcode[] targets_Barcode;
+        
+        public double[] getStandardDeviations () {
+            
+            return new double[1];
+        }
 
         public LimelightResults() {
             botpose = new double[6];
@@ -465,7 +469,9 @@ public class LimelightHelpers {
             targets_Barcode = new LimelightTarget_Barcode[0];
 
         }
-
+        /*public Matrix<N3,N1> getStandardDeviationsMatrix() {
+            return new Matrix<>(3, 1, standardDeviations[0::2]);
+        }*/
 
     }
 

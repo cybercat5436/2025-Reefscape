@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.LimelightHelpers.LimelightResults;
 import frc.robot.Telemetry;
 
 public class PoseUpdater extends SubsystemBase {
@@ -35,7 +36,6 @@ public class PoseUpdater extends SubsystemBase {
   public NetworkTableEntry txLocal;
   public NetworkTableEntry tyLocal;
   public NetworkTableEntry taLocal;
-
   public double yError = 0.0;
   public double distanceEstimate = 0.0;
   public boolean isEnabled = false;   // can be to prevent updates during certain periods in auton
@@ -167,38 +167,31 @@ public class PoseUpdater extends SubsystemBase {
     totalAdjustment = 0;
 
   }*/
+  public void enable() {
+    isEnabled = true;
+  }
+  public void disable() {
+    isEnabled = false;
+  }
   @Override
   public void periodic() {
+    LimelightResults limelightResults = limeLightFront.getLatestResults();
     // This method will be called once per scheduler run
     isTargetVisible = limeLightFront.getVisionTargetStatus();
     SignalLogger.writeDouble("LimeLight Front/Vision Area", limeLightFront.getVisionArea(), "mm^2");
     
-    commandSwerveDrivetrain.addVisionMeasurement(limeLightFront.getRobotPose(), commandSwerveDrivetrain.getState().Timestamp);
     // Calculate error
-    if(isTargetVisible) {
-      
+    if (limelightResults.botpose_tagcount > 0) {
+      System.out.println("Position is being updated");
       calculateYError();
 
       // update pose if active  
-      if (isEnabled && !isLockedOut) {
-        //updateOdometry(yError);
-        
-        // prevent over-eager updating of odometry
-        startLockoutPeriod();
+      if (isEnabled) {
+        commandSwerveDrivetrain.addVisionMeasurement(limelightResults.getBotPose2d(), limelightResults.timestamp_LIMELIGHT_publish);
       }
     }else{
-      ta = 0;
-      tx = 0;
-      distanceEstimate = 0.0;
-      yError = 0.0;
-    }
 
-    // manage lockout state
-    if(isLockedOut && cyclesSinceLocked > CYCLE_LOCKOUT){
-      endLockoutPeriod();
     }
-
-    cyclesSinceLocked++;
   }
 
   public void startLockoutPeriod() {
