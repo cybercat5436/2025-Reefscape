@@ -55,7 +55,8 @@ public class LimeLight extends SubsystemBase {
     verticalError = getVisionTargetVerticalError();
     area = getVisionTargetAreaError();
     targetInView = getVisionTargetStatus();
-    if (isLoggingEnabled) {Pose2d p = getRobotPose();
+    Pose2d p = getRobotPose();
+    if (isLoggingEnabled) {
     SmartDashboard.putString("Camera Pose2d", p.toString());
     LimelightResults limelightResults = LimelightHelpers.getLatestResults(limelightName);
     positionStandardDeviations = limelightResults.standardDeviations;

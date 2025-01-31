@@ -183,14 +183,11 @@ public class PoseUpdater extends SubsystemBase {
     // Calculate error
     if (limelightResults.botpose_tagcount > 0) {
       System.out.println("Position is being updated");
-      calculateYError();
 
       // update pose if active  
       if (isEnabled) {
         commandSwerveDrivetrain.addVisionMeasurement(limelightResults.getBotPose2d(), limelightResults.timestamp_LIMELIGHT_publish);
       }
-    }else{
-
     }
   }
 
