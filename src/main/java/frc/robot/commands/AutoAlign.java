@@ -5,6 +5,7 @@
 package frc.robot.commands;
 import javax.sound.sampled.SourceDataLine;
 
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -25,13 +26,15 @@ public class AutoAlign extends Command {
   double yError;
   private double targetTx = 1;
   private double horizontalThreshold = 0.2;
-  private double kP = 0.4;
+  private double kP = 0.3;
   private Timer timer = new Timer();
   private double robotY;
   private double robotX;
   private double maxSpeed = 3;
   private double timeThreshold = 1.0;
-  private final SwerveRequest.RobotCentric drive = new SwerveRequest.RobotCentric();
+  private double MaxAngularRate = 0.75;
+  private final SwerveRequest.RobotCentric autoDrive = new SwerveRequest.RobotCentric()
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
   private boolean isAligned;
   private boolean isTimedOut;
 
@@ -55,13 +58,16 @@ public class AutoAlign extends Command {
   @Override
   public void execute() {
     robotX = limelight.getVisionArea();
-    robotY = limelight.getVisionTargetHorizontalError();
+    robotY = -limelight.getVisionTargetHorizontalError();
 
     xSpeed = robotX * kP * maxSpeed;
     ySpeed = robotY * kP * maxSpeed;
     commandSwerveDrivetrain.applyRequest(() ->
-    drive.withVelocityX(0) // Drive forward with negative Y (forward)
-        .withVelocityY(ySpeed));
+      // drive.withVelocityY(ySpeed));
+    autoDrive.withVelocityX(0) // Drive forward with negative Y (forward)
+        .withVelocityY(1)
+        .withRotationalRate(0));
+    
     
     SmartDashboard.putNumber("Auto align YSpeed", ySpeed);
   }

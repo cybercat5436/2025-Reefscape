@@ -28,6 +28,11 @@ public class RobotContainer {
     private double HalfSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.25;
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
     private double HalfAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond) *0.5;
+    private double robotX;
+    private double robotY;
+    private double kP = 0.03;
+    private double ySpeed = 0;
+    private double xSpeed = 0;
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
             .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
@@ -68,12 +73,25 @@ public class RobotContainer {
             )
         );
 
-        joystick.back().whileTrue(drivetrain.applyRequest(() ->
-        robotCentricDrive.withVelocityX(joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-            .withVelocityY(joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-            .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
-            
-        ));
+        joystick.x().whileTrue(drivetrain.applyRequest(() -> {
+        robotX = limeLightFront.getVisionArea();
+        robotY = -limeLightFront.getVisionTargetHorizontalError();
+        xSpeed = robotX * kP * MaxSpeed;
+        ySpeed = robotY * kP * MaxSpeed;
+            SmartDashboard.putNumber("robot y velocity", joystick.getLeftX() * MaxSpeed);
+        return robotCentricDrive.withVelocityX(0) // Drive forward with negative Y (forward)
+            .withVelocityY(ySpeed) // Drive left with negative X (left)
+            .withRotationalRate(-joystick.getRightX() * MaxAngularRate); // Drive counterclockwise with negative X (left)
+        
+    })
+    );
+//     joystick.back().whileTrue(drivetrain.applyRequest(() -> {
+//         SmartDashboard.putNumber("robot y velocity", joystick.getLeftX() * MaxSpeed);
+//     return robotCentricDrive.withVelocityX(joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+//         .withVelocityY(joystick.getLefty) // Drive left with negative X (left)
+//         .withRotationalRate(-joystick.getRightX() * MaxAngularRate); // Drive counterclockwise with negative X (left)
+        
+// }));
         
       
         joystick.rightBumper().whileTrue(drivetrain.applyRequest(() ->
@@ -86,8 +104,6 @@ public class RobotContainer {
         joystick.b().whileTrue(drivetrain.applyRequest(() ->
             point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
         ));
-        joystick.x().whileTrue(autoAlign);
-
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
         joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
