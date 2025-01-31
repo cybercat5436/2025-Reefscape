@@ -12,7 +12,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
-//import frc.robot.LimelightHelpers.LimelightResults;
+import frc.robot.LimelightHelpers.LimelightResults;
+
 public class LimeLight extends SubsystemBase {
   public NetworkTable tableLimelight;
   public NetworkTableEntry txLocal; //horizontal error
@@ -32,8 +33,9 @@ public class LimeLight extends SubsystemBase {
   private double min_aim = -0.1;
   private double visionSpeed;
   private boolean targetInView = false;
-  public boolean isEnabled = true;
+  public boolean isLoggingEnabled = false;
   public double spinThreshold = 75;
+
   double[] positionStandardDeviations = new double[12];
   public LimeLight(String networkTableName) {
     tableLimelight = NetworkTableInstance.getDefault().getTable(networkTableName);
@@ -53,27 +55,24 @@ public class LimeLight extends SubsystemBase {
     verticalError = getVisionTargetVerticalError();
     area = getVisionTargetAreaError();
     targetInView = getVisionTargetStatus();
-    // SmartDashboard.putBoolean("Valid Target Found", targetInView);
-    // SmartDashboard.putNumber("tx", getVisionTargetHorizontalError());
-    // SmartDashboard.putNumber("ty", getVisionTargetVerticalError());
-    // SmartDashboard.putNumber("tz", tzLocal.getDouble(0));
-    // if (isOriented()) {
-      // System.out.println("It is oriented!!!!");
-    
-    // }
-    // System.out.println("This is Tlong:" + tLongLocal.getDouble(0));
-    // SmartDashboard.putNumber("tLong", tLongLocal.getDouble(0));
-    // SmartDashboard.putBoolean("Is oriented", isOriented());
-    if (isEnabled) {Pose2d p = getRobotPose();
+    if (isLoggingEnabled) {Pose2d p = getRobotPose();
     SmartDashboard.putString("Camera Pose2d", p.toString());
-    positionStandardDeviations = NetworkTableInstance.getDefault().getTable("limelight").getEntry("<variablename>").getDoubleArray(new double[6]);
-    System.out.println("Standard deviation of limelight measurement (MegaTag2) " + positionStandardDeviations[6]+" "+positionStandardDeviations[7]+" "+positionStandardDeviations[8]);
-    //System.out.println("Time of Limelight publishing measurement: (ms since Limelight boot) " + LimelightHelpers.LimelightResults.timestamp_LIMELIGHT_publish + " Rio receipt time: " + LimelightHelpers.LimelightResults.timestamp_RIOFPGA_capture);
-    System.out.println("Number of tags visible:"+LimelightHelpers.getTargetCount(limelightName));
+    LimelightResults limelightResults = LimelightHelpers.getLatestResults(limelightName);
+    positionStandardDeviations = limelightResults.standardDeviations;
+    if (positionStandardDeviations.length > 2) {
+      System.out.println("Standard deviation of limelight measurement (MegaTag2) " + positionStandardDeviations[0]+" "+positionStandardDeviations[1]);
+    } else {
+      System.out.println("No position measurement (MegaTag2)");
+    }
+    System.out.println("Time of Limelight publishing measurement: (ms since Limelight boot) " + limelightResults.timestamp_LIMELIGHT_publish + " Rio receipt time: " + limelightResults.timestamp_RIOFPGA_capture);
+    System.out.println("Number of tags visible:"+limelightResults.botpose_tagcount);
+
     }
   }
   
-
+  public LimelightResults getLatestResults() {
+    return LimelightHelpers.getLatestResults(limelightName);
+  }
   // This was refactored into SwerveJoystickCommand
   public boolean alignToTarget(boolean targetFound, double xError, double yError, String zone){
     double yOffset = 0;
@@ -186,10 +185,10 @@ public Pose2d getRobotPose() {
   return LimelightHelpers.getBotPose2d(limelightName);
 }
 public void enable() {
-  isEnabled = true;
+  isLoggingEnabled = true;
 }
 public void disable() {
-  isEnabled = false;
+  isLoggingEnabled = false;
 }
 public Color getStatusLed() {
   int tags = LimelightHelpers.getTargetCount(limelightName);

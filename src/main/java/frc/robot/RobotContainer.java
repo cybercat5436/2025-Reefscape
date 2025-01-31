@@ -69,6 +69,8 @@ public class RobotContainer {
        SmartDashboard.putData("Auton Chooser", autonChooser);
     // autonChooser.addOption("Complex Auto", m_complexAuto);
     configureBindings();
+    poseUpdater.enable();
+    
     }
 
     private void configureBindings() {
