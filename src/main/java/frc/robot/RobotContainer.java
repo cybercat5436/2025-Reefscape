@@ -27,7 +27,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-//import frc.robot.commands.ColorBlinkCommand;
+import frc.robot.commands.AutoAlign;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Climber2;
@@ -46,8 +46,16 @@ public class RobotContainer {
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
     private double HalfAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond) *0.5;
 
+    private double robotX;
+    private double robotY;
+    private double kP = 0.03;
+    private double ySpeed = 0;
+    private double xSpeed = 0;
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+            .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+    private final SwerveRequest.RobotCentric robotCentricDrive = new SwerveRequest.RobotCentric()
             .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
@@ -59,7 +67,8 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private final LimeLight limeLightFront = new LimeLight("limelight-front");
-     private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, drivetrain);
+    private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, drivetrain);
+    private final AutoAlign autoAlign = new AutoAlign(drivetrain,limeLightFront);
     private SendableChooser<Command> autonChooser;
     public final Climber climber = new Climber();
     public final Climber2 climber2 = new Climber2();
@@ -108,6 +117,26 @@ public class RobotContainer {
             )
         );
     
+
+        joystick.x().whileTrue(drivetrain.applyRequest(() -> {
+        robotX = limeLightFront.getVisionArea();
+        robotY = -limeLightFront.getVisionTargetHorizontalError();
+        xSpeed = robotX * kP * MaxSpeed;
+        ySpeed = robotY * kP * MaxSpeed;
+            SmartDashboard.putNumber("robot y velocity", joystick.getLeftX() * MaxSpeed);
+        return robotCentricDrive.withVelocityX(0) // Drive forward with negative Y (forward)
+            .withVelocityY(ySpeed) // Drive left with negative X (left)
+            .withRotationalRate(-joystick.getRightX() * MaxAngularRate); // Drive counterclockwise with negative X (left)
+        
+    })
+    );
+//     joystick.back().whileTrue(drivetrain.applyRequest(() -> {
+//         SmartDashboard.putNumber("robot y velocity", joystick.getLeftX() * MaxSpeed);
+//     return robotCentricDrive.withVelocityX(joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+//         .withVelocityY(joystick.getLefty) // Drive left with negative X (left)
+//         .withRotationalRate(-joystick.getRightX() * MaxAngularRate); // Drive counterclockwise with negative X (left)
+        
+// }));
         
       
         joystick.rightBumper().whileTrue(drivetrain.applyRequest(() ->{
@@ -134,7 +163,6 @@ public class RobotContainer {
         joystick.b().whileTrue(drivetrain.applyRequest(() ->
             point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
         ));
-
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.

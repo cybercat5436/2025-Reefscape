@@ -49,6 +49,7 @@ public class LimeLight extends SubsystemBase {
     limelightName = networkTableName;
 }
 
+
 @Override
   public void periodic() {
     horizontalError = getVisionTargetHorizontalError();
@@ -69,6 +70,7 @@ public class LimeLight extends SubsystemBase {
     System.out.println("Number of tags visible:"+limelightResults.botpose_tagcount);
 
     }
+    SmartDashboard.putNumber("tx", getVisionTargetHorizontalError());
   }
   
   public LimelightResults getLatestResults() {
