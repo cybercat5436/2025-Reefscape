@@ -101,11 +101,11 @@ public class RobotContainer {
            .onFalse(new InstantCommand(() -> coral.stopMotor())); 
 
         joystick2.y()
-           .whileTrue(new InstantCommand(() -> algae.intakeBall(0.3)))
+           .whileTrue(new InstantCommand(() -> algae.intakeBall(0.1)))
            .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
 
         joystick2.b()
-           .whileTrue(new InstantCommand(() -> algae.releaseBall(0.3)))
+           .whileTrue(new InstantCommand(() -> algae.releaseBall(0.1)))
            .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
         joystick2.povUp()
             .onTrue(new InstantCommand(() -> elevator.raiseLevel1()))
