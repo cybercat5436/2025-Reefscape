@@ -35,7 +35,7 @@ public enum Sensors{
       numValues =10;
       sensorUsed = new CANrange(49);
       this.gamePiece = "coral";
-      config.FovParams.FOVRangeX = 7;
+      config.FovParams.FOVRangeX = 10;
       config.FovParams.FOVRangeY = 27;
 
     } else if (sensor == Sensors.algae){
