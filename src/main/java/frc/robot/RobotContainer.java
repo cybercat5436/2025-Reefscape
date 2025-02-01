@@ -69,23 +69,23 @@ public class RobotContainer {
     private final CommandXboxController joystick2 = new CommandXboxController(1);
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private final LimeLight limeLightFront = new LimeLight("limelight-front");
-    private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, drivetrain);
+    // private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, drivetrain);
     private final AutoAlign autoAlign = new AutoAlign(drivetrain,limeLightFront);
     private SendableChooser<Command> autonChooser;
     public final Climber climber = new Climber();
     public final Climber2 climber2 = new Climber2();
-    public final GamePieceDetector coralSensor = new GamePieceDetector(4000, GamePieceDetector.Sensors.coral);
-    //public final GamePieceDetector algaeSensor = new GamePieceDetector(3000, GamePieceDetector.Sensors.algae);
+    public final GamePieceDetector coralSensor = new GamePieceDetector(35000, GamePieceDetector.Sensors.coral);
+    public final GamePieceDetector algaeSensor = new GamePieceDetector(25000, GamePieceDetector.Sensors.algae);
     public final Coral coral = new Coral();
     public final Algae algae = new Algae();
     public final Elevator elevator = new Elevator();
     public CANdleSystem candleSystem = new CANdleSystem(joystick.getHID());
     public RobotContainer(){
-        autonChooser = AutoBuilder.buildAutoChooser("Test auton 2");
+        autonChooser = AutoBuilder.buildAutoChooser();
        SmartDashboard.putData("Auton Chooser", autonChooser);
     // autonChooser.addOption("Complex Auto", m_complexAuto);
     configureBindings();
-    poseUpdater.enable();
+    // poseUpdater.enable();
     
     }
 
