@@ -9,6 +9,8 @@ import java.util.Optional;
 
 import com.ctre.phoenix6.SignalLogger;
 
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -16,6 +18,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.Odometry;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -23,6 +26,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers.LimelightResults;
+import frc.robot.LimelightHelpers;
 import frc.robot.Telemetry;
 
 public class PoseUpdater extends SubsystemBase {
@@ -175,18 +179,40 @@ public class PoseUpdater extends SubsystemBase {
   }
   @Override
   public void periodic() {
+    
     LimelightResults limelightResults = limeLightFront.getLatestResults();
     // This method will be called once per scheduler run
     isTargetVisible = limeLightFront.getVisionTargetStatus();
     SignalLogger.writeDouble("LimeLight Front/Vision Area", limeLightFront.getVisionArea(), "mm^2");
-    
+    //System.out.println("The person not programming is");
     // Calculate error
-    if (limelightResults.botpose_tagcount > 0) {
-      System.out.println("Position is being updated");
-
+    if (LimelightHelpers.getTargetCount(limeLightFront.limelightName) > 0) {
+      //System.out.println("Position is being updated");
+      
       // update pose if active  
       if (isEnabled) {
-        commandSwerveDrivetrain.addVisionMeasurement(limelightResults.getBotPose2d(), limelightResults.timestamp_LIMELIGHT_publish);
+        //System.out.println("Hi, Chris Farhood");
+
+        double robotYaw = commandSwerveDrivetrain.getStateCopy().Pose.getRotation().getDegrees();
+
+        LimelightHelpers.SetRobotOrientation(limeLightFront.limelightName, robotYaw, 0.0, 0.0, 0.0, 0.0, 0.0);
+
+        // Get the pose estimate
+        LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue(limeLightFront.limelightName);
+        
+        // Add it to your pose estimator
+        commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
+        commandSwerveDrivetrain.addVisionMeasurement(
+            limelightMeasurement.pose,
+            limelightMeasurement.timestampSeconds
+        );
+        //System.out.println(limelightMeasurement.pose);
+        SmartDashboard.putNumber("Limelight Measured X", limelightMeasurement.pose.getX());
+        SmartDashboard.putNumber("Limelight Measured Y", limelightMeasurement.pose.getY());
+        SmartDashboard.putNumber("Limelight Timestamp", limelightMeasurement.timestampSeconds);
+        //System.out.println("Hi");
+
+        //SwerveDrivePoseEstimator.update(robotYaw, commandSwerveDrivetrain.);
       }
     }
   }

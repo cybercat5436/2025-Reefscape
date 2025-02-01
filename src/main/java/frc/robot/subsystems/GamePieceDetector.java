@@ -46,7 +46,7 @@ public enum Sensors{
     } else {
       isCoralClose = false;
     }
-    System.out.println(isCoralClose + " signal: " + sensorUsed.getSignalStrength().getValueAsDouble());
+    //System.out.println(isCoralClose + " signal: " + sensorUsed.getSignalStrength().getValueAsDouble());
     
   }
 }
