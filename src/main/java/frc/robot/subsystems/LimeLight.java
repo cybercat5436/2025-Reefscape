@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import java.util.HashMap;
+
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -38,6 +40,28 @@ public class LimeLight extends SubsystemBase {
     tLongLocal = tableLimelight.getEntry("tlong");
   
 }
+ public int getAprilTagId() {
+  return (int)tableLimelight.getEntry("tid").getDouble(0);
+ }
+public double getRotationAngle () {
+   HashMap<Integer, Double> RotationTableLookUpAngles = new HashMap<>();
+    RotationTableLookUpAngles.put(6,300.0);
+    RotationTableLookUpAngles.put(7,0.0);
+    RotationTableLookUpAngles.put(8, 60.0);
+    RotationTableLookUpAngles.put(9,120.0);
+    RotationTableLookUpAngles.put(10, 180.0);
+    RotationTableLookUpAngles.put(11,240.0);
+    RotationTableLookUpAngles.put(17,240.0);
+    RotationTableLookUpAngles.put(18,180.0);
+    RotationTableLookUpAngles.put(19, 120.0);
+    RotationTableLookUpAngles.put(20, 60.0);
+    RotationTableLookUpAngles.put(21,0.0);
+    RotationTableLookUpAngles.put(22,300.0);
+    RotationTableLookUpAngles.put(-1,0.0);
+  
+    return RotationTableLookUpAngles.get(getAprilTagId());
+    
+}
 
 
 @Override
@@ -57,6 +81,8 @@ public class LimeLight extends SubsystemBase {
     // System.out.println("This is Tlong:" + tLongLocal.getDouble(0));
     // SmartDashboard.putNumber("tLong", tLongLocal.getDouble(0));
     // SmartDashboard.putBoolean("Is oriented", isOriented());
+    SmartDashboard.putNumber("Id number",getAprilTagId() );
+    SmartDashboard.putNumber("rotation angle", getRotationAngle());
   }
   
 
@@ -129,6 +155,7 @@ public class LimeLight extends SubsystemBase {
   }  
 
 
+
   // Checks for cone orientation
   public boolean isOriented(){
     if (tLongLocal.getDouble(0) >= spinThreshold) {
@@ -169,6 +196,5 @@ public double getVisionTargetVerticalError(){
 public double getVisionTargetSkew(){
   return tsLocal.getDouble(0);
 }
-
 
 }

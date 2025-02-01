@@ -3,6 +3,13 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.commands;
+import java.util.HashMap;
+
+import static edu.wpi.first.units.Units.Rotation;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.sound.sampled.SourceDataLine;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
@@ -11,6 +18,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LimeLight;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -33,10 +41,13 @@ public class AutoAlign extends Command {
   private double maxSpeed = 3;
   private double timeThreshold = 1.0;
   private double MaxAngularRate = 0.75;
-  private final SwerveRequest.RobotCentric autoDrive = new SwerveRequest.RobotCentric()
+  private double rotationRate = 0.0;
+  private double rotationAngle;
+  private final SwerveRequest.RobotCentric robotCentricDrive = new SwerveRequest.RobotCentric()
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
   private boolean isAligned;
   private boolean isTimedOut;
+   
 
   public AutoAlign(CommandSwerveDrivetrain commandSwerveDrivetrain, LimeLight limeLight) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -44,7 +55,42 @@ public class AutoAlign extends Command {
     this.commandSwerveDrivetrain = commandSwerveDrivetrain;
     this.limelight = limeLight;
     
+    // HashMap<Double, Double> RotationTableLookUpAngles = new HashMap<>();
+    // RotationTableLookUpAngles.put(6.0,300.0);
+    // RotationTableLookUpAngles.put(7.0,0.0);
+    // RotationTableLookUpAngles.put(8.0, 60.0);
+    // RotationTableLookUpAngles.put(9.0,120.0);
+    // RotationTableLookUpAngles.put(10.0, 180.0);
+    // RotationTableLookUpAngles.put(11.0,240.0);
+    // RotationTableLookUpAngles.put(17.0,240.0);
+    // RotationTableLookUpAngles.put(18.0,180.0);
+    // RotationTableLookUpAngles.put(19.0, 120.0);
+    // RotationTableLookUpAngles.put(20.0, 60.0);
+    // RotationTableLookUpAngles.put(21.0,0.0);
+    // RotationTableLookUpAngles.put(22.0,300.0);
+
+    HashMap<Integer, Double> RotationTableLookUpAngles = new HashMap<>();
+    RotationTableLookUpAngles.put(6,300.0);
+    RotationTableLookUpAngles.put(7,0.0);
+    RotationTableLookUpAngles.put(8, 60.0);
+    RotationTableLookUpAngles.put(9,120.0);
+    RotationTableLookUpAngles.put(10, 180.0);
+    RotationTableLookUpAngles.put(11,240.0);
+    RotationTableLookUpAngles.put(17,240.0);
+    RotationTableLookUpAngles.put(18,180.0);
+    RotationTableLookUpAngles.put(19, 120.0);
+    RotationTableLookUpAngles.put(20, 60.0);
+    RotationTableLookUpAngles.put(21,0.0);
+    RotationTableLookUpAngles.put(22,300.0);
+  
+    rotationAngle = RotationTableLookUpAngles.get(limeLight.getAprilTagId());
+    
+    
+
   }
+  
+  
+
 
   // Called when the command is initially scheduled.
   @Override
@@ -59,16 +105,21 @@ public class AutoAlign extends Command {
   public void execute() {
     robotX = limelight.getVisionArea();
     robotY = -limelight.getVisionTargetHorizontalError();
-
+    // TO-DO Add robot rotation error from limelight
+    // Followed limelight example for aiming and ranging
+    rotationRate = robotY * kP * MaxAngularRate;
     xSpeed = robotX * kP * maxSpeed;
     ySpeed = robotY * kP * maxSpeed;
     commandSwerveDrivetrain.applyRequest(() ->
       // drive.withVelocityY(ySpeed));
-    autoDrive.withVelocityX(0) // Drive forward with negative Y (forward)
-        .withVelocityY(1)
-        .withRotationalRate(0));
+        robotCentricDrive
+        .withVelocityX(xSpeed) // Drive forward with negative Y (forward)
+        .withVelocityY(ySpeed)
+        .withRotationalRate(rotationRate));
+
     
-    
+
+
     SmartDashboard.putNumber("Auto align YSpeed", ySpeed);
   }
 
