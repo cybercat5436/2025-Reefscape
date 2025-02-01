@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
+import frc.robot.subsystems.LimeLight;
 
 public class Telemetry {
     private final double MaxSpeed;
@@ -49,6 +50,7 @@ public class Telemetry {
     /* Robot pose for field positioning */
     private final NetworkTable table = inst.getTable("Pose");
     private final DoubleArrayPublisher fieldPub = table.getDoubleArrayTopic("robotPose").publish();
+    private final DoubleArrayPublisher cameraPose = table.getDoubleArrayTopic("cameraPose").publish();
     private final StringPublisher fieldTypePub = table.getStringTopic(".type").publish();
 
     /* Mechanisms to represent the swerve module states */
@@ -107,11 +109,10 @@ public class Telemetry {
         SignalLogger.writeDoubleArray("DriveState/ModuleStates", m_moduleStatesArray);
         SignalLogger.writeDoubleArray("DriveState/ModuleTargets", m_moduleTargetsArray);
         SignalLogger.writeDouble("DriveState/OdometryPeriod", state.OdometryPeriod, "seconds");
-
         /* Telemeterize the pose to a Field2d */
         fieldTypePub.set("Field2d");
         fieldPub.set(m_poseArray);
-
+        //cameraPose.set(LimeLight.poseArray());
         /* Telemeterize the module states to a Mechanism2d */
         for (int i = 0; i < 4; ++i) {
             m_moduleSpeeds[i].setAngle(state.ModuleStates[i].angle);
