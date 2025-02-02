@@ -43,9 +43,9 @@ import frc.robot.subsystems.LimeLight;
 import frc.robot.subsystems.PoseUpdater;
 
 public class RobotContainer {
-    private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.5; // kSpeedAt12Volts desired top speed
+    private double maxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.5; // kSpeedAt12Volts desired top speed
     private double HalfSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.25;
-    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+    private double maxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
     private double HalfAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond) *0.5;
 
     private double robotX;
@@ -55,15 +55,15 @@ public class RobotContainer {
     private double xSpeed = 0;
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-            .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+            .withDeadband(maxSpeed * 0.1).withRotationalDeadband(maxAngularRate * 0.1) // Add a 10% deadband
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
     private final SwerveRequest.RobotCentric robotCentricDrive = new SwerveRequest.RobotCentric()
-            .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+            .withDeadband(maxSpeed * 0.1).withRotationalDeadband(maxAngularRate * 0.1) // Add a 10% deadband
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
    
-    private final Telemetry logger = new Telemetry(MaxSpeed);
+    private final Telemetry logger = new Telemetry(maxSpeed);
 
     private final CommandXboxController joystick = new CommandXboxController(0);
     private final CommandXboxController joystick2 = new CommandXboxController(1);
@@ -130,17 +130,17 @@ public class RobotContainer {
         joystick2.leftStick()
             .onTrue(new InstantCommand(() -> algae.armToProcesser()))
             .onFalse(new InstantCommand(() -> algae.stopArm()));
-        SlewRateLimiter slewRateLimiterX = new SlewRateLimiter(MaxSpeed);
-        SlewRateLimiter slewRateLimiterY = new SlewRateLimiter(MaxSpeed);
-        SlewRateLimiter slewRateLimiterTurnX = new SlewRateLimiter(MaxSpeed);
+        SlewRateLimiter slewRateLimiterX = new SlewRateLimiter(maxSpeed * 2);  //Note: setting slewratelimiter to 2x speed means it takes 0.5s to accelerate to full speed
+        SlewRateLimiter slewRateLimiterY = new SlewRateLimiter(maxSpeed * 2);
+        SlewRateLimiter slewRateLimiterTurnX = new SlewRateLimiter(maxAngularRate * 2);  //corrected from using MaxSpeed
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->{
-                double xSpeed = slewRateLimiterX.calculate(joystick.getLeftY()* MaxSpeed);
+                double xSpeed = slewRateLimiterX.calculate(joystick.getLeftY()* maxSpeed);
                 
-                double ySpeed = slewRateLimiterY.calculate(joystick.getLeftX()* MaxSpeed);
+                double ySpeed = slewRateLimiterY.calculate(joystick.getLeftX()* maxSpeed);
                 
-                double yTurnSpeed = slewRateLimiterTurnX.calculate(joystick.getRightX()* MaxAngularRate);
+                double yTurnSpeed = slewRateLimiterTurnX.calculate(joystick.getRightX()* maxAngularRate);
 
                 SmartDashboard.putNumber("xSpeed",xSpeed);
                 SmartDashboard.putNumber("ySpeed",ySpeed);
@@ -157,12 +157,12 @@ public class RobotContainer {
         joystick.x().whileTrue(drivetrain.applyRequest(() -> {
         robotX = limeLightFront.getVisionArea();
         robotY = -limeLightFront.getVisionTargetHorizontalError();
-        xSpeed = robotX * kP * MaxSpeed;
-        ySpeed = robotY * kP * MaxSpeed;
-            SmartDashboard.putNumber("robot y velocity", joystick.getLeftX() * MaxSpeed);
+        xSpeed = robotX * kP * maxSpeed;
+        ySpeed = robotY * kP * maxSpeed;
+            SmartDashboard.putNumber("robot y velocity", joystick.getLeftX() * maxSpeed);
         return robotCentricDrive.withVelocityX(0) // Drive forward with negative Y (forward)
             .withVelocityY(ySpeed) // Drive left with negative X (left)
-            .withRotationalRate(-joystick.getRightX() * MaxAngularRate); // Drive counterclockwise with negative X (left)
+            .withRotationalRate(-joystick.getRightX() * maxAngularRate); // Drive counterclockwise with negative X (left)
         
     })
     );
