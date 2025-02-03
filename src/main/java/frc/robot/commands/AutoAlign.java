@@ -30,14 +30,17 @@ public class AutoAlign extends Command {
   private LimeLight limelight;
   private double ySpeed = 0.0;
   private double xSpeed = 0.0;
-  private double turningSpeed = 0.0;
+  
   double yError;
-  private double targetTx = 1;
+  
   private double horizontalThreshold = 0.2;
+  private double rotationThreshold;
   private double kP = 0.3;
+  private double kpRotation = 0.3;
   private Timer timer = new Timer();
   private double robotY;
   private double robotX;
+  private double robotrotation;
   private double maxSpeed = 3;
   private double timeThreshold = 1.0;
   private double MaxAngularRate = 0.75;
@@ -69,21 +72,21 @@ public class AutoAlign extends Command {
     // RotationTableLookUpAngles.put(21.0,0.0);
     // RotationTableLookUpAngles.put(22.0,300.0);
 
-    HashMap<Integer, Double> RotationTableLookUpAngles = new HashMap<>();
-    RotationTableLookUpAngles.put(6,300.0);
-    RotationTableLookUpAngles.put(7,0.0);
-    RotationTableLookUpAngles.put(8, 60.0);
-    RotationTableLookUpAngles.put(9,120.0);
-    RotationTableLookUpAngles.put(10, 180.0);
-    RotationTableLookUpAngles.put(11,240.0);
-    RotationTableLookUpAngles.put(17,240.0);
-    RotationTableLookUpAngles.put(18,180.0);
-    RotationTableLookUpAngles.put(19, 120.0);
-    RotationTableLookUpAngles.put(20, 60.0);
-    RotationTableLookUpAngles.put(21,0.0);
-    RotationTableLookUpAngles.put(22,300.0);
+    // HashMap<Integer, Double> RotationTableLookUpAngles = new HashMap<>();
+    // RotationTableLookUpAngles.put(6,300.0);
+    // RotationTableLookUpAngles.put(7,0.0);
+    // RotationTableLookUpAngles.put(8, 60.0);
+    // RotationTableLookUpAngles.put(9,120.0);
+    // RotationTableLookUpAngles.put(10, 180.0);
+    // RotationTableLookUpAngles.put(11,240.0);
+    // RotationTableLookUpAngles.put(17,240.0);
+    // RotationTableLookUpAngles.put(18,180.0);
+    // RotationTableLookUpAngles.put(19, 120.0);
+    // RotationTableLookUpAngles.put(20, 60.0);
+    // RotationTableLookUpAngles.put(21,0.0);
+    // RotationTableLookUpAngles.put(22,300.0);
   
-    rotationAngle = RotationTableLookUpAngles.get(limeLight.getAprilTagId());
+    // rotationAngle = RotationTableLookUpAngles.get(limeLight.getAprilTagId());
     
     
 
@@ -105,17 +108,21 @@ public class AutoAlign extends Command {
   public void execute() {
     robotX = limelight.getVisionArea();
     robotY = -limelight.getVisionTargetHorizontalError();
+    rotationThreshold = limelight.getRotationAngle();
     // TO-DO Add robot rotation error from limelight
     // Followed limelight example for aiming and ranging
-    rotationRate = robotY * kP * MaxAngularRate;
+    robotrotation = commandSwerveDrivetrain.getStateCopy().Pose.getRotation().getDegrees();
+    rotationRate = robotrotation * kpRotation * MaxAngularRate;
     xSpeed = robotX * kP * maxSpeed;
     ySpeed = robotY * kP * maxSpeed;
-    commandSwerveDrivetrain.applyRequest(() ->
-      // drive.withVelocityY(ySpeed));
-        robotCentricDrive
-        .withVelocityX(xSpeed) // Drive forward with negative Y (forward)
-        .withVelocityY(ySpeed)
-        .withRotationalRate(rotationRate));
+    // commandSwerveDrivetrain.applyRequest(() ->
+    //   // drive.withVelocityY(ySpeed));
+    //     robotCentricDrive
+    //     .withVelocityX(xSpeed) // Drive forward with negative Y (forward)
+    //     .withVelocityY(ySpeed)
+    //     .withRotationalRate(rotationRate));
+    commandSwerveDrivetrain.setControl(robotCentricDrive);
+    robotCentricDrive.withVelocityX(0).withVelocityY(ySpeed).withRotationalRate(rotationRate);
 
     
 
@@ -148,7 +155,9 @@ public class AutoAlign extends Command {
   public boolean isFinished() {
     // double distanceError = Math.abs(Math.sqrt(Math.pow(robotX,2))+Math.pow(robotY,2));
     double distanceError = Math.abs(robotY);
-     isAligned = distanceError < horizontalThreshold;
+    double rotationError = Math.abs(rotationRate);
+    //double rotationThreshold = limelight.getRotationAngle();
+     isAligned = distanceError < horizontalThreshold && rotationError < rotationThreshold;
      isTimedOut = timer.get() > timeThreshold;
     return isAligned || isTimedOut;
     
