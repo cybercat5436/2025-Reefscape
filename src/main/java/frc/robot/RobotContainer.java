@@ -70,7 +70,7 @@ public class RobotContainer {
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private final LimeLight limeLightFront = new LimeLight("limelight-front");
     // private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, drivetrain);
-    private final AutoAlign autoAlign = new AutoAlign(drivetrain,limeLightFront);
+    // private final AutoAlign autoAlign = new AutoAlign(drivetrain,limeLightFront);
     private SendableChooser<Command> autonChooser;
     public final Climber climber = new Climber();
     public final Climber2 climber2 = new Climber2();
@@ -88,6 +88,7 @@ public class RobotContainer {
     // poseUpdater.enable();
     
     }
+   
 
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
@@ -154,18 +155,20 @@ public class RobotContainer {
         );
     
 
-        joystick.x().whileTrue(drivetrain.applyRequest(() -> {
-        robotX = limeLightFront.getVisionArea();
-        robotY = -limeLightFront.getVisionTargetHorizontalError();
-        xSpeed = robotX * kP * maxSpeed;
-        ySpeed = robotY * kP * maxSpeed;
-            SmartDashboard.putNumber("robot y velocity", joystick.getLeftX() * maxSpeed);
-        return robotCentricDrive.withVelocityX(0) // Drive forward with negative Y (forward)
-            .withVelocityY(ySpeed) // Drive left with negative X (left)
-            .withRotationalRate(-joystick.getRightX() * maxAngularRate); // Drive counterclockwise with negative X (left)
-        
-    })
-    );
+        // joystick.x().whileTrue(autoAlign);
+
+    //     joystick.x().whileTrue(drivetrain.applyRequest(() -> {
+    //     robotX = limeLightFront.getVisionArea();
+    //     robotY = -limeLightFront.getVisionTargetHorizontalError();
+    //     xSpeed = robotX * kP * maxSpeed;
+    //     ySpeed = robotY * kP * maxSpeed;
+    //         SmartDashboard.putNumber("robot y velocity", joystick.getLeftX() * maxSpeed);
+    //     return robotCentricDrive
+    //         .withVelocityX(0) // Drive forward with negative Y (forward)
+    //         .withVelocityY(ySpeed) // Drive left with negative X (left)
+    //         .withRotationalRate(-joystick.getRightX() * maxAngularRate); // Drive counterclockwise with negative X (left)   
+    //     })   
+    // );
 //     joystick.back().whileTrue(drivetrain.applyRequest(() -> {
 //         SmartDashboard.putNumber("robot y velocity", joystick.getLeftX() * MaxSpeed);
 //     return robotCentricDrive.withVelocityX(joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)

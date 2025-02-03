@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import java.util.HashMap;
+
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -48,6 +50,28 @@ public class LimeLight extends SubsystemBase {
     tLongLocal = tableLimelight.getEntry("tlong");
     limelightName = networkTableName;
 }
+ public int getAprilTagId() {
+  return (int)tableLimelight.getEntry("tid").getDouble(0);
+ }
+public double getRotationAngle () {
+   HashMap<Integer, Double> RotationTableLookUpAngles = new HashMap<>();
+    RotationTableLookUpAngles.put(6,300.0);
+    RotationTableLookUpAngles.put(7,0.0);
+    RotationTableLookUpAngles.put(8, 60.0);
+    RotationTableLookUpAngles.put(9,120.0);
+    RotationTableLookUpAngles.put(10, 180.0);
+    RotationTableLookUpAngles.put(11,240.0);
+    RotationTableLookUpAngles.put(17,240.0);
+    RotationTableLookUpAngles.put(18,180.0);
+    RotationTableLookUpAngles.put(19, 120.0);
+    RotationTableLookUpAngles.put(20, 60.0);
+    RotationTableLookUpAngles.put(21,0.0);
+    RotationTableLookUpAngles.put(22,300.0);
+    RotationTableLookUpAngles.put(-1,0.0);
+  
+    return RotationTableLookUpAngles.get(getAprilTagId());
+    
+}
 
 
 @Override
@@ -71,6 +95,8 @@ public class LimeLight extends SubsystemBase {
 
     }
     SmartDashboard.putNumber("tx", getVisionTargetHorizontalError());
+    SmartDashboard.putNumber("Id number", getAprilTagId());
+    SmartDashboard.putNumber("rotation angle", getRotationAngle());
   }
   
   public LimelightResults getLatestResults() {
@@ -142,6 +168,7 @@ public class LimeLight extends SubsystemBase {
     return targetAligned;
 
   }  
+
 
 
   // Checks for cone orientation
