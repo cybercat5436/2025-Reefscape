@@ -9,16 +9,21 @@ import static edu.wpi.first.units.Units.Rotation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import javax.sound.sampled.SourceDataLine;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.FieldCentricFacingAngle;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LimeLight;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -32,21 +37,30 @@ public class AutoAlign extends Command {
   private double xSpeed = 0.0;
   private double turningSpeed = 0.0;
   double yError;
-  private double targetTx = 1;
+  private double targetRobotY;
+  private double targetRobotX;
   private double horizontalThreshold = 0.2;
-  private double kP = 0.3;
+  private double VerticalThreshold = 13;
   private Timer timer = new Timer();
-  private double robotY;
-  private double robotX;
-  private double maxSpeed = 3;
+  private double robotYError;
+  private double robotXError;
+  private double maxSpeed = 1;
   private double timeThreshold = 1.0;
   private double MaxAngularRate = 0.75;
-  private double rotationRate = 0.0;
+  private double rotationRate;
   private double rotationAngle;
   private final SwerveRequest.RobotCentric robotCentricDrive = new SwerveRequest.RobotCentric()
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
-  private boolean isAligned;
+  private boolean isYAligned;
+  private boolean isXAligned;
   private boolean isTimedOut;
+  private double kPX = 1;
+  private double kPY = 0.48;
+  private double kDY = 0.05;
+  private double currentX;
+  private double currentY;
+  private double previousYError;
+  private double robotYErrorChange;
    
 
   public AutoAlign(CommandSwerveDrivetrain commandSwerveDrivetrain, LimeLight limeLight) {
@@ -55,38 +69,8 @@ public class AutoAlign extends Command {
     this.commandSwerveDrivetrain = commandSwerveDrivetrain;
     this.limelight = limeLight;
     
-    // HashMap<Double, Double> RotationTableLookUpAngles = new HashMap<>();
-    // RotationTableLookUpAngles.put(6.0,300.0);
-    // RotationTableLookUpAngles.put(7.0,0.0);
-    // RotationTableLookUpAngles.put(8.0, 60.0);
-    // RotationTableLookUpAngles.put(9.0,120.0);
-    // RotationTableLookUpAngles.put(10.0, 180.0);
-    // RotationTableLookUpAngles.put(11.0,240.0);
-    // RotationTableLookUpAngles.put(17.0,240.0);
-    // RotationTableLookUpAngles.put(18.0,180.0);
-    // RotationTableLookUpAngles.put(19.0, 120.0);
-    // RotationTableLookUpAngles.put(20.0, 60.0);
-    // RotationTableLookUpAngles.put(21.0,0.0);
-    // RotationTableLookUpAngles.put(22.0,300.0);
-
-    HashMap<Integer, Double> RotationTableLookUpAngles = new HashMap<>();
-    RotationTableLookUpAngles.put(6,300.0);
-    RotationTableLookUpAngles.put(7,0.0);
-    RotationTableLookUpAngles.put(8, 60.0);
-    RotationTableLookUpAngles.put(9,120.0);
-    RotationTableLookUpAngles.put(10, 180.0);
-    RotationTableLookUpAngles.put(11,240.0);
-    RotationTableLookUpAngles.put(17,240.0);
-    RotationTableLookUpAngles.put(18,180.0);
-    RotationTableLookUpAngles.put(19, 120.0);
-    RotationTableLookUpAngles.put(20, 60.0);
-    RotationTableLookUpAngles.put(21,0.0);
-    RotationTableLookUpAngles.put(22,300.0);
-  
-    rotationAngle = RotationTableLookUpAngles.get(limeLight.getAprilTagId());
-    
-    
-
+    SendableRegistry.addLW(this, this.getClass().getSimpleName(), this.getClass().getSimpleName());
+    SmartDashboard.putData(this);
   }
   
   
@@ -98,26 +82,40 @@ public class AutoAlign extends Command {
     timer.reset();
     timer.start();
     System.out.println("starting auto align");
+
+
+    targetRobotY = 0;
+    targetRobotX = 13;//Area target
+    rotationAngle = limelight.getRotationAngle();
+    
+    previousYError = 0;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    robotX = limelight.getVisionArea();
-    robotY = -limelight.getVisionTargetHorizontalError();
     // TO-DO Add robot rotation error from limelight
     // Followed limelight example for aiming and ranging
-    rotationRate = robotY * kP * MaxAngularRate;
-    xSpeed = robotX * kP * maxSpeed;
-    ySpeed = robotY * kP * maxSpeed;
-    commandSwerveDrivetrain.applyRequest(() ->
-      // drive.withVelocityY(ySpeed));
-        robotCentricDrive
-        .withVelocityX(xSpeed) // Drive forward with negative Y (forward)
-        .withVelocityY(ySpeed)
-        .withRotationalRate(rotationRate));
+    // rotationRate = kP * Math.min(MaxAngularRate, Math.abs(robotY)) * Math.signum(robotY);
+    // robotXError = limelight.getVisionArea();
+    currentX = limelight.getVisionArea();
+    currentY = limelight.getVisiontX();
+    robotYError = targetRobotY - currentY;
+    robotYErrorChange = robotYError - previousYError;
+    robotXError = currentX ==0 ? 0.0 : targetRobotX - currentX;
 
-    
+    xSpeed = kPX * Math.min(maxSpeed, Math.abs(robotXError)) * Math.signum(robotXError);
+    ySpeed = kPY * Math.min(maxSpeed, Math.abs(robotYError)) * Math.signum(robotYError);
+    ySpeed += kDY * robotYErrorChange * maxSpeed;
+    commandSwerveDrivetrain.setControl(
+        robotCentricDrive
+        .withVelocityX(xSpeed) 
+        .withVelocityY(ySpeed)
+        // .withRotationalRate(rotationAngle)
+    );
+  
+
+    previousYError = robotYError;
 
 
     SmartDashboard.putNumber("Auto align YSpeed", ySpeed);
@@ -130,16 +128,26 @@ public class AutoAlign extends Command {
     //happens in robotcontainer
     timer.stop();
     
-    if(isAligned) {
-      System.out.println("Robot Aligned");
+    if(isYAligned) {
+      System.out.println("Robot Y Aligned");
     }else if(isTimedOut){
       System.out.println("Robot time up");
     }else if(interrupted){
       System.out.println("Robot interupted");
+    }else if (isXAligned){
+      System.out.println("Robot X Aligned");
     }
       
     
     
+  }
+  @Override
+  public void initSendable(SendableBuilder builder) {
+    // TODO Auto-generated method stub
+    super.initSendable(builder);
+    builder.addDoubleProperty("kP X", () -> this.kPX, (value) -> this.kPX = value);
+    builder.addDoubleProperty("kP Y", () -> this.kPY, (value) -> this.kPY = value);
+    builder.addDoubleProperty("kD Y", () -> this.kDY, (value) -> this.kDY = value);
   }
 
 
@@ -147,10 +155,12 @@ public class AutoAlign extends Command {
   @Override
   public boolean isFinished() {
     // double distanceError = Math.abs(Math.sqrt(Math.pow(robotX,2))+Math.pow(robotY,2));
-    double distanceError = Math.abs(robotY);
-     isAligned = distanceError < horizontalThreshold;
-     isTimedOut = timer.get() > timeThreshold;
-    return isAligned || isTimedOut;
+    double distanceError = Math.abs(robotYError);
+    double XDistanceError = Math.abs(robotXError);
+    //  isYAligned = distanceError < horizontalThreshold;
+     isXAligned = XDistanceError > VerticalThreshold;
+    //  isTimedOut = timer.get() > timeThreshold;
+    return isXAligned;
     
   }
 }

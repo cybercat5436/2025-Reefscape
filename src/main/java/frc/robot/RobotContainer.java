@@ -50,7 +50,7 @@ public class RobotContainer {
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private final LimeLight limeLightFront = new LimeLight("limelight-front");
     private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, drivetrain);
-    // private final AutoAlign autoAlign = new AutoAlign(drivetrain,limeLightFront);
+    private final AutoAlign autoAlign = new AutoAlign(drivetrain,limeLightFront);
     private SendableChooser<Command> autonChooser;
       
     public RobotContainer(){
@@ -74,7 +74,8 @@ public class RobotContainer {
             )
         );
 
-        // joystick.x().whileTrue(autoAlign);
+        joystick.x().whileTrue(autoAlign);
+        
 
     //     joystick.x().whileTrue(drivetrain.applyRequest(() -> {
     //     robotX = limeLightFront.getVisionArea();

@@ -66,12 +66,12 @@ public double getRotationAngle () {
 
 @Override
   public void periodic() {
-    horizontalError = getVisionTargetHorizontalError();
+    horizontalError = getVisiontX();
     verticalError = getVisionTargetVerticalError();
     area = getVisionTargetAreaError();
     targetInView = getVisionTargetStatus();
     // SmartDashboard.putBoolean("Valid Target Found", targetInView);
-    SmartDashboard.putNumber("tx", getVisionTargetHorizontalError());
+    SmartDashboard.putNumber("tx", getVisiontX());
     // SmartDashboard.putNumber("ty", getVisionTargetVerticalError());
     // SmartDashboard.putNumber("tz", tzLocal.getDouble(0));
     // if (isOriented()) {
@@ -178,7 +178,7 @@ public double getRotationAngle () {
   }
 
 
-  public double getVisionTargetHorizontalError(){
+  public double getVisiontX(){
     return txLocal.getDouble(0);
   }
 
