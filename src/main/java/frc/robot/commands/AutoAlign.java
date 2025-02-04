@@ -10,6 +10,13 @@ import static edu.wpi.first.units.Units.Rotation;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.util.HashMap;
+
+import static edu.wpi.first.units.Units.Rotation;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.sound.sampled.SourceDataLine;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
@@ -72,21 +79,21 @@ public class AutoAlign extends Command {
     // RotationTableLookUpAngles.put(21.0,0.0);
     // RotationTableLookUpAngles.put(22.0,300.0);
 
-    // HashMap<Integer, Double> RotationTableLookUpAngles = new HashMap<>();
-    // RotationTableLookUpAngles.put(6,300.0);
-    // RotationTableLookUpAngles.put(7,0.0);
-    // RotationTableLookUpAngles.put(8, 60.0);
-    // RotationTableLookUpAngles.put(9,120.0);
-    // RotationTableLookUpAngles.put(10, 180.0);
-    // RotationTableLookUpAngles.put(11,240.0);
-    // RotationTableLookUpAngles.put(17,240.0);
-    // RotationTableLookUpAngles.put(18,180.0);
-    // RotationTableLookUpAngles.put(19, 120.0);
-    // RotationTableLookUpAngles.put(20, 60.0);
-    // RotationTableLookUpAngles.put(21,0.0);
-    // RotationTableLookUpAngles.put(22,300.0);
+    HashMap<Integer, Double> RotationTableLookUpAngles = new HashMap<>();
+    RotationTableLookUpAngles.put(6,300.0);
+    RotationTableLookUpAngles.put(7,0.0);
+    RotationTableLookUpAngles.put(8, 60.0);
+    RotationTableLookUpAngles.put(9,120.0);
+    RotationTableLookUpAngles.put(10, 180.0);
+    RotationTableLookUpAngles.put(11,240.0);
+    RotationTableLookUpAngles.put(17,240.0);
+    RotationTableLookUpAngles.put(18,180.0);
+    RotationTableLookUpAngles.put(19, 120.0);
+    RotationTableLookUpAngles.put(20, 60.0);
+    RotationTableLookUpAngles.put(21,0.0);
+    RotationTableLookUpAngles.put(22,300.0);
   
-    // rotationAngle = RotationTableLookUpAngles.get(limeLight.getAprilTagId());
+    rotationAngle = RotationTableLookUpAngles.get(limeLight.getAprilTagId());
     
     
 
@@ -108,21 +115,21 @@ public class AutoAlign extends Command {
   public void execute() {
     robotX = limelight.getVisionArea();
     robotY = -limelight.getVisionTargetHorizontalError();
-    rotationThreshold = limelight.getRotationAngle();
+    // TO-DO Add robot rotation error from limelight
+    // Followed limelight example for aiming and ranging
+    rotationRate = robotY * kP * MaxAngularRate;    rotationThreshold = limelight.getRotationAngle();
     // TO-DO Add robot rotation error from limelight
     // Followed limelight example for aiming and ranging
     robotrotation = commandSwerveDrivetrain.getStateCopy().Pose.getRotation().getDegrees();
     rotationRate = robotrotation * kpRotation * MaxAngularRate;
     xSpeed = robotX * kP * maxSpeed;
     ySpeed = robotY * kP * maxSpeed;
-    // commandSwerveDrivetrain.applyRequest(() ->
-    //   // drive.withVelocityY(ySpeed));
-    //     robotCentricDrive
-    //     .withVelocityX(xSpeed) // Drive forward with negative Y (forward)
-    //     .withVelocityY(ySpeed)
-    //     .withRotationalRate(rotationRate));
-    commandSwerveDrivetrain.setControl(robotCentricDrive);
-    robotCentricDrive.withVelocityX(0).withVelocityY(ySpeed).withRotationalRate(rotationRate);
+    commandSwerveDrivetrain.applyRequest(() ->
+      // drive.withVelocityY(ySpeed));
+        robotCentricDrive
+        .withVelocityX(xSpeed) // Drive forward with negative Y (forward)
+        .withVelocityY(ySpeed)
+        .withRotationalRate(rotationRate));
 
     
 

@@ -50,6 +50,7 @@ public class LimeLight extends SubsystemBase {
     tLongLocal = tableLimelight.getEntry("tlong");
     limelightName = networkTableName;
 }
+
  public int getAprilTagId() {
   return (int)tableLimelight.getEntry("tid").getDouble(0);
  }
@@ -95,10 +96,18 @@ public double getRotationAngle () {
 
     }
     SmartDashboard.putNumber("tx", getVisionTargetHorizontalError());
-    SmartDashboard.putNumber("Id number", getAprilTagId());
+    // SmartDashboard.putNumber("ty", getVisionTargetVerticalError());
+    // SmartDashboard.putNumber("tz", tzLocal.getDouble(0));
+    // if (isOriented()) {
+      // System.out.println("It is oriented!!!!");
+    
+    // }
+    // System.out.println("This is Tlong:" + tLongLocal.getDouble(0));
+    // SmartDashboard.putNumber("tLong", tLongLocal.getDouble(0));
+    // SmartDashboard.putBoolean("Is oriented", isOriented());
+    SmartDashboard.putNumber("Id number",getAprilTagId() );
     SmartDashboard.putNumber("rotation angle", getRotationAngle());
   }
-  
   public LimelightResults getLatestResults() {
     return LimelightHelpers.getLatestResults(limelightName);
   }
