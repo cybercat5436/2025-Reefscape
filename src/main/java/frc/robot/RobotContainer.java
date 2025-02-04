@@ -79,7 +79,7 @@ public class RobotContainer {
     public final Coral coral = new Coral();
     public final Algae algae = new Algae();
     public final Elevator elevator = new Elevator();
-    public CANdleSystem candleSystem = new CANdleSystem(joystick.getHID());
+    public CANdleSystem candleSystem = new CANdleSystem(joystick.getHID(), coralSensor, algaeSensor);
     public RobotContainer(){
         autonChooser = AutoBuilder.buildAutoChooser();
        SmartDashboard.putData("Auton Chooser", autonChooser);
@@ -237,8 +237,8 @@ public class RobotContainer {
         joystick.a()
             .whileTrue(new InstantCommand(() -> climber2.leftClimb(0.2)).repeatedly())
             .onFalse(new InstantCommand(() -> climber2.stopClimb()));
-
-        joystick.povLeft().onTrue(new InstantCommand(() -> candleSystem.changeAnimation(AnimationTypes.Fire)));
+        
+        joystick.povLeft().onTrue(new InstantCommand(() -> candleSystem.incrementAnimation()));
         joystick.povDown().onTrue(new InstantCommand(() -> candleSystem.turnOffColors()));
         joystick.povUp().onTrue(new InstantCommand(() -> candleSystem.showTeamColors()));
         /*joystick.povRight()

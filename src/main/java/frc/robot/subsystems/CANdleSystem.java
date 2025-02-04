@@ -20,7 +20,8 @@ public class CANdleSystem extends SubsystemBase {
     private final CANdle m_candle = new CANdle(TunerConstants.kCANdleID, "rio");
     private final int LedCount = 512;
     private XboxController joystick;
-
+    private GamePieceDetector coralSensor;
+    private GamePieceDetector algaeSensor;
     private Animation m_toAnimate = null;
 
     public enum AnimationTypes {
@@ -45,7 +46,7 @@ public class CANdleSystem extends SubsystemBase {
     }
     private AnimationTypes m_currentAnimation;
 
-    public CANdleSystem(XboxController joy) {
+    public CANdleSystem(XboxController joy, GamePieceDetector coralSensor, GamePieceDetector algaeSensor) {
         this.joystick = joy;
         changeAnimation(AnimationTypes.SetAll);
         CANdleConfiguration configAll = new CANdleConfiguration();
@@ -55,6 +56,8 @@ public class CANdleSystem extends SubsystemBase {
         configAll.brightnessScalar = 0.1;
         configAll.vBatOutputMode = VBatOutputMode.Modulated;
         m_candle.configAllSettings(configAll, 100);
+        this.coralSensor = coralSensor;
+        this.algaeSensor = algaeSensor;
     }
 
 
@@ -78,7 +81,7 @@ public class CANdleSystem extends SubsystemBase {
         //m_candle.setLEDs(225,215,0,0,4,2);
     }
     public void showRed() {
-        m_candle.setLEDs(255, 0, 0, 0, 0, 8);
+        m_candle.setLEDs(255, 0, 0);
     }
     public void showYellow() {
         m_candle.setLEDs(255,255,0);
@@ -189,6 +192,9 @@ public class CANdleSystem extends SubsystemBase {
             m_candle.animate(m_toAnimate);
         }
         m_candle.modulateVBatOutput(joystick.getRightY());*/
+        if (algaeSensor.getIsGamePieceDetected()){
+            showGreen();
+        } 
     }
 
     @Override

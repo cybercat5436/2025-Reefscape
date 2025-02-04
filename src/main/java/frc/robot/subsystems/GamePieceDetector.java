@@ -16,23 +16,25 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class GamePieceDetector extends SubsystemBase {
   /** Creates a new CoralSensor. */ 
 
-private boolean isCoralClose;
+private boolean isGamePieceDetected;
 private double signalStrengthThreshhold;
 private CANrange sensorUsed;
 private String gamePiece;
 private ArrayList<Double> signalStrengths = new ArrayList<>();
 private int numValues = 1;
 
+
 public enum Sensors{
   coral,
   algae,
 }
+
   public GamePieceDetector(double signalStrength, Sensors sensor) {
     CANrangeConfiguration config = new CANrangeConfiguration();
     signalStrengthThreshhold = signalStrength;
     
     if (sensor == Sensors.coral){
-      numValues =10;
+      numValues = 10;
       sensorUsed = new CANrange(49);
       this.gamePiece = "coral";
       config.FovParams.FOVRangeX = 10;
@@ -50,16 +52,18 @@ public enum Sensors{
     
     
   }
-   
+  public boolean getIsGamePieceDetected(){
+    return isGamePieceDetected;
+  }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
     addValueToBuffer();
-    isCoralClose = (calculateAverage() > signalStrengthThreshhold);
-    
+    isGamePieceDetected = (calculateAverage() > signalStrengthThreshhold);
+ 
     //System.out.println(isCoralClose + " signal: " + sensorUsed.getSignalStrength().getValueAsDouble());
-    SmartDashboard.putBoolean(this.gamePiece + " is present" , isCoralClose);
+    SmartDashboard.putBoolean(this.gamePiece + " is present" , isGamePieceDetected);
     SmartDashboard.putNumber(this.gamePiece + " signal strength" , sensorUsed.getSignalStrength().getValueAsDouble());
   }
 
