@@ -55,7 +55,7 @@ public class AutoAlign extends Command {
   private boolean isXAligned;
   private boolean isTimedOut;
   private double kPX = 1;
-  private double kPY = 0.48;
+  private double kPY = 0.6;
   private double kDY = 0.05;
   private double currentX;
   private double currentY;
@@ -102,7 +102,7 @@ public class AutoAlign extends Command {
     currentY = limelight.getVisiontX();
     robotYError = targetRobotY - currentY;
     robotYErrorChange = robotYError - previousYError;
-    robotXError = currentX ==0 ? 0.0 : targetRobotX - currentX;
+    robotXError = currentX == 0 ? 0.0 : targetRobotX - currentX;
 
     xSpeed = kPX * Math.min(maxSpeed, Math.abs(robotXError)) * Math.signum(robotXError);
     ySpeed = kPY * Math.min(maxSpeed, Math.abs(robotYError)) * Math.signum(robotYError);
@@ -117,7 +117,7 @@ public class AutoAlign extends Command {
 
     previousYError = robotYError;
 
-
+    SmartDashboard.putNumber("Robot rotation pose", commandSwerveDrivetrain.getState().Pose.getRotation().getDegrees());
     SmartDashboard.putNumber("Auto align YSpeed", ySpeed);
   }
 
@@ -139,7 +139,6 @@ public class AutoAlign extends Command {
     }
       
     
-    
   }
   @Override
   public void initSendable(SendableBuilder builder) {
@@ -155,12 +154,12 @@ public class AutoAlign extends Command {
   @Override
   public boolean isFinished() {
     // double distanceError = Math.abs(Math.sqrt(Math.pow(robotX,2))+Math.pow(robotY,2));
-    double distanceError = Math.abs(robotYError);
+    double YDistanceError = Math.abs(robotYError);
     double XDistanceError = Math.abs(robotXError);
-    //  isYAligned = distanceError < horizontalThreshold;
+     isYAligned = YDistanceError < horizontalThreshold;
      isXAligned = XDistanceError > VerticalThreshold;
-    //  isTimedOut = timer.get() > timeThreshold;
-    return isXAligned;
+     isTimedOut = timer.get() > timeThreshold;
+    return isYAligned || isTimedOut;
     
   }
 }

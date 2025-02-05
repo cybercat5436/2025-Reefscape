@@ -127,5 +127,10 @@ public class RobotContainer {
         return autonChooser.getSelected();
         
     }
+
+    private void registerNamedCommands(){
+
+        
+    }
 }
 
