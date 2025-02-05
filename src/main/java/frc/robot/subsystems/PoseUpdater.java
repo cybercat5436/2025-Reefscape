@@ -8,6 +8,7 @@ import java.lang.reflect.Array;
 import java.util.Optional;
 
 import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.Utils;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -16,6 +17,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.Odometry;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.sendable.Sendable;
@@ -179,19 +181,47 @@ public class PoseUpdater extends SubsystemBase {
   }
   @Override
   public void periodic() {
-    
+    if(DriverStation.isDisabled()){
+
+      Boolean doRejectUpdate = false;
+
+      LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(limeLightFront.limelightName);
+      
+      if(mt1.tagCount == 1 && mt1.rawFiducials.length == 1)
+      {
+        if(mt1.rawFiducials[0].ambiguity > .7)
+        {
+          doRejectUpdate = true;
+        }
+        if(mt1.rawFiducials[0].distToCamera > 3)
+        {
+          doRejectUpdate = true;
+        }
+      }
+      if(mt1.tagCount == 0)
+      {
+        doRejectUpdate = true;
+      }
+
+      if(!doRejectUpdate)
+      {
+        commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,9999999));
+        commandSwerveDrivetrain.addVisionMeasurement(
+           mt1.pose,
+           Utils.getCurrentTimeSeconds());
+      }
+      //AddVisionMeasurement should use timestamp from the mt1 pose, this is a temporary workaround.
+
+    }else {
     LimelightResults limelightResults = limeLightFront.getLatestResults();
     // This method will be called once per scheduler run
     isTargetVisible = limeLightFront.getVisionTargetStatus();
     SignalLogger.writeDouble("LimeLight Front/Vision Area", limeLightFront.getVisionArea(), "mm^2");
-    //System.out.println("The person not programming is");
     // Calculate error
     if (LimelightHelpers.getTargetCount(limeLightFront.limelightName) > 0) {
-      //System.out.println("Position is being updated");
       
       // update pose if active  
       if (isEnabled) {
-        //System.out.println("Hi, Chris Farhood");
 
         double robotYaw = commandSwerveDrivetrain.getStateCopy().Pose.getRotation().getDegrees();
 
@@ -204,17 +234,22 @@ public class PoseUpdater extends SubsystemBase {
         commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
         commandSwerveDrivetrain.addVisionMeasurement(
             limelightMeasurement.pose,
-            limelightMeasurement.timestampSeconds
+            Utils.getCurrentTimeSeconds()
         );
-        //System.out.println(limelightMeasurement.pose);
+        //System.out.println("Pose X "+limelightMeasurement.pose.getX()+" Y "+limelightMeasurement.pose.getY());
         SmartDashboard.putNumber("Limelight Measured X", limelightMeasurement.pose.getX());
         SmartDashboard.putNumber("Limelight Measured Y", limelightMeasurement.pose.getY());
         SmartDashboard.putNumber("Limelight Timestamp", limelightMeasurement.timestampSeconds);
-        //System.out.println("Hi");
+        /*SwerveModulePosition modulePositions[] = new SwerveModulePosition[4];
+        for (int i = 0; i <= 3; i++) {
+          modulePositions[i] = commandSwerveDrivetrain.getModule(i).getPosition(false);
+        }
+        SwerveDrivePoseEstimator.update(new Rotation2d(robotYaw), modulePositions);*/
 
-        //SwerveDrivePoseEstimator.update(robotYaw, commandSwerveDrivetrain.);
+        SmartDashboard.putNumber("FPGATimeSeconds",Utils.getCurrentTimeSeconds());
       }
     }
+  }
   }
 
   public void startLockoutPeriod() {

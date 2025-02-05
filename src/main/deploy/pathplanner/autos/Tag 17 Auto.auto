@@ -7,13 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "2m to tag 8"
+            "pathName": "2m to tag 17"
           }
         }
       ]
     }
   },
-  "resetOdom": true,
+  "resetOdom": false,
   "folder": null,
   "choreoAuto": false
 }
