@@ -57,10 +57,15 @@ public class AutoAlign extends Command {
   private double kPX = 1;
   private double kPY = 0.6;
   private double kDY = 0.05;
+  private double rotationkP = 1;
   private double currentX;
   private double currentY;
   private double previousYError;
   private double robotYErrorChange;
+  private double targetRotation;
+  private double rotationError;
+  private double currentRotation;
+  private double rotationSpeed;
    
 
   public AutoAlign(CommandSwerveDrivetrain commandSwerveDrivetrain, LimeLight limeLight) {
@@ -98,20 +103,24 @@ public class AutoAlign extends Command {
     // Followed limelight example for aiming and ranging
     // rotationRate = kP * Math.min(MaxAngularRate, Math.abs(robotY)) * Math.signum(robotY);
     // robotXError = limelight.getVisionArea();
+    currentRotation =commandSwerveDrivetrain.getState().Pose.getRotation().getDegrees();
     currentX = limelight.getVisionArea();
     currentY = limelight.getVisiontX();
+    targetRotation = limelight.getRotationAngle();
     robotYError = targetRobotY - currentY;
     robotYErrorChange = robotYError - previousYError;
     robotXError = currentX == 0 ? 0.0 : targetRobotX - currentX;
+    rotationError = targetRotation - currentRotation;
 
     xSpeed = kPX * Math.min(maxSpeed, Math.abs(robotXError)) * Math.signum(robotXError);
     ySpeed = kPY * Math.min(maxSpeed, Math.abs(robotYError)) * Math.signum(robotYError);
+    rotationSpeed = rotationkP * Math.min(MaxAngularRate, Math.abs(rotationError)) * Math.signum(rotationError);
     ySpeed += kDY * robotYErrorChange * maxSpeed;
     commandSwerveDrivetrain.setControl(
         robotCentricDrive
         .withVelocityX(xSpeed) 
         .withVelocityY(ySpeed)
-        // .withRotationalRate(rotationAngle)
+        .withRotationalRate(rotationSpeed)
     );
   
 
