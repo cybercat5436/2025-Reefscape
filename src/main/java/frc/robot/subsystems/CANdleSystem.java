@@ -23,6 +23,7 @@ public class CANdleSystem extends SubsystemBase {
     private GamePieceDetector coralSensor;
     private GamePieceDetector algaeSensor;
     private Animation m_toAnimate = null;
+    LimeLight limeLightFront;
 
     public enum AnimationTypes {
         ColorFlow,
@@ -46,7 +47,8 @@ public class CANdleSystem extends SubsystemBase {
     }
     private AnimationTypes m_currentAnimation;
 
-    public CANdleSystem(XboxController joy, GamePieceDetector coralSensor, GamePieceDetector algaeSensor) {
+    public CANdleSystem(XboxController joy, GamePieceDetector coralSensor, GamePieceDetector algaeSensor, LimeLight front) {
+        //308 LEDS Total
         this.joystick = joy;
         changeAnimation(AnimationTypes.SetAll);
         CANdleConfiguration configAll = new CANdleConfiguration();
@@ -58,6 +60,7 @@ public class CANdleSystem extends SubsystemBase {
         m_candle.configAllSettings(configAll, 100);
         this.coralSensor = coralSensor;
         this.algaeSensor = algaeSensor;
+        this.limeLightFront = front;
     }
 
 
@@ -86,14 +89,38 @@ public class CANdleSystem extends SubsystemBase {
     public void showYellow() {
         m_candle.setLEDs(255,255,0);
     }
+    public void showYellow(int start, int end) {
+        m_candle.setLEDs(255,255,0, 0, start, end);
+    }
     public void showGreen() {
         m_candle.setLEDs(0,128,0);
+    }
+    public void showGreen(int start, int end) {
+        m_candle.setLEDs(0,128,0,0,start,end);
+    }
+    public void showBlue(int start, int end){
+        m_candle.setLEDs(0,0,255,0,start,end);
+    }
+    public void showBlue(){
+        m_candle.setLEDs(0,0,255);
     }
     public void turnOffColors() {
         m_candle.setLEDs(0,0,0);
         changeAnimation(AnimationTypes.SetAll);
         
     }
+    public void coralColors(){
+        showGreen(0,153);
+    }
+    public void algaeColors(){
+        //showBlue(0,20);
+        showBlue(155,231);
+    }
+    public void limeLightOrientedColors(){
+        showYellow(154,308);
+    }
+
+    
 
 
     public void incrementAnimation() {
@@ -192,9 +219,22 @@ public class CANdleSystem extends SubsystemBase {
             m_candle.animate(m_toAnimate);
         }
         m_candle.modulateVBatOutput(joystick.getRightY());*/
+        
         if (algaeSensor.getIsGamePieceDetected()){
-            showGreen();
+            algaeColors();
         } 
+        if (coralSensor.getIsGamePieceDetected()){
+            coralColors();
+        } 
+        if (limeLightFront.isOriented()){
+            limeLightOrientedColors();
+        } 
+        
+        if (!algaeSensor.getIsGamePieceDetected() && !coralSensor.getIsGamePieceDetected() && !limeLightFront.isOriented()){
+            turnOffColors();
+        }
+        
+
     }
 
     @Override

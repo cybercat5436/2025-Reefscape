@@ -79,7 +79,7 @@ public class RobotContainer {
     public final Coral coral = new Coral();
     public final Algae algae = new Algae();
     public final Elevator elevator = new Elevator();
-    public CANdleSystem candleSystem = new CANdleSystem(joystick.getHID(), coralSensor, algaeSensor);
+    public CANdleSystem candleSystem = new CANdleSystem(joystick.getHID(), coralSensor, algaeSensor, limeLightFront);
     public RobotContainer(){
         autonChooser = AutoBuilder.buildAutoChooser();
        SmartDashboard.putData("Auton Chooser", autonChooser);
