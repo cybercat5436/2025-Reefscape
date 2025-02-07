@@ -203,4 +203,19 @@ public Color getStatusLed() {
     return Color.kGreen;
   }
 }
+public int getTagCount(){
+  int tags = LimelightHelpers.getTargetCount(limelightName);
+  return tags;
+  /*if (tags == 0){
+    return Color.kRed;
+  } else if (tags == 1){
+    return Color.kYellow;
+  } else if (tags == 2){
+    return Color.kMagenta;
+  } else if (tags == 3){
+    return Color.kLightBlue;
+  } else{
+    return Color.kWhite;
+  }*/
+}
 }

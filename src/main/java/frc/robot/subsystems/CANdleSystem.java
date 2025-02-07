@@ -86,6 +86,9 @@ public class CANdleSystem extends SubsystemBase {
     public void showRed() {
         m_candle.setLEDs(255, 0, 0);
     }
+    public void showRed(int start, int end) {
+        m_candle.setLEDs(255,0,0,0,start,end);
+    }
     public void showYellow() {
         m_candle.setLEDs(255,255,0);
     }
@@ -104,27 +107,62 @@ public class CANdleSystem extends SubsystemBase {
     public void showBlue(){
         m_candle.setLEDs(0,0,255);
     }
+    public void showMagenta(int start, int end){
+        m_candle.setLEDs(255, 0, 255,0,start, end);
+    }
+    public void showMagenta(){
+        m_candle.setLEDs(255, 0, 255);
+    }
+
+    public void showLightBlue(int start, int end){
+        m_candle.setLEDs(173, 216, 230, 0, start, end);
+    }
+    public void showLightBlue(){
+        m_candle.setLEDs(173, 216, 230);
+
+    }
+    public void showWhite(int start, int end){
+        m_candle.setLEDs(255, 255, 255, 0, start, end);
+    }
+    public void showWhite(){
+        m_candle.setLEDs(255, 255, 255);
+    }
     public void turnOffColors() {
         m_candle.setLEDs(0,0,0);
         changeAnimation(AnimationTypes.SetAll);
         
     }
+    public void turnOffColors(int start, int end){
+        m_candle.setLEDs(0, 0, 0, 0, start, end);
+        changeAnimation(AnimationTypes.SetAll);
+    }
+
     public void coralColors(){
-        showGreen(0,153);
+        showGreen(0,102);
     }
     public  void coralOff(){
-        m_candle.setLEDs(0, 0, 0, 0, 0, 153);
+        turnOffColors(0,102);
     }
     public void algaeColors(){
         //showBlue(0,20);
-        showBlue(153,231);
+        showBlue(207,308);
     }
     public void algaeOff(){
-        m_candle.setLEDs(0, 0, 0, 0, 155, 231);
+        turnOffColors(207,308);
     }
 
-    public void limeLightOrientedColors(){
-        showYellow(154,308);
+    public void limeLightStatusColors(int tagAmount, int start, int end){
+        if (limeLightFront.getTagCount() == 0){
+            showRed(start, end); //red
+        } else if (limeLightFront.getTagCount() == 1){
+            showYellow(start,end); //Yellow
+        } else if (limeLightFront.getTagCount() == 2){
+            showMagenta(start,end);
+        } else if (limeLightFront.getTagCount() == 3){
+            showLightBlue(start,end);
+        } else{
+            showWhite(start,end);
+        }
     }
 
     
@@ -240,24 +278,7 @@ public class CANdleSystem extends SubsystemBase {
             coralOff();
         }*/
         
-
-
-
-
-        //work on
-        /*
-        if (limeLightFront.getTagCount() == 0){
-            m_candle.setLEDS(0,0,0); //red
-        } else if (limeLightFront.getTagCount() == 1){
-            m_candle.setLEDS(0,0,0); //Yellow
-        } else if (limeLightFront.getTagCount() == 2){
-            m_candle.setLEDS(0,0,0); //Magenta
-        } else if (limeLightFront.getTagCount() == 3){
-            m_candle.setLEDS(0,0,0); //lightBlue
-        } else{
-            //white
-        }
-        */
+        limeLightStatusColors(limeLightFront.getTagCount(), 103, 206);
     
         
 
