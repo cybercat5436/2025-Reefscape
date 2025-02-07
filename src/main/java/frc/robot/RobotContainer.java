@@ -262,7 +262,16 @@ public class RobotContainer {
             new WaitCommand(0.25)
         );
 
+        Trigger coralTrigger = new Trigger(() -> coralSensor.getIsGamePieceDetected());
+        coralTrigger
+            .onTrue(new InstantCommand(()->candleSystem.coralColors()))
+            .onFalse(new InstantCommand(()->candleSystem.coralOff()));
 
+        Trigger algaeTrigger = new Trigger(() -> algaeSensor.getIsGamePieceDetected());
+        algaeTrigger
+            .onTrue(new InstantCommand(()->candleSystem.algaeColors()))
+            .onFalse(new InstantCommand(()->candleSystem.algaeOff()));
+        
         //joystick.povRight().onTrue(new ParallelRaceGroup(blinkLight, new WaitCommand(2.25)));
         //joystick.povRight().onTrue(new ColorBlinkCommand(AvailableColors.Red, candleSystem));
     }

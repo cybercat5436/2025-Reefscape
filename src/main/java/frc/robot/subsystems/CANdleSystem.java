@@ -112,10 +112,17 @@ public class CANdleSystem extends SubsystemBase {
     public void coralColors(){
         showGreen(0,153);
     }
+    public  void coralOff(){
+        m_candle.setLEDs(0, 0, 0, 0, 0, 153);
+    }
     public void algaeColors(){
         //showBlue(0,20);
-        showBlue(155,231);
+        showBlue(153,231);
     }
+    public void algaeOff(){
+        m_candle.setLEDs(0, 0, 0, 0, 155, 231);
+    }
+
     public void limeLightOrientedColors(){
         showYellow(154,308);
     }
@@ -220,19 +227,38 @@ public class CANdleSystem extends SubsystemBase {
         }
         m_candle.modulateVBatOutput(joystick.getRightY());*/
         
-        if (algaeSensor.getIsGamePieceDetected()){
+        /*if (algaeSensor.getIsGamePieceDetected()){
             algaeColors();
-        } 
-        if (coralSensor.getIsGamePieceDetected()){
-            coralColors();
-        } 
-        if (limeLightFront.isOriented()){
-            limeLightOrientedColors();
-        } 
-        
-        if (!algaeSensor.getIsGamePieceDetected() && !coralSensor.getIsGamePieceDetected() && !limeLightFront.isOriented()){
-            turnOffColors();
+        } else{
+            algaeOff();
+
         }
+            */
+        /*if (coralSensor.getIsGamePieceDetected()){
+            coralColors();
+        } else{
+            coralOff();
+        }*/
+        
+
+
+
+
+        //work on
+        /*
+        if (limeLightFront.getTagCount() == 0){
+            m_candle.setLEDS(0,0,0); //red
+        } else if (limeLightFront.getTagCount() == 1){
+            m_candle.setLEDS(0,0,0); //Yellow
+        } else if (limeLightFront.getTagCount() == 2){
+            m_candle.setLEDS(0,0,0); //Magenta
+        } else if (limeLightFront.getTagCount() == 3){
+            m_candle.setLEDS(0,0,0); //lightBlue
+        } else{
+            //white
+        }
+        */
+    
         
 
     }
