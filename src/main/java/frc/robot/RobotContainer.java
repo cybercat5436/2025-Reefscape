@@ -12,6 +12,7 @@ import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.revrobotics.spark.SparkBase;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -105,7 +106,7 @@ public class RobotContainer {
            .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
 
         joystick2.b()
-           .whileTrue(new InstantCommand(() -> algae.releaseBall(0.1)))
+           .whileTrue(new InstantCommand(() -> algae.releaseBall(0.1))) 
            .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
         joystick2.povUp()
             .onTrue(new InstantCommand(() -> elevator.raiseLevel1()))
@@ -122,14 +123,14 @@ public class RobotContainer {
             .onTrue(new InstantCommand(() -> elevator.raiseLevel4()))
             .onFalse(new InstantCommand(() -> elevator.stopElevator()));
         joystick2.rightBumper()
-            .onTrue(new InstantCommand(() -> algae.raiseArmHigh()))
-            .onFalse(new InstantCommand(() -> algae.stopArm()));
+            .onTrue(new InstantCommand(() -> algae.algaeHigh()))
+            .onFalse(new InstantCommand(() -> algae.algaeStop()));
         joystick2.leftBumper()
-            .onTrue(new InstantCommand(() -> algae.raiseArmLow()))
-            .onFalse(new InstantCommand(() -> algae.stopArm()));
+            .onTrue(new InstantCommand(() -> algae.algaeLow()))
+            .onFalse(new InstantCommand(() -> algae.algaeStop()));
         joystick2.leftStick()
-            .onTrue(new InstantCommand(() -> algae.armToProcesser()))
-            .onFalse(new InstantCommand(() -> algae.stopArm()));
+            .onTrue(new InstantCommand(() -> algae.algaeProcessor()))
+            .onFalse(new InstantCommand(() -> algae.algaeStop()));
         SlewRateLimiter slewRateLimiterX = new SlewRateLimiter(maxSpeed * 2);  //Note: setting slewratelimiter to 2x speed means it takes 0.5s to accelerate to full speed
         SlewRateLimiter slewRateLimiterY = new SlewRateLimiter(maxSpeed * 2);
         SlewRateLimiter slewRateLimiterTurnX = new SlewRateLimiter(maxAngularRate * 2);  //corrected from using MaxSpeed
@@ -210,22 +211,16 @@ public class RobotContainer {
         // reset the field-centric heading on left bumper press
         joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
         // climber commands
-        // joystick.y()
-            // .whileTrue(new InstantCommand(() -> climber.climb(0.1)).repeatedly())
-            // .onFalse(new InstantCommand(() -> climber.stopClimb()));
-        // joystick.a()
-        //     .whileTrue(new InstantCommand(() -> climber.climb(-0.7)).repeatedly())
-        //     .onFalse(new InstantCommand(() -> climber.stopClimb()));
-
+        
         drivetrain.registerTelemetry(logger::telemeterize);
         SmartDashboard.putData("reset odymetry to 0,0",new InstantCommand(() -> drivetrain.resetPose(new Pose2d(0.0,0.0, new Rotation2d()))));
         
 
-        // new Trigger(() -> (joystick.getRightY() > -0.2) new InstantCommand(() -> climber.rightClimb(0.2)));
-        joystick.y()
-            .whileTrue(new InstantCommand(() -> climber2.rightClimb(-0.2)).repeatedly())
-            .onFalse(new InstantCommand(() -> climber2.stopClimb()));
-        // new Trigger(() -> (joystick.getRightY() < 0.2))
+        new Trigger (() -> (joystick.getRightY() > -0.2) () ->  new InstantCommand(() -> climber.rightClimb(0.2)));
+        // joystick.y(
+        //     .whileTrue(new InstantCommand(() -> climber2.rightClimb(-0.2)).repeatedly())
+        //     .onFalse(new InstantCommand(() -> climber2.stopClimb()));
+        new Trigger(() -> (joystick.getRightY() < 0.2) new InstantCommand(() -> climber.leftClimb(0.2)));
         joystick.x()
             .whileTrue(new InstantCommand(() -> climber2.rightClimb(0.2)).repeatedly())
             .onFalse(new InstantCommand(() -> climber2.stopClimb()));
