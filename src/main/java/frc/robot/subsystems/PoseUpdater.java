@@ -181,75 +181,82 @@ public class PoseUpdater extends SubsystemBase {
   }
   @Override
   public void periodic() {
+    LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue(limeLightFront.limelightName);
+    double robotYaw = commandSwerveDrivetrain.getPigeon2().getYaw().getValueAsDouble();//commandSwerveDrivetrain.getStateCopy().Pose.getRotation().getDegrees();
+
     if(DriverStation.isDisabled()){
 
       Boolean doRejectUpdate = false;
 
-      LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(limeLightFront.limelightName);
-      
-      if(mt1.tagCount == 1 && mt1.rawFiducials.length == 1)
+      if (limelightMeasurement == null) return;
+    //  SmartDashboard.putNumber("Limelight Measured Heading", limelightMeasurement.pose.getRotation().getDegrees());
+    //  SmartDashboard.putString("MegaTag","1");
+
+      if(limelightMeasurement.tagCount == 1 && limelightMeasurement.rawFiducials.length == 1)
       {
-        if(mt1.rawFiducials[0].ambiguity > .7)
+        if(limelightMeasurement.rawFiducials[0].ambiguity > .7)
         {
           doRejectUpdate = true;
         }
-        if(mt1.rawFiducials[0].distToCamera > 3)
+        if(limelightMeasurement.rawFiducials[0].distToCamera > 3)
         {
           doRejectUpdate = true;
         }
       }
-      if(mt1.tagCount == 0)
+      if(limelightMeasurement.tagCount == 0)
       {
         doRejectUpdate = true;
       }
 
       if(!doRejectUpdate)
       {
+        commandSwerveDrivetrain.getPigeon2().setYaw(limelightMeasurement.pose.getRotation().getDegrees());
         commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,9999999));
         commandSwerveDrivetrain.addVisionMeasurement(
-           mt1.pose,
+           limelightMeasurement.pose,
            Utils.getCurrentTimeSeconds());
       }
+      //set initial gyro position on commandswervedrivetrain
       //AddVisionMeasurement should use timestamp from the mt1 pose, this is a temporary workaround.
 
-    }else {
-    LimelightResults limelightResults = limeLightFront.getLatestResults();
-    // This method will be called once per scheduler run
-    isTargetVisible = limeLightFront.getVisionTargetStatus();
-    SignalLogger.writeDouble("LimeLight Front/Vision Area", limeLightFront.getVisionArea(), "mm^2");
-    // Calculate error
-    if (LimelightHelpers.getTargetCount(limeLightFront.limelightName) > 0) {
-      
-      // update pose if active  
-      if (isEnabled) {
-
-        double robotYaw = commandSwerveDrivetrain.getStateCopy().Pose.getRotation().getDegrees();
-
-        LimelightHelpers.SetRobotOrientation(limeLightFront.limelightName, robotYaw, 0.0, 0.0, 0.0, 0.0, 0.0);
-
-        // Get the pose estimate
-        LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue(limeLightFront.limelightName);
+    } else {
+      //LimelightResults limelightResults = limeLightFront.getLatestResults();
+      // This method will be called once per scheduler run
+      isTargetVisible = limeLightFront.getVisionTargetStatus();
+      //SignalLogger.writeDouble("LimeLight Front/Vision Area", limeLightFront.getVisionArea(), "mm^2");
+      // Calculate error
+      if (LimelightHelpers.getTargetCount(limeLightFront.limelightName) > 0) {
         
-        // Add it to your pose estimator
-        commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
-        commandSwerveDrivetrain.addVisionMeasurement(
-            limelightMeasurement.pose,
-            Utils.getCurrentTimeSeconds()
-        );
-        //System.out.println("Pose X "+limelightMeasurement.pose.getX()+" Y "+limelightMeasurement.pose.getY());
-        SmartDashboard.putNumber("Limelight Measured X", limelightMeasurement.pose.getX());
-        SmartDashboard.putNumber("Limelight Measured Y", limelightMeasurement.pose.getY());
-        SmartDashboard.putNumber("Limelight Timestamp", limelightMeasurement.timestampSeconds);
-        /*SwerveModulePosition modulePositions[] = new SwerveModulePosition[4];
-        for (int i = 0; i <= 3; i++) {
-          modulePositions[i] = commandSwerveDrivetrain.getModule(i).getPosition(false);
-        }
-        SwerveDrivePoseEstimator.update(new Rotation2d(robotYaw), modulePositions);*/
+        // update pose if active  
+        if (isEnabled) {
+          LimelightHelpers.SetRobotOrientation(limeLightFront.limelightName, robotYaw, 0.0, 0.0, 0.0, 0.0, 0.0);
+          // Get the pose estimate
+          
+          // Add it to your pose estimator
+          //commandSwerveDrivetrain.getPigeon2().setYaw(limelightMeasurement.pose.getRotation().getDegrees());
 
-        SmartDashboard.putNumber("FPGATimeSeconds",Utils.getCurrentTimeSeconds());
+          commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
+          commandSwerveDrivetrain.addVisionMeasurement(
+              limelightMeasurement.pose,
+              Utils.getCurrentTimeSeconds()
+          );
+          //System.out.println("Pose X "+limelightMeasurement.pose.getX()+" Y "+limelightMeasurement.pose.getY());
+        //  SmartDashboard.putNumber("Limelight Measured X", limelightMeasurement.pose.getX());
+        //  SmartDashboard.putNumber("Limelight Measured Y", limelightMeasurement.pose.getY());
+        //  SmartDashboard.putNumber("Limelight Measured Heading", limelightMeasurement.pose.getRotation().getDegrees());
+        //  SmartDashboard.putNumber("Limelight Timestamp", limelightMeasurement.timestampSeconds);
+          /*SwerveModulePosition modulePositions[] = new SwerveModulePosition[4];
+          for (int i = 0; i <= 3; i++) {
+            modulePositions[i] = commandSwerveDrivetrain.getModule(i).getPosition(false);
+          }
+          SwerveDrivePoseEstimator.update(new Rotation2d(robotYaw), modulePositions);*/
+        //  SmartDashboard.putNumber("FPGATimeSeconds",Utils.getCurrentTimeSeconds());
+        //  SmartDashboard.putString("MegaTag","2");
+        }
       }
     }
-  }
+    //SmartDashboard.putNumber("CommandSwerveDrivetrain Yaw", robotYaw);
+
   }
 
   public void startLockoutPeriod() {
