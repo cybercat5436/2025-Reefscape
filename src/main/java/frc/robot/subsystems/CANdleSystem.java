@@ -137,15 +137,31 @@ public class CANdleSystem extends SubsystemBase {
         changeAnimation(AnimationTypes.SetAll);
     }
 
-    public void coralColors(){
-        showGreen(0,102);
+    public void coralColors(boolean isOn){
+        int r = 0;
+        int g = isOn ? 128 : 0;
+        int b = 0;
+        m_candle.setLEDs(r,g,b,0,8,103);
+        m_candle.setLEDs(r,g,b,0,3,2);
+        
+        // showGreen(8,103);
+        // showGreen(3,2);
     }
     public  void coralOff(){
-        turnOffColors(0,102);
+        turnOffColors(8,103);
     }
-    public void algaeColors(){
+    public void algaeColors(boolean isOn){
         //showBlue(0,20);
-        showBlue(207,308);
+        int r = 0;
+        int g = 0;
+        int b = isOn ? 255 : 0;
+        m_candle.setLEDs(r,g,b,0,207,308);
+        m_candle.setLEDs(r,g,b,0,5,1);
+        m_candle.setLEDs(r,g,b,0,2,1);
+        // showBlue(207,308);
+        // showBlue(5,1);
+        // showBlue(2,1);
+
     }
     public void algaeOff(){
         turnOffColors(207,308);
@@ -278,14 +294,35 @@ public class CANdleSystem extends SubsystemBase {
             coralOff();
         }*/
         
-        limeLightStatusColors(limeLightFront.getTagCount(), 103, 206);
-    
+        limeLightStatusColors(limeLightFront.getTagCount(), 103, 104);
+        limeLightStatusColors(limeLightFront.getTagCount(), 0, 2);
+        limeLightStatusColors(limeLightFront.getTagCount(), 6, 6);
         
 
     }
 
     @Override
     public void simulationPeriodic() {
-        // This method will be called once per scheduler run during simulation
+        // turnOffColors(8,103);
+        // turnOffColors(2,4);
+        // turnOffColors(206,100);
+        // if(coralSensor.getIsGamePieceDetected()){
+        //     coralColors();
+        // }else{
+        //     turnOffColors(3,1); 
+        //     turnOffColors(4,1);
+        // }
+        // if(algaeSensor.getIsGamePieceDetected()){
+        //     algaeColors();
+        // }else{
+        //     m_candle.setLEDs(0,0,255,0,2,1); 
+        //     turnOffColors(5,1);
+        // }
+        // //limelight color
+        // if(true){
+        // limeLightStatusColors(limeLightFront.getTagCount(), 6, 2);
+        // limeLightStatusColors(limeLightFront.getTagCount(), 0, 2);
+        // }
+
     }
 }

@@ -238,9 +238,9 @@ public class RobotContainer {
             .whileTrue(new InstantCommand(() -> climber2.leftClimb(0.2)).repeatedly())
             .onFalse(new InstantCommand(() -> climber2.stopClimb()));
         
-        joystick.povLeft().onTrue(new InstantCommand(() -> candleSystem.incrementAnimation()));
-        joystick.povDown().onTrue(new InstantCommand(() -> candleSystem.turnOffColors()));
-        joystick.povUp().onTrue(new InstantCommand(() -> candleSystem.showTeamColors()));
+        // joystick.povLeft().onTrue(new InstantCommand(() -> candleSystem.incrementAnimation()));
+        // joystick.povDown().onTrue(new InstantCommand(() -> candleSystem.turnOffColors()));
+        // joystick.povUp().onTrue(new InstantCommand(() -> candleSystem.showTeamColors()));
         /*joystick.povRight()
             .onTrue(new InstantCommand(() -> candleSystem.flashColor(AvailableColors.Red))
             .andThen(new WaitCommand(0.5))
@@ -264,13 +264,13 @@ public class RobotContainer {
 
         Trigger coralTrigger = new Trigger(() -> coralSensor.getIsGamePieceDetected());
         coralTrigger
-            .onTrue(new InstantCommand(()->candleSystem.coralColors()))
-            .onFalse(new InstantCommand(()->candleSystem.coralOff()));
+            .onTrue(new InstantCommand(()->candleSystem.coralColors(true)))
+            .onFalse(new InstantCommand(()->candleSystem.coralColors(false)));
 
         Trigger algaeTrigger = new Trigger(() -> algaeSensor.getIsGamePieceDetected());
         algaeTrigger
-            .onTrue(new InstantCommand(()->candleSystem.algaeColors()))
-            .onFalse(new InstantCommand(()->candleSystem.algaeOff()));
+            .onTrue(new InstantCommand(()->candleSystem.algaeColors(true)))
+            .onFalse(new InstantCommand(()->candleSystem.algaeColors(false)));
         
         //joystick.povRight().onTrue(new ParallelRaceGroup(blinkLight, new WaitCommand(2.25)));
         //joystick.povRight().onTrue(new ColorBlinkCommand(AvailableColors.Red, candleSystem));
