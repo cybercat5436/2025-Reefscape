@@ -30,7 +30,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.AutoAlign;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.Climber;
+// import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Climber2;
 import frc.robot.subsystems.Algae;
 import frc.robot.subsystems.CANdleSystem;
@@ -73,7 +73,7 @@ public class RobotContainer {
     // private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, drivetrain);
     private final AutoAlign autoAlign = new AutoAlign(drivetrain,limeLightFront);
     private SendableChooser<Command> autonChooser;
-    public final Climber climber = new Climber();
+    // public final Climber climber = new Climber();
     public final Climber2 climber2 = new Climber2();
     public final GamePieceDetector coralSensor = new GamePieceDetector(35000, GamePieceDetector.Sensors.coral);
     public final GamePieceDetector algaeSensor = new GamePieceDetector(25000, GamePieceDetector.Sensors.algae);
@@ -215,24 +215,25 @@ public class RobotContainer {
         drivetrain.registerTelemetry(logger::telemeterize);
         SmartDashboard.putData("reset odymetry to 0,0",new InstantCommand(() -> drivetrain.resetPose(new Pose2d(0.0,0.0, new Rotation2d()))));
         
+        Trigger rightClimbUpTrigger = new Trigger (() -> (joystick2.getRightY() < -0.2));
+        Trigger rightClimbDownTrigger = new Trigger(() -> (joystick2.getRightY() > 0.2));
+        Trigger leftClimbUpTrigger = new Trigger(() -> (joystick2.getLeftY() < -0.2));
+        Trigger leftClimbDownTrigger = new Trigger(() -> (joystick2.getLeftY() > 0.2));
+        Trigger rightClimberStopTrigger = new Trigger(() -> joystick2.getRightY() >= -0.2 && joystick2.getRightY() <= 0.2);
+        Trigger leftClimberStopTrigger = new Trigger(() -> joystick2.getLeftY() >= -0.2 && joystick2.getLeftY() <= 0.2);
 
-        new Trigger (() -> (joystick.getRightY() > -0.2) () ->  new InstantCommand(() -> climber.rightClimb(0.2)));
-        // joystick.y(
-        //     .whileTrue(new InstantCommand(() -> climber2.rightClimb(-0.2)).repeatedly())
-        //     .onFalse(new InstantCommand(() -> climber2.stopClimb()));
-        new Trigger(() -> (joystick.getRightY() < 0.2) new InstantCommand(() -> climber.leftClimb(0.2)));
-        joystick.x()
-            .whileTrue(new InstantCommand(() -> climber2.rightClimb(0.2)).repeatedly())
-            .onFalse(new InstantCommand(() -> climber2.stopClimb()));
-        // new Trigger(() -> (joystick.getLeftY() > -0.2))
-        joystick.b()
-            .whileTrue(new InstantCommand(() -> climber2.leftClimb(-0.2)).repeatedly())
-            .onFalse(new InstantCommand(() -> climber2.stopClimb()));
-        // new Trigger(() -> (joystick.getLeftY() < 0.2))
-        joystick.a()
-            .whileTrue(new InstantCommand(() -> climber2.leftClimb(0.2)).repeatedly())
-            .onFalse(new InstantCommand(() -> climber2.stopClimb()));
-
+        rightClimbUpTrigger
+            .whileTrue(new InstantCommand(() -> climber2.rightClimb(0.2)));
+        leftClimbUpTrigger
+            .whileTrue(new InstantCommand(() -> climber2.leftClimb(0.2)));
+        rightClimbDownTrigger
+            .whileTrue(new InstantCommand(() -> climber2.rightClimb(-0.2)));
+        leftClimbDownTrigger
+            .whileTrue(new InstantCommand(() -> climber2.leftClimb(-0.2)));
+        leftClimberStopTrigger
+            .whileTrue(new InstantCommand(() -> climber2.leftClimb(0)));
+        rightClimberStopTrigger
+            .whileTrue(new InstantCommand(() -> climber2.rightClimb(0)));
         joystick.povLeft().onTrue(new InstantCommand(() -> candleSystem.changeAnimation(AnimationTypes.Fire)));
         joystick.povDown().onTrue(new InstantCommand(() -> candleSystem.turnOffColors()));
         joystick.povUp().onTrue(new InstantCommand(() -> candleSystem.showTeamColors()));

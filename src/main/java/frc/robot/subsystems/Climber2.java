@@ -44,14 +44,19 @@ public class Climber2 extends SubsystemBase {
   leftOut.Output = speed;
   leftClimber.setControl(leftOut);
   SmartDashboard.putNumber("ClimberLeft2", leftClimber.get());
+  System.out.println("left climbing with speed " + speed);
  }
+
  public void rightClimb(double speed) {
   rightOut.Output = speed;
   rightClimber.setControl(rightOut);
   SmartDashboard.putNumber("ClimberRight2", rightClimber.get());
+  System.out.println("right climbing with speed " + speed);
  }
  
-
+//  public void rightClimb(double speed){
+//   rightClimber.set(speed);
+//  }
 public void stopClimb(){
 leftOut.Output = 0;
 rightOut.Output = 0;
@@ -59,7 +64,7 @@ leftClimber.setControl(leftOut);
 rightClimber.setControl(rightOut);
 SmartDashboard.putNumber("ClimberLeft", leftClimber.get());
   SmartDashboard.putNumber("ClimberRight", rightClimber.get());
-  System.out.println("Stopped ");
+  System.out.println("Stopped climbing ");
 }
 
   @Override
