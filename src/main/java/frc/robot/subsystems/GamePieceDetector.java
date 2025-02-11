@@ -33,13 +33,13 @@ public enum Sensors{
     
     if (sensor == Sensors.coral){
       numValues =10;
-      sensorUsed = new CANrange(49);
+      sensorUsed = new CANrange(17);
       this.gamePiece = "coral";
       config.FovParams.FOVRangeX = 10;
       config.FovParams.FOVRangeY = 27;
 
     } else if (sensor == Sensors.algae){
-      sensorUsed = new CANrange(45);
+      sensorUsed = new CANrange(18);
       this.gamePiece = "algae";
       config.FovParams.FOVRangeX=10;
       config.FovParams.FOVRangeY=10;

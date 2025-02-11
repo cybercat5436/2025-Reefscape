@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Coral extends SubsystemBase {
   /** Creates a new Coral. */
-  private SparkMax coralMotor = new SparkMax (37, MotorType.kBrushless);
+  private SparkMax coralMotor = new SparkMax (11, MotorType.kBrushless);
   public Coral() {
     SparkMaxConfig coralConfig = new SparkMaxConfig();
     coralConfig

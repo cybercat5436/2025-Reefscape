@@ -28,8 +28,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Algae extends SubsystemBase {
   /** Creates a new Algae. */
-  private SparkMax ballMotor = new SparkMax (39, MotorType.kBrushless);
-  private final SparkMax armMotor = new SparkMax(38, MotorType.kBrushless); 
+  private SparkMax ballMotor = new SparkMax (13, MotorType.kBrushless);
+  private final SparkMax armMotor = new SparkMax(14, MotorType.kBrushless); 
   SparkMaxConfig ballConfig;
   SparkMaxConfig armConfig;
   private SparkClosedLoopController armClosedLoopController;

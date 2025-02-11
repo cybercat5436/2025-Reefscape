@@ -20,7 +20,7 @@ public class Elevator extends SubsystemBase {
   private double L2 = 2;
   private double L3 = 3;
   private double L4 = 4;
-  private final TalonFX elevator = new TalonFX(57);
+  private final TalonFX elevator = new TalonFX(12);
   public Elevator() {
     var talonFXConfigs = new TalonFXConfiguration();
     talonFXConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;

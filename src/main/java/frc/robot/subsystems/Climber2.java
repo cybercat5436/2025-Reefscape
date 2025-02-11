@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
@@ -17,8 +16,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Climber2 extends SubsystemBase {
   /** Creates a new Climber2. */
-    private final TalonFX rightClimber = new TalonFX(10);
-    private final TalonFX leftClimber = new TalonFX(11);
+    private final TalonFX rightClimber = new TalonFX(15);
+    private final TalonFX leftClimber = new TalonFX(16);
     private final DutyCycleOut leftOut = new DutyCycleOut(0);
     private final DutyCycleOut rightOut = new DutyCycleOut(0);
   /** Creates a new Climber. */
