@@ -12,6 +12,7 @@ import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -81,11 +82,14 @@ public class RobotContainer {
     public final Elevator elevator = new Elevator();
     public CANdleSystem candleSystem = new CANdleSystem(joystick.getHID());
     public RobotContainer(){
+        NamedCommands.registerCommand("enablePoseUpdater", new InstantCommand(() -> poseUpdater.enable()));
+        NamedCommands.registerCommand("disablePoseUpdater", new InstantCommand(() -> poseUpdater.disable()));
+
         autonChooser = AutoBuilder.buildAutoChooser("Test auton 2");
        SmartDashboard.putData("Auton Chooser", autonChooser);
     // autonChooser.addOption("Complex Auto", m_complexAuto);
     configureBindings();
-    poseUpdater.enable();
+    //poseUpdater.enable();
     
     }
 
@@ -177,13 +181,13 @@ public class RobotContainer {
       
         joystick.rightBumper().whileTrue(drivetrain.applyRequest(() ->{
             
-                double xSpeed = slewRateLimiterX.calculate(joystick.getLeftY()* HalfSpeed);
+                double xSpeed = -slewRateLimiterX.calculate(joystick.getLeftY()* 2 * HalfSpeed);
                 
                 
-                double ySpeed = slewRateLimiterY.calculate(joystick.getLeftX()* HalfSpeed);
+                double ySpeed = -slewRateLimiterY.calculate(joystick.getLeftX()* 2 * HalfSpeed);
                 
                 
-                double yTurnSpeed = slewRateLimiterTurnX.calculate(joystick.getRightX()* HalfAngularRate);
+                double yTurnSpeed = slewRateLimiterTurnX.calculate(joystick.getRightX()* 2 * HalfAngularRate);
                 SmartDashboard.putNumber("RBySpeed",ySpeed);
                 SmartDashboard.putNumber("RBxSpeed",xSpeed);
                 SmartDashboard.putNumber("RByTurnSpeed",yTurnSpeed);

@@ -181,10 +181,13 @@ public class PoseUpdater extends SubsystemBase {
   }
   @Override
   public void periodic() {
-    LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue(limeLightFront.limelightName);
     double robotYaw = commandSwerveDrivetrain.getPigeon2().getYaw().getValueAsDouble();//commandSwerveDrivetrain.getStateCopy().Pose.getRotation().getDegrees();
-
+    double robotYaw2 = commandSwerveDrivetrain.getState().Pose.getRotation().getDegrees();
+    SmartDashboard.putNumber("Yaw from Pigeon", robotYaw);
+    SmartDashboard.putNumber("Yaw2 from Pose", robotYaw2);
+    // SmartDashboard.putNumberArray("Megatag1 Pose", Array(megatag1Pose.toMatrix()));
     if(DriverStation.isDisabled()){
+      LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue(limeLightFront.limelightName);
 
       Boolean doRejectUpdate = false;
 
@@ -231,13 +234,13 @@ public class PoseUpdater extends SubsystemBase {
         if (isEnabled) {
           LimelightHelpers.SetRobotOrientation(limeLightFront.limelightName, robotYaw, 0.0, 0.0, 0.0, 0.0, 0.0);
           // Get the pose estimate
-          
+          LimelightHelpers.PoseEstimate limelightMeasurement2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limeLightFront.limelightName);
           // Add it to your pose estimator
           //commandSwerveDrivetrain.getPigeon2().setYaw(limelightMeasurement.pose.getRotation().getDegrees());
 
           commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
           commandSwerveDrivetrain.addVisionMeasurement(
-              limelightMeasurement.pose,
+              limelightMeasurement2.pose,
               Utils.getCurrentTimeSeconds()
           );
           //System.out.println("Pose X "+limelightMeasurement.pose.getX()+" Y "+limelightMeasurement.pose.getY());
