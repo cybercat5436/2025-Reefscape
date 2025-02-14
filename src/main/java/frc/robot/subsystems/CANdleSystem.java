@@ -24,6 +24,7 @@ public class CANdleSystem extends SubsystemBase {
     private GamePieceDetector algaeSensor;
     private Animation m_toAnimate = null;
     LimeLight limeLightFront;
+    public boolean animationOff = false;    
 
     public enum AnimationTypes {
         ColorFlow,
@@ -61,6 +62,7 @@ public class CANdleSystem extends SubsystemBase {
         this.coralSensor = coralSensor;
         this.algaeSensor = algaeSensor;
         this.limeLightFront = front;
+        changeAnimation(AnimationTypes.Larson);
     }
 
 
@@ -134,6 +136,8 @@ public class CANdleSystem extends SubsystemBase {
     }
     public void turnOffColors(int start, int end){
         m_candle.setLEDs(0, 0, 0, 0, start, end);
+    }
+    public void turnOffAnimation(){  
         changeAnimation(AnimationTypes.SetAll);
     }
 
@@ -164,20 +168,36 @@ public class CANdleSystem extends SubsystemBase {
 
     }
     public void algaeOff(){
-        turnOffColors(207,308);
+        turnOffColors(207,102);
     }
 
-    public void limeLightStatusColors(int tagAmount, int start, int end){
-        if (limeLightFront.getTagCount() == 0){
-            showRed(start, end); //red
-        } else if (limeLightFront.getTagCount() == 1){
-            showYellow(start,end); //Yellow
-        } else if (limeLightFront.getTagCount() == 2){
-            showMagenta(start,end);
-        } else if (limeLightFront.getTagCount() == 3){
-            showLightBlue(start,end);
-        } else{
-            showWhite(start,end);
+    public void limeLightStatusColors(int tagAmount){
+        int start = 103;
+        int count = 104;
+        int candleStart1 = 0;
+        int candleCount1 = 2;
+
+        int candleStart2 = 6;
+        int candleCount2 = 2;
+        if (animationOff){
+
+        if (tagAmount == 0){
+            showRed(start, count);
+            showRed(candleStart1, candleCount1);
+            showRed(candleStart2, candleCount2);
+        } else if (tagAmount == 1){
+            showYellow(start,count); //Yellow
+            showYellow(candleStart1, candleCount1);
+            showYellow(candleStart2, candleCount2);
+        } else if (tagAmount == 2){
+            showMagenta(start,count);
+            showMagenta(candleStart1, candleCount1);
+            showMagenta(candleStart2, candleCount2);
+        } else if (tagAmount == 3){
+            showLightBlue(start,count);
+            showLightBlue(candleStart1, candleCount1);
+            showLightBlue(candleStart2, candleCount2);
+        } 
         }
     }
 
@@ -187,14 +207,14 @@ public class CANdleSystem extends SubsystemBase {
     public void incrementAnimation() {
         switch(m_currentAnimation) {
             case ColorFlow: changeAnimation(AnimationTypes.Fire); break;
-            case Fire: changeAnimation(AnimationTypes.Larson); break;
+            case Fire: changeAnimation(AnimationTypes.Larson); break; //DAVID SUGGESTION
             case Larson: changeAnimation(AnimationTypes.Rainbow); break;
             case Rainbow: changeAnimation(AnimationTypes.RgbFade); break;
             case RgbFade: changeAnimation(AnimationTypes.SingleFade); break;
             case SingleFade: changeAnimation(AnimationTypes.Strobe); break;
             case Strobe: changeAnimation(AnimationTypes.Twinkle); break;
             case Twinkle: changeAnimation(AnimationTypes.TwinkleOff); break;
-            case TwinkleOff: changeAnimation(AnimationTypes.ColorFlow); break;
+            case TwinkleOff: changeAnimation(AnimationTypes.ColorFlow); break; //DAVID SUGGESTION
             case SetAll: changeAnimation(AnimationTypes.ColorFlow); break;
         }
     }
@@ -239,7 +259,7 @@ public class CANdleSystem extends SubsystemBase {
                 m_toAnimate = new FireAnimation();
                 break;
             case Larson:
-                m_toAnimate = new LarsonAnimation(0, 255, 46, 0, 1, LedCount, BounceMode.Front, 3);
+                m_toAnimate = new LarsonAnimation(0, 255, 46, 0, 2, LedCount, BounceMode.Front, 20);
                 break;
             case Rainbow:
                 m_toAnimate = new RainbowAnimation(1, 0.1, LedCount);
@@ -294,9 +314,7 @@ public class CANdleSystem extends SubsystemBase {
             coralOff();
         }*/
         
-        limeLightStatusColors(limeLightFront.getTagCount(), 103, 104);
-        limeLightStatusColors(limeLightFront.getTagCount(), 0, 2);
-        limeLightStatusColors(limeLightFront.getTagCount(), 6, 6);
+        limeLightStatusColors(limeLightFront.getTagCount());
         
 
     }

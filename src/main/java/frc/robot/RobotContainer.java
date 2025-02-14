@@ -234,9 +234,13 @@ public class RobotContainer {
             .whileTrue(new InstantCommand(() -> climber2.leftClimb(-0.2)).repeatedly())
             .onFalse(new InstantCommand(() -> climber2.stopClimb()));
         // new Trigger(() -> (joystick.getLeftY() < 0.2))
+
         joystick.a()
             .whileTrue(new InstantCommand(() -> climber2.leftClimb(0.2)).repeatedly())
             .onFalse(new InstantCommand(() -> climber2.stopClimb()));
+
+        
+        //joystic.a().whileTrue(new InstantCommand(() -> candleSystem.limeLightStatusColors(2,103)));
         
         // joystick.povLeft().onTrue(new InstantCommand(() -> candleSystem.incrementAnimation()));
         // joystick.povDown().onTrue(new InstantCommand(() -> candleSystem.turnOffColors()));
@@ -264,14 +268,18 @@ public class RobotContainer {
 
         Trigger coralTrigger = new Trigger(() -> coralSensor.getIsGamePieceDetected());
         coralTrigger
-            .onTrue(new InstantCommand(()->candleSystem.coralColors(true)))
-            .onFalse(new InstantCommand(()->candleSystem.coralColors(false)));
+            .onTrue(new InstantCommand(() -> candleSystem.coralColors(true)))
+            .onTrue(new InstantCommand(() -> candleSystem.turnOffAnimation()))
+            .onFalse(new InstantCommand(() -> candleSystem.coralColors(false)));
 
         Trigger algaeTrigger = new Trigger(() -> algaeSensor.getIsGamePieceDetected());
         algaeTrigger
-            .onTrue(new InstantCommand(()->candleSystem.algaeColors(true)))
-            .onFalse(new InstantCommand(()->candleSystem.algaeColors(false)));
+            .onTrue(new InstantCommand(() -> candleSystem.algaeColors(true)))
+            .onTrue(new InstantCommand(() -> candleSystem.turnOffAnimation()))
+            .onFalse(new InstantCommand(() -> candleSystem.algaeColors(false)));
+
         
+        joystick.povDown().onTrue(new InstantCommand(() -> candleSystem.turnOffColors()));
         //joystick.povRight().onTrue(new ParallelRaceGroup(blinkLight, new WaitCommand(2.25)));
         //joystick.povRight().onTrue(new ColorBlinkCommand(AvailableColors.Red, candleSystem));
     }
