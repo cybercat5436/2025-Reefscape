@@ -93,44 +93,61 @@ public class RobotContainer {
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
-        joystick2.a()
+        joystick2.y().and(joystick2.leftBumper())
+          .whileTrue(new InstantCommand(() -> coral.forward(0.3)))
+          .onFalse(new InstantCommand(() -> coral.stopMotor())); 
+        joystick2.b().and(joystick2.leftBumper())
+          .whileTrue(new InstantCommand(() -> coral.forward(0.3)))
+          .onFalse(new InstantCommand(() -> coral.stopMotor())); 
+        joystick2.x().and(joystick2.leftBumper())
+          .whileTrue(new InstantCommand(() -> coral.forward(0.3)))
+          .onFalse(new InstantCommand(() -> coral.stopMotor())); 
+        joystick2.a().and(joystick2.leftBumper())
           .whileTrue(new InstantCommand(() -> coral.forward(0.3)))
           .onFalse(new InstantCommand(() -> coral.stopMotor())); 
 
-        joystick2.x()
+        joystick2.leftBumper()
            .whileTrue(new InstantCommand(() -> coral.backward(0.3)))
            .onFalse(new InstantCommand(() -> coral.stopMotor())); 
 
-        joystick2.y()
+        joystick2.rightBumper()
            .whileTrue(new InstantCommand(() -> algae.intakeBall(0.1)))
            .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
 
-        joystick2.b()
+        joystick2.povUp().and(joystick2.rightBumper())
            .whileTrue(new InstantCommand(() -> algae.releaseBall(0.1))) 
            .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
-        joystick2.povUp()
+        joystick2.povRight().and(joystick2.rightBumper())
+           .whileTrue(new InstantCommand(() -> algae.releaseBall(0.1))) 
+           .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
+        joystick2.povLeft().and(joystick2.rightBumper())
+           .whileTrue(new InstantCommand(() -> algae.releaseBall(0.1))) 
+           .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
+        
+    
+        joystick2.a()
             .onTrue(new InstantCommand(() -> elevator.raiseLevel1()))
             .onFalse(new InstantCommand(() -> elevator.stopElevator()));
-        joystick2.povRight()
+        joystick2.x()
             .onTrue(new InstantCommand(() -> elevator.raiseLevel2()))
             .onFalse(new InstantCommand(() -> elevator.stopElevator()));
-
-        joystick2.povDown()
+        joystick2.b()
             .onTrue(new InstantCommand(() -> elevator.raiseLevel3()))
             .onFalse(new InstantCommand(() -> elevator.stopElevator()));
-
-        joystick2.povLeft()
+        joystick2.y()
             .onTrue(new InstantCommand(() -> elevator.raiseLevel4()))
             .onFalse(new InstantCommand(() -> elevator.stopElevator()));
-        joystick2.rightBumper()
+       
+        joystick2.povUp()
             .onTrue(new InstantCommand(() -> algae.algaeHigh()))
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
-        joystick2.leftBumper()
+        joystick2.povRight()
             .onTrue(new InstantCommand(() -> algae.algaeLow()))
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
-        joystick2.leftStick()
+        joystick2.povLeft()
             .onTrue(new InstantCommand(() -> algae.algaeProcessor()))
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
+
         SlewRateLimiter slewRateLimiterX = new SlewRateLimiter(maxSpeed * 2);  //Note: setting slewratelimiter to 2x speed means it takes 0.5s to accelerate to full speed
         SlewRateLimiter slewRateLimiterY = new SlewRateLimiter(maxSpeed * 2);
         SlewRateLimiter slewRateLimiterTurnX = new SlewRateLimiter(maxAngularRate * 2);  //corrected from using MaxSpeed
@@ -209,7 +226,7 @@ public class RobotContainer {
         joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
         // reset the field-centric heading on left bumper press
-        joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
         // climber commands
         
         drivetrain.registerTelemetry(logger::telemeterize);
@@ -223,11 +240,11 @@ public class RobotContainer {
         Trigger leftClimberStopTrigger = new Trigger(() -> joystick2.getLeftY() >= -0.2 && joystick2.getLeftY() <= 0.2);
 
         rightClimbUpTrigger
-            .whileTrue(new InstantCommand(() -> climber2.rightClimb(0.2)));
+            .whileTrue(new InstantCommand(() -> climber2.rightClimb(-0.2)));
         leftClimbUpTrigger
             .whileTrue(new InstantCommand(() -> climber2.leftClimb(0.2)));
         rightClimbDownTrigger
-            .whileTrue(new InstantCommand(() -> climber2.rightClimb(-0.2)));
+            .whileTrue(new InstantCommand(() -> climber2.rightClimb(0.2)));
         leftClimbDownTrigger
             .whileTrue(new InstantCommand(() -> climber2.leftClimb(-0.2)));
         leftClimberStopTrigger
