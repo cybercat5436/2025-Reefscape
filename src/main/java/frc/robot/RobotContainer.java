@@ -89,7 +89,7 @@ public class RobotContainer {
        SmartDashboard.putData("Auton Chooser", autonChooser);
     // autonChooser.addOption("Complex Auto", m_complexAuto);
     configureBindings();
-    //poseUpdater.enable();
+    poseUpdater.enable();
     
     }
 
@@ -222,7 +222,7 @@ public class RobotContainer {
         //     .onFalse(new InstantCommand(() -> climber.stopClimb()));
 
         drivetrain.registerTelemetry(logger::telemeterize);
-        SmartDashboard.putData("reset odymetry to 0,0",new InstantCommand(() -> drivetrain.resetPose(new Pose2d(0.0,0.0, new Rotation2d()))));
+        //SmartDashboard.putData("reset odymetry to 0,0",new InstantCommand(() -> drivetrain.resetPose(new Pose2d(0.0,0.0, new Rotation2d()))));
         
 
         // new Trigger(() -> (joystick.getRightY() > -0.2) new InstantCommand(() -> climber.rightClimb(0.2)));

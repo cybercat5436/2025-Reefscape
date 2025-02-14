@@ -181,7 +181,8 @@ public class PoseUpdater extends SubsystemBase {
   }
   @Override
   public void periodic() {
-    double robotYaw = commandSwerveDrivetrain.getPigeon2().getYaw().getValueAsDouble();//commandSwerveDrivetrain.getStateCopy().Pose.getRotation().getDegrees();
+    //double robotYaw = commandSwerveDrivetrain.getPigeon2().getYaw(true).getValueAsDouble();//commandSwerveDrivetrain.getStateCopy().Pose.getRotation().getDegrees();
+    double robotYaw = 0;
     double robotYaw2 = commandSwerveDrivetrain.getState().Pose.getRotation().getDegrees();
     SmartDashboard.putNumber("Yaw from Pigeon", robotYaw);
     SmartDashboard.putNumber("Yaw2 from Pose", robotYaw2);
@@ -192,11 +193,16 @@ public class PoseUpdater extends SubsystemBase {
       Boolean doRejectUpdate = false;
 
       if (limelightMeasurement == null) return;
+      SmartDashboard.putNumber("Limelight presumed heading", limelightMeasurement.pose.getRotation().getDegrees());
+      SmartDashboard.putNumber("Limelight Measured X", limelightMeasurement.pose.getX());
+      SmartDashboard.putNumber("Limelight Measured Y", limelightMeasurement.pose.getY());
+      SmartDashboard.putNumber("Robot X",commandSwerveDrivetrain.getState().Pose.getX());
+      SmartDashboard.putNumber("Robot Y",commandSwerveDrivetrain.getState().Pose.getY());
+
     //  SmartDashboard.putNumber("Limelight Measured Heading", limelightMeasurement.pose.getRotation().getDegrees());
     //  SmartDashboard.putString("MegaTag","1");
 
-      if(limelightMeasurement.tagCount == 1 && limelightMeasurement.rawFiducials.length == 1)
-      {
+      if(limelightMeasurement.tagCount == 1 && limelightMeasurement.rawFiducials.length == 1) {
         if(limelightMeasurement.rawFiducials[0].ambiguity > .7)
         {
           doRejectUpdate = true;
@@ -213,11 +219,11 @@ public class PoseUpdater extends SubsystemBase {
 
       if(!doRejectUpdate)
       {
-        commandSwerveDrivetrain.getPigeon2().setYaw(limelightMeasurement.pose.getRotation().getDegrees());
-        commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,9999999));
+        //commandSwerveDrivetrain.getPigeon2().setYaw(limelightMeasurement.pose.getRotation().getDegrees());
+        commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,.25));
         commandSwerveDrivetrain.addVisionMeasurement(
            limelightMeasurement.pose,
-           Utils.getCurrentTimeSeconds());
+           limelightMeasurement.timestampSeconds);
       }
       //set initial gyro position on commandswervedrivetrain
       //AddVisionMeasurement should use timestamp from the mt1 pose, this is a temporary workaround.
@@ -238,14 +244,14 @@ public class PoseUpdater extends SubsystemBase {
           // Add it to your pose estimator
           //commandSwerveDrivetrain.getPigeon2().setYaw(limelightMeasurement.pose.getRotation().getDegrees());
 
-          commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
+          commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 99999999));
           commandSwerveDrivetrain.addVisionMeasurement(
               limelightMeasurement2.pose,
-              Utils.getCurrentTimeSeconds()
+              limelightMeasurement2.timestampSeconds
           );
           //System.out.println("Pose X "+limelightMeasurement.pose.getX()+" Y "+limelightMeasurement.pose.getY());
-        //  SmartDashboard.putNumber("Limelight Measured X", limelightMeasurement.pose.getX());
-        //  SmartDashboard.putNumber("Limelight Measured Y", limelightMeasurement.pose.getY());
+        SmartDashboard.putNumber("Limelight Measured X", limelightMeasurement2.pose.getX());
+        SmartDashboard.putNumber("Limelight Measured Y", limelightMeasurement2.pose.getY());
         //  SmartDashboard.putNumber("Limelight Measured Heading", limelightMeasurement.pose.getRotation().getDegrees());
         //  SmartDashboard.putNumber("Limelight Timestamp", limelightMeasurement.timestampSeconds);
           /*SwerveModulePosition modulePositions[] = new SwerveModulePosition[4];
