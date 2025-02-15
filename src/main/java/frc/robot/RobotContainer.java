@@ -76,7 +76,7 @@ public class RobotContainer {
     // public final Climber climber = new Climber();
     public final Climber2 climber2 = new Climber2();
     public final GamePieceDetector coralSensor = new GamePieceDetector(35000, GamePieceDetector.Sensors.coral);
-    public final GamePieceDetector algaeSensor = new GamePieceDetector(25000, GamePieceDetector.Sensors.algae);
+    public final GamePieceDetector algaeSensor = new GamePieceDetector(25000, GamePieceDetector.Sensors.algae, 0.1);
     public final Coral coral = new Coral();
     public final Algae algae = new Algae();
     public final Elevator elevator = new Elevator();
