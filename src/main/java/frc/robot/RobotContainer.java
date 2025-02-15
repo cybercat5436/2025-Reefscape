@@ -44,10 +44,11 @@ import frc.robot.subsystems.LimeLight;
 import frc.robot.subsystems.PoseUpdater;
 
 public class RobotContainer {
-    private double maxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.5; // kSpeedAt12Volts desired top speed
+    private double maxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.2; // kSpeedAt12Volts desired top speed
     private double HalfSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.25;
-    private double maxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
-    private double HalfAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond) *0.5;
+    private double fastSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.5;
+    private double maxAngularRate = RotationsPerSecond.of(0.35).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+    private double HalfAngularRate = maxAngularRate*0.8;
 
     private double robotX;
     private double robotY;
@@ -131,9 +132,9 @@ public class RobotContainer {
         joystick2.leftStick()
             .onTrue(new InstantCommand(() -> algae.algaeProcessor()))
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
-        SlewRateLimiter slewRateLimiterX = new SlewRateLimiter(maxSpeed * 2);  //Note: setting slewratelimiter to 2x speed means it takes 0.5s to accelerate to full speed
-        SlewRateLimiter slewRateLimiterY = new SlewRateLimiter(maxSpeed * 2);
-        SlewRateLimiter slewRateLimiterTurnX = new SlewRateLimiter(maxAngularRate * 2);  //corrected from using MaxSpeed
+        SlewRateLimiter slewRateLimiterX = new SlewRateLimiter(maxSpeed * 3);  //Note: setting slewratelimiter to 2x speed means it takes 0.5s to accelerate to full speed
+        SlewRateLimiter slewRateLimiterY = new SlewRateLimiter(maxSpeed * 3);
+        SlewRateLimiter slewRateLimiterTurnX = new SlewRateLimiter(maxAngularRate * 8);  //corrected from using MaxSpeed
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->{
@@ -175,8 +176,8 @@ public class RobotContainer {
         
 // }));
         
-      
-        joystick.rightBumper().whileTrue(drivetrain.applyRequest(() ->{
+        //slow mode
+        joystick.leftTrigger().whileTrue(drivetrain.applyRequest(() ->{
             
                 double xSpeed = slewRateLimiterX.calculate(joystick.getLeftY()* HalfSpeed);
                 
@@ -193,8 +194,33 @@ public class RobotContainer {
         return drive.withVelocityX(xSpeed * Math.abs(xSpeed)) // Drive forward with negative Y (forward)
             .withVelocityY(ySpeed * Math.abs(ySpeed)) // Drive left with negative X (left)
             .withRotationalRate(-(yTurnSpeed * Math.abs(yTurnSpeed) ));
-        } // Drive counterclockwise with negative X (left)
+        }
+         // Drive counterclockwise with negative X (left)
+
     ));
+    
+//     joystick.rightTrigger().whileTrue(drivetrain.applyRequest(() ->{
+            
+//         double xSpeed = slewRateLimiterX.calculate(joystick.getLeftY()* fastSpeed);
+        
+        
+//         double ySpeed = slewRateLimiterY.calculate(joystick.getLeftX()* fastSpeed);
+        
+        
+//         //double yTurnSpeed = slewRateLimiterTurnX.calculate(joystick.getRightX()* HalfAngularRate);
+//         SmartDashboard.putNumber("RBySpeed",ySpeed);
+//         SmartDashboard.putNumber("RBxSpeed",xSpeed);
+//        //SmartDashboard.putNumber("RByTurnSpeed",yTurnSpeed);
+
+
+// return drive.withVelocityX(xSpeed * Math.abs(xSpeed)) // Drive forward with negative Y (forward)
+//     .withVelocityY(ySpeed * Math.abs(ySpeed)); // Drive left with negative X (left)
+//    // .withRotationalRate(-(yTurnSpeed * Math.abs(yTurnSpeed) ));
+// }
+//  // Drive counterclockwise with negative X (left)
+
+// ));
+
     
         joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
         joystick.b().whileTrue(drivetrain.applyRequest(() ->
@@ -209,7 +235,7 @@ public class RobotContainer {
         joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
         // reset the field-centric heading on left bumper press
-        joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
         // climber commands
         
         drivetrain.registerTelemetry(logger::telemeterize);
