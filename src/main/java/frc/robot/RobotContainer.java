@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.AutoAlign;
+import frc.robot.generated.ChassisTunerConstants;
 import frc.robot.generated.TunerConstants;
 // import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Climber2;
@@ -68,7 +69,8 @@ public class RobotContainer {
 
     private final CommandXboxController joystick = new CommandXboxController(0);
     private final CommandXboxController joystick2 = new CommandXboxController(1);
-    public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    public CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    private SendableChooser<String> robotChooser = new SendableChooser<>();
     private final LimeLight limeLightFront = new LimeLight("limelight-front");
     // private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, drivetrain);
     private final AutoAlign autoAlign = new AutoAlign(drivetrain,limeLightFront);
@@ -81,13 +83,23 @@ public class RobotContainer {
     public final Algae algae = new Algae();
     public final Elevator elevator = new Elevator();
     public CANdleSystem candleSystem = new CANdleSystem(joystick.getHID());
+    public boolean isChassis = false;
     public RobotContainer(){
         autonChooser = AutoBuilder.buildAutoChooser();
        SmartDashboard.putData("Auton Chooser", autonChooser);
     // autonChooser.addOption("Complex Auto", m_complexAuto);
-    configureBindings();
-    // poseUpdater.enable();
+        SmartDashboard.putData("Robot Chooser", robotChooser);
+        robotChooser.addOption("Chassis", "Chassis");
+        robotChooser.addOption("Comp bot", "Comp bot");
+        // drivetrain = TunerConstants.cre or Chass
+        SmartDashboard.putData("Change To ChassisBot", new InstantCommand(() ->toggleDrivetrain()));
+        SmartDashboard.putBoolean("isChassis Bot", isChassis);
     
+    }
+    public void toggleDrivetrain () {
+        drivetrain = (isChassis)?ChassisTunerConstants.createDrivetrain():TunerConstants.createDrivetrain();
+        if (isChassis)isChassis = false;
+        else isChassis = true;
     }
 
     private void configureBindings() {
