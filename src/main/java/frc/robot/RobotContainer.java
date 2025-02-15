@@ -6,6 +6,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.lang.annotation.Repeatable;
 import java.time.temporal.TemporalAccessor;
 
 import com.ctre.phoenix.led.CANdle;
@@ -44,10 +45,10 @@ import frc.robot.subsystems.LimeLight;
 import frc.robot.subsystems.PoseUpdater;
 
 public class RobotContainer {
-    private double maxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.5; // kSpeedAt12Volts desired top speed
-    private double HalfSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.25;
-    private double maxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
-    private double HalfAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond) *0.5;
+    private double maxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.35; // kSpeedAt12Volts desired top speed
+    private double HalfSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.15;
+    private double maxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond) * 0.5; // 3/4 of a rotation per second max angular velocity
+    private double HalfAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond) *0.25;
 
     private double robotX;
     private double robotY;
@@ -93,60 +94,76 @@ public class RobotContainer {
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
-        joystick2.y().and(joystick2.leftBumper())
-          .whileTrue(new InstantCommand(() -> coral.forward(0.3)))
-          .onFalse(new InstantCommand(() -> coral.stopMotor())); 
-        joystick2.b().and(joystick2.leftBumper())
-          .whileTrue(new InstantCommand(() -> coral.forward(0.3)))
-          .onFalse(new InstantCommand(() -> coral.stopMotor())); 
-        joystick2.x().and(joystick2.leftBumper())
-          .whileTrue(new InstantCommand(() -> coral.forward(0.3)))
-          .onFalse(new InstantCommand(() -> coral.stopMotor())); 
-        joystick2.a().and(joystick2.leftBumper())
-          .whileTrue(new InstantCommand(() -> coral.forward(0.3)))
-          .onFalse(new InstantCommand(() -> coral.stopMotor())); 
+        
+        Trigger algaeIntakeTrigger = new Trigger ((joystick2.rightTrigger()));
+        Trigger coralIntakeTrigger = new Trigger ((joystick2.leftTrigger()));
+
+
+        coralIntakeTrigger
+            .whileTrue(new InstantCommand(() -> coral.forward(1)))
+            .onFalse(new InstantCommand(() -> coral.stopMotor()));
+        
+        algaeIntakeTrigger
+            .whileTrue(new InstantCommand(() -> algae.intakeBall(1)))
+            .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
 
         joystick2.leftBumper()
-           .whileTrue(new InstantCommand(() -> coral.backward(0.3)))
+           .whileTrue(new InstantCommand(() -> coral.backward(1)))
            .onFalse(new InstantCommand(() -> coral.stopMotor())); 
-
         joystick2.rightBumper()
-           .whileTrue(new InstantCommand(() -> algae.intakeBall(0.1)))
+           .whileTrue(new InstantCommand(() -> algae.intakeBall(-1)))
            .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
 
-        joystick2.povUp().and(joystick2.rightBumper())
-           .whileTrue(new InstantCommand(() -> algae.releaseBall(0.1))) 
-           .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
-        joystick2.povRight().and(joystick2.rightBumper())
-           .whileTrue(new InstantCommand(() -> algae.releaseBall(0.1))) 
-           .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
-        joystick2.povLeft().and(joystick2.rightBumper())
-           .whileTrue(new InstantCommand(() -> algae.releaseBall(0.1))) 
-           .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
         
-    
+        // joystick2.a()
+        //     .whileTrue(new InstantCommand(() -> elevator.raise()))
+        //     .onFalse(new InstantCommand(() -> elevator.stopElevator()));
+        // joystick2.x()
+        //     .whileTrue(new InstantCommand(() -> elevator.lower()))
+        //     .onFalse(new InstantCommand(() -> elevator.stopElevator()));
         joystick2.a()
-            .onTrue(new InstantCommand(() -> elevator.raiseLevel1()))
+            .whileTrue(new InstantCommand(() -> elevator.raiseLevel1()))
             .onFalse(new InstantCommand(() -> elevator.stopElevator()));
         joystick2.x()
-            .onTrue(new InstantCommand(() -> elevator.raiseLevel2()))
-            .onFalse(new InstantCommand(() -> elevator.stopElevator()));
-        joystick2.b()
-            .onTrue(new InstantCommand(() -> elevator.raiseLevel3()))
+            .whileTrue(new InstantCommand(() -> elevator.raiseLevel2()))
             .onFalse(new InstantCommand(() -> elevator.stopElevator()));
         joystick2.y()
-            .onTrue(new InstantCommand(() -> elevator.raiseLevel4()))
+            .whileTrue(new InstantCommand(() -> elevator.raiseLevel3()))
+            .onFalse(new InstantCommand(() -> elevator.stopElevator()));
+        joystick2.b()
+            .whileTrue(new InstantCommand(() -> elevator.raiseLevel4()))
             .onFalse(new InstantCommand(() -> elevator.stopElevator()));
        
+
+        joystick2.povUp().and(joystick2.rightBumper())
+            .whileTrue(new InstantCommand(() -> algae.releaseBall(-0.3))) 
+            .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
+        joystick2.povRight().and(joystick2.rightBumper())
+            .whileTrue(new InstantCommand(() -> algae.releaseBall(-0.3))) 
+            .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
+        joystick2.povLeft()
+          .whileTrue(new InstantCommand(() -> algae.releaseBall(-0.3))) 
+           .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
+
+        // joystick2.povUp()
+        //     .whileTrue(new InstantCommand(() -> algae.algaeHigh()).repeatedly())
+        //     .onFalse(new InstantCommand(() -> algae.algaeStop()));
         joystick2.povUp()
-            .onTrue(new InstantCommand(() -> algae.algaeHigh()))
+            .whileTrue(new InstantCommand(() -> algae.algaeHigh(0.5)).repeatedly())
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
+        joystick2.povDown()
+            .whileTrue(new InstantCommand(() -> algae.algaeHigh(-0.3)).repeatedly())
+            .onFalse(new InstantCommand(() -> algae.algaeStop()));
+        
         joystick2.povRight()
-            .onTrue(new InstantCommand(() -> algae.algaeLow()))
+            .whileTrue(new InstantCommand(() -> algae.algaeLow()).repeatedly())
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
         joystick2.povLeft()
-            .onTrue(new InstantCommand(() -> algae.algaeProcessor()))
+            .whileTrue(new InstantCommand(() -> algae.algaeProcessor()).repeatedly())
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
+            
+        
+        
 
         SlewRateLimiter slewRateLimiterX = new SlewRateLimiter(maxSpeed * 2);  //Note: setting slewratelimiter to 2x speed means it takes 0.5s to accelerate to full speed
         SlewRateLimiter slewRateLimiterY = new SlewRateLimiter(maxSpeed * 2);
@@ -192,8 +209,9 @@ public class RobotContainer {
         
 // }));
         
-      
-        joystick.rightBumper().whileTrue(drivetrain.applyRequest(() ->{
+        Trigger slowModeTrigger = new Trigger ((joystick.leftTrigger()));
+
+        slowModeTrigger.whileTrue(drivetrain.applyRequest(() ->{
             
                 double xSpeed = slewRateLimiterX.calculate(joystick.getLeftY()* HalfSpeed);
                 
@@ -239,17 +257,17 @@ public class RobotContainer {
         Trigger rightClimberStopTrigger = new Trigger(() -> joystick2.getRightY() >= -0.2 && joystick2.getRightY() <= 0.2);
         Trigger leftClimberStopTrigger = new Trigger(() -> joystick2.getLeftY() >= -0.2 && joystick2.getLeftY() <= 0.2);
 
-        rightClimbUpTrigger
-            .whileTrue(new InstantCommand(() -> climber2.rightClimb(-0.2)));
         leftClimbUpTrigger
+            .whileTrue(new InstantCommand(() -> climber2.rightClimb(-0.2)));
+        rightClimbUpTrigger
             .whileTrue(new InstantCommand(() -> climber2.leftClimb(0.2)));
-        rightClimbDownTrigger
-            .whileTrue(new InstantCommand(() -> climber2.rightClimb(0.2)));
         leftClimbDownTrigger
+            .whileTrue(new InstantCommand(() -> climber2.rightClimb(0.2)));
+        rightClimbDownTrigger
             .whileTrue(new InstantCommand(() -> climber2.leftClimb(-0.2)));
-        leftClimberStopTrigger
-            .whileTrue(new InstantCommand(() -> climber2.leftClimb(0)));
         rightClimberStopTrigger
+            .whileTrue(new InstantCommand(() -> climber2.leftClimb(0)));
+        leftClimberStopTrigger
             .whileTrue(new InstantCommand(() -> climber2.rightClimb(0)));
         joystick.povLeft().onTrue(new InstantCommand(() -> candleSystem.changeAnimation(AnimationTypes.Fire)));
         joystick.povDown().onTrue(new InstantCommand(() -> candleSystem.turnOffColors()));

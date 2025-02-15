@@ -29,15 +29,15 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Algae extends SubsystemBase {
   /** Creates a new Algae. */
   private SparkMax ballMotor = new SparkMax (13, MotorType.kBrushless);
-  private final SparkMax armMotor = new SparkMax(14, MotorType.kBrushless); 
+  private SparkMax armMotor = new SparkMax(14, MotorType.kBrushless); 
   SparkMaxConfig ballConfig;
   SparkMaxConfig armConfig;
   private SparkClosedLoopController armClosedLoopController;
   private RelativeEncoder encoder;
-  private double targetPositionHigh = 1;
-  private double targetPositionLow = 1;
+  private double targetPositionHigh = 56.81;
+  private double targetPositionLow = 74.33;
   private double targetPositionProcessor = 1;
-  private double targetVelocity = 1;
+  private double targetVelocity = 500;
   private double stopVelocity = 0;
 
   
@@ -128,12 +128,21 @@ public class Algae extends SubsystemBase {
       ClosedLoopSlot.kSlot0);
       armClosedLoopController.setReference(targetVelocity, ControlType.kMAXMotionVelocityControl,
       ClosedLoopSlot.kSlot1);
+      System.out.println("Algae High");
     }
+    public void algaeHigh(double speed) {
+      armMotor.set(speed);
+    }
+    public void algaeStop() {
+      armMotor.set(0);
+    }
+    
     public void algaeLow() {
       armClosedLoopController.setReference(targetPositionLow, ControlType.kMAXMotionPositionControl,
       ClosedLoopSlot.kSlot0);
       armClosedLoopController.setReference(targetVelocity, ControlType.kMAXMotionVelocityControl,
       ClosedLoopSlot.kSlot1);
+      System.out.println("Algae Low");
     }
     public void algaeProcessor() {
       armClosedLoopController.setReference(targetPositionProcessor, ControlType.kMAXMotionPositionControl,
@@ -141,13 +150,13 @@ public class Algae extends SubsystemBase {
       armClosedLoopController.setReference(targetVelocity, ControlType.kMAXMotionVelocityControl,
       ClosedLoopSlot.kSlot1);
     }
-    public void algaeStop() {
-      armClosedLoopController.setReference(targetPositionLow, ControlType.kMAXMotionPositionControl,
-      ClosedLoopSlot.kSlot0);
-      armClosedLoopController.setReference(stopVelocity, ControlType.kMAXMotionVelocityControl,
-      ClosedLoopSlot.kSlot1);
-      
-    }
+    // public void algaeStop() {
+    //   armClosedLoopController.setReference(targetPositionLow, ControlType.kMAXMotionPositionControl,
+    //   ClosedLoopSlot.kSlot0);
+    //   armClosedLoopController.setReference(stopVelocity, ControlType.kMAXMotionVelocityControl,
+    //   ClosedLoopSlot.kSlot1);
+    //   System.out.println("Algae Stop");
+    // }
     public void intakeBall(double speed) {
       ballMotor.set(speed);
     }
@@ -159,7 +168,7 @@ public class Algae extends SubsystemBase {
     }
   public void periodic() {
     // This method will be called once per scheduler run
-
+    SmartDashboard.putNumber("Algae Encoder", (encoder.getPosition()));
   }
 
   
