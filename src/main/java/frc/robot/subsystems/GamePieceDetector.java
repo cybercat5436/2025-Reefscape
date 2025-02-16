@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class GamePieceDetector extends SubsystemBase {
   /** Creates a new CoralSensor. */ 
 
-private boolean isCoralClose;
+private boolean isGamePieceClose;
 private double signalStrengthThreshhold;
 private double distanceThreshold = 0;
 private CANrange sensorUsed;
@@ -63,14 +63,15 @@ public enum Sensors{
   public void periodic() {
     // This method will be called once per scheduler run
     addValueToBuffer();
-    isCoralClose = (calculateAverage() > signalStrengthThreshhold);
+    isGamePieceClose = (calculateAverage() > signalStrengthThreshhold);
     if(this.sensor == Sensors.algae) {
-      isCoralClose = isCoralClose && (sensorUsed.getDistance().getValueAsDouble() < this.distanceThreshold);
+      isGamePieceClose = isGamePieceClose && (sensorUsed.getDistance().getValueAsDouble() < this.distanceThreshold);
     }
 
     //System.out.println(isCoralClose + " signal: " + sensorUsed.getSignalStrength().getValueAsDouble());
-    SmartDashboard.putBoolean(this.gamePiece + " is present" , isCoralClose);
-    SmartDashboard.putNumber(this.gamePiece + " signal strength" , sensorUsed.getSignalStrength().getValueAsDouble());
+    SmartDashboard.putBoolean(this.gamePiece + " is present" , isGamePieceClose);
+    SmartDashboard.putNumber(this.gamePiece + " signal strength" , sensorUsed.getSignalStrength(false).getValueAsDouble());
+    SmartDashboard.putNumber(this.gamePiece + " Distance" , sensorUsed.getDistance(false).getValueAsDouble());
   }
 
   private void addValueToBuffer(){
