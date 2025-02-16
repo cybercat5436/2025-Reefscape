@@ -18,10 +18,12 @@ public class GamePieceDetector extends SubsystemBase {
 
 private boolean isCoralClose;
 private double signalStrengthThreshhold;
+private double distanceThreshold = 0;
 private CANrange sensorUsed;
 private String gamePiece;
 private ArrayList<Double> signalStrengths = new ArrayList<>();
 private int numValues = 1;
+private Sensors sensor;
 
 public enum Sensors{
   coral,
@@ -30,7 +32,8 @@ public enum Sensors{
   public GamePieceDetector(double signalStrength, Sensors sensor) {
     CANrangeConfiguration config = new CANrangeConfiguration();
     signalStrengthThreshhold = signalStrength;
-    
+    this.sensor = sensor;
+
     if (sensor == Sensors.coral){
       numValues =10;
       sensorUsed = new CANrange(17);
@@ -50,14 +53,21 @@ public enum Sensors{
     
     
   }
-   
+  public GamePieceDetector(double signalStrength, Sensors sensor, double distanceThreshold) {
+    this(signalStrength, sensor);
+    this.distanceThreshold = distanceThreshold;
+
+  }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
     addValueToBuffer();
     isCoralClose = (calculateAverage() > signalStrengthThreshhold);
-    
+    if(this.sensor == Sensors.algae) {
+      isCoralClose = isCoralClose && (sensorUsed.getDistance().getValueAsDouble() < this.distanceThreshold);
+    }
+
     //System.out.println(isCoralClose + " signal: " + sensorUsed.getSignalStrength().getValueAsDouble());
     SmartDashboard.putBoolean(this.gamePiece + " is present" , isCoralClose);
     SmartDashboard.putNumber(this.gamePiece + " signal strength" , sensorUsed.getSignalStrength().getValueAsDouble());
