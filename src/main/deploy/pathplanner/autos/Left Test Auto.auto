@@ -9,6 +9,12 @@
           "data": {
             "pathName": "Left Side Pt 1"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "autoCoralHigh"
+          }
         }
       ]
     }
