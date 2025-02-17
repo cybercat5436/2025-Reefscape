@@ -17,6 +17,10 @@ import com.revrobotics.spark.SparkBase;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -70,7 +74,7 @@ public class RobotContainer {
     private final CommandXboxController joystick = new CommandXboxController(0);
     private final CommandXboxController joystick2 = new CommandXboxController(1);
     public CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-    private SendableChooser<String> robotChooser = new SendableChooser<>();
+
     private final LimeLight limeLightFront = new LimeLight("limelight-front");
     // private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, drivetrain);
     private final AutoAlign autoAlign = new AutoAlign(drivetrain,limeLightFront);
@@ -86,16 +90,16 @@ public class RobotContainer {
     public boolean isChassis = false;
     public RobotContainer(){
         autonChooser = AutoBuilder.buildAutoChooser();
-       SmartDashboard.putData("Auton Chooser", autonChooser);
-    // autonChooser.addOption("Complex Auto", m_complexAuto);
-        SmartDashboard.putData("Robot Chooser", robotChooser);
-        robotChooser.addOption("Chassis", "Chassis");
-        robotChooser.addOption("Comp bot", "Comp bot");
-        // drivetrain = TunerConstants.cre or Chass
+        SmartDashboard.putData("Auton Chooser", autonChooser);
         SmartDashboard.putData("Change To ChassisBot", new InstantCommand(() ->toggleDrivetrain()));
-        SmartDashboard.putBoolean("isChassis Bot", isChassis);
-    
+        configureBindings();
     }
+
+    public boolean getisChassis(){
+        return isChassis;
+    }
+
+
     public void toggleDrivetrain () {
         drivetrain = (isChassis)?ChassisTunerConstants.createDrivetrain():TunerConstants.createDrivetrain();
         if (isChassis)isChassis = false;

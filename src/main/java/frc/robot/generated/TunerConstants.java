@@ -210,7 +210,7 @@ public class TunerConstants {
      * This should only be called once in your robot program,.
      */
     public static CommandSwerveDrivetrain createDrivetrain() {
-        System.out.println("TunerConstants drivetrain");
+        System.out.println(">>>>>>>>>>>>>>>TunerConstants drivetrain");
         return new CommandSwerveDrivetrain(
             DrivetrainConstants, FrontLeft, FrontRight, BackLeft, BackRight
         );
