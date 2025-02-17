@@ -32,14 +32,16 @@ public class Coral extends SubsystemBase {
 
   public void forward(double speed) {
     coralMotor.set(speed);
-
+    
   }
-
+  
   public void backward(double speed) {
+    System.out.println("Backward%%%%%%%%");
     coralMotor.set(-speed);
   }
 
   public void stopMotor() {
+    System.out.println("Stopped^^^^^^");
     coralMotor.set(0);
 
   }

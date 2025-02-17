@@ -13,6 +13,7 @@ import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.revrobotics.spark.SparkBase;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -24,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -82,14 +84,53 @@ public class RobotContainer {
     public final Algae algae = new Algae();
     public final Elevator elevator = new Elevator();
     public CANdleSystem candleSystem = new CANdleSystem(joystick.getHID());
+    private SequentialCommandGroup autoCoralHigh = new SequentialCommandGroup(
+        new InstantCommand(() -> elevator.raiseLevel4())
+        ,Commands.waitSeconds(2.5)
+        .andThen(new InstantCommand(() -> coral.backward(1)))
+        , Commands.waitSeconds(.5)
+         .andThen(new InstantCommand(() -> coral.stopMotor())))
+         .andThen(new InstantCommand(() -> elevator.stopElevator()));
+    // private Command autoCoralHigh = Commands.sequence(
+    //     new InstantCommand(() -> elevator.raiseLevel4())
+    //     ,Commands.print("done raising.")
+    //     ,Commands.waitSeconds(2.5)
+    //     ,Commands.print("Done waiting")
+    //     ,(new InstantCommand(() -> coral.backward(1)))
+    //     ,Commands.waitSeconds(.5)
+    //     ,(new InstantCommand(() -> coral.stopMotor()))
+    //     ,(new InstantCommand(() -> elevator.stopElevator()))
+
+
+    // );
+
+
     public RobotContainer(){
         autonChooser = AutoBuilder.buildAutoChooser();
        SmartDashboard.putData("Auton Chooser", autonChooser);
     // autonChooser.addOption("Complex Auto", m_complexAuto);
     configureBindings();
     // poseUpdater.enable();
-    
+    registerNamedCommands();
     }
+
+    
+
+        //Command autoCoralHigh = Commands.sequence(new InstantCommand(() -> elevator.raiseLevel4()), new InstantCommand(() -> coral.forward(1)));
+
+
+
+
+
+    
+
+    private void registerNamedCommands(){
+        NamedCommands.registerCommand("autoCoralHigh", autoCoralHigh);
+
+
+
+    }
+
 
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
@@ -113,6 +154,8 @@ public class RobotContainer {
         joystick2.rightBumper()
            .whileTrue(new InstantCommand(() -> algae.intakeBall(-1)))
            .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
+        
+        
 
         
         // joystick2.a()
@@ -141,13 +184,16 @@ public class RobotContainer {
         joystick2.povRight().and(joystick2.rightBumper())
             .whileTrue(new InstantCommand(() -> algae.releaseBall(-0.3))) 
             .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
-        joystick2.povLeft()
-          .whileTrue(new InstantCommand(() -> algae.releaseBall(-0.3))) 
-           .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
+        //joystick2.povLeft()
+         // .whileTrue(new InstantCommand(() -> algae.releaseBall(-0.3))) 
+         //  .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
 
         // joystick2.povUp()
         //     .whileTrue(new InstantCommand(() -> algae.algaeHigh()).repeatedly())
         //     .onFalse(new InstantCommand(() -> algae.algaeStop()));
+        joystick2.povLeft()
+        .onTrue(autoCoralHigh);
+
         joystick2.povUp()
             .whileTrue(new InstantCommand(() -> algae.algaeHigh(0.5)).repeatedly())
             .onFalse(new InstantCommand(() -> algae.algaeStop()));

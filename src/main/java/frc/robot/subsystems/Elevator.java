@@ -23,7 +23,7 @@ public class Elevator extends SubsystemBase {
   MotionMagicVoltage m_motmag = new MotionMagicVoltage(0);
   final VoltageOut m_request = new VoltageOut(0);
   private double L1 = 0;
-  private double L2 = 26;
+  private double L2 = 26.5;
   private double L3 = 65.64;
   private double L4 = 129;
   private final TalonFXS elevator = new TalonFXS(12);
@@ -76,6 +76,7 @@ public class Elevator extends SubsystemBase {
   public void raiseLevel4() {
     m_motmag.Slot = 0;
     elevator.setControl(m_motmag.withPosition(L4));
+    System.out.println("raised$$$$$$$$");
   } 
   public void stopElevator() {
     elevator.setControl(m_request.withOutput(0));
@@ -86,6 +87,6 @@ public class Elevator extends SubsystemBase {
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("Elevator Rotor Encoder", elevator.getRotorPosition().getValueAsDouble());
     SmartDashboard.putNumber("Elevator Encoder", elevator.getPosition().getValueAsDouble());
-    SmartDashboard.putNumber("Elevator Quadrature Position", elevator.getRawQuadraturePosition().getValueAsDouble());
+    //SmartDashboard.putNumber("Elevator Quadrature Position", elevator.getRawQuadraturePosition().getValueAsDouble());
   }
 }
