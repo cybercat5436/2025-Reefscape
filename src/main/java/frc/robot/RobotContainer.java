@@ -9,6 +9,8 @@ import static edu.wpi.first.units.Units.*;
 import java.lang.annotation.Repeatable;
 import java.time.temporal.TemporalAccessor;
 
+import javax.sound.sampled.SourceDataLine;
+
 import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -106,12 +108,12 @@ public class RobotContainer {
 
 
     public RobotContainer(){
+        // autonChooser.addOption("Complex Auto", m_complexAuto);
+        configureBindings();
+        // poseUpdater.enable();
+        registerNamedCommands();
         autonChooser = AutoBuilder.buildAutoChooser();
        SmartDashboard.putData("Auton Chooser", autonChooser);
-    // autonChooser.addOption("Complex Auto", m_complexAuto);
-    configureBindings();
-    // poseUpdater.enable();
-    registerNamedCommands();
     }
 
     
@@ -125,6 +127,7 @@ public class RobotContainer {
     
 
     private void registerNamedCommands(){
+        NamedCommands.registerCommand("printSomething", new InstantCommand(() -> System.out.println(">>>>>>>>>>>>>Printing Something")));
         NamedCommands.registerCommand("autoCoralHigh", autoCoralHigh);
 
 
@@ -191,21 +194,23 @@ public class RobotContainer {
         // joystick2.povUp()
         //     .whileTrue(new InstantCommand(() -> algae.algaeHigh()).repeatedly())
         //     .onFalse(new InstantCommand(() -> algae.algaeStop()));
-        joystick2.povLeft()
-        .onTrue(autoCoralHigh);
+        // joystick2.povLeft()
+        // .onTrue(autoCoralHigh);
 
+        // joystick2.povUp()
+        //     .whileTrue(new InstantCommand(() -> algae.algaeHigh(0.5)).repeatedly())
+        //     .onFalse(new InstantCommand(() -> algae.algaeStop()));
+        // joystick2.povDown()
+        //     .whileTrue(new InstantCommand(() -> algae.algaeHigh(-0.3)).repeatedly())
+        //     .onFalse(new InstantCommand(() -> algae.algaeStop()));
         joystick2.povUp()
-            .whileTrue(new InstantCommand(() -> algae.algaeHigh(0.5)).repeatedly())
+            .onTrue(new InstantCommand(() -> algae.algaeHigh()))
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
-        joystick2.povDown()
-            .whileTrue(new InstantCommand(() -> algae.algaeHigh(-0.3)).repeatedly())
-            .onFalse(new InstantCommand(() -> algae.algaeStop()));
-        
         joystick2.povRight()
-            .whileTrue(new InstantCommand(() -> algae.algaeLow()).repeatedly())
+            .onTrue(new InstantCommand(() -> algae.algaeLow()))
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
         joystick2.povLeft()
-            .whileTrue(new InstantCommand(() -> algae.algaeProcessor()).repeatedly())
+            .onTrue(new InstantCommand(() -> algae.algaeProcessor()))
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
             
         

@@ -53,11 +53,11 @@ public class Algae extends SubsystemBase {
       .smartCurrentLimit(50)
         .idleMode(IdleMode.kBrake);
     ballMotor.configure(ballConfig, ResetMode.kResetSafeParameters,PersistMode.kPersistParameters);
+    encoder = armMotor.getEncoder(); 
+    armClosedLoopController = armMotor.getClosedLoopController();
     armConfig.encoder
         .positionConversionFactor(1)
         .velocityConversionFactor(1);
-    armClosedLoopController = armMotor.getClosedLoopController();
-    encoder = armMotor.getEncoder();
 
     /*
      * Create a new SPARK MAX configuration object. This will store the
@@ -126,8 +126,6 @@ public class Algae extends SubsystemBase {
     public void algaeHigh() {
       armClosedLoopController.setReference(targetPositionHigh, ControlType.kMAXMotionPositionControl,
       ClosedLoopSlot.kSlot0);
-      armClosedLoopController.setReference(targetVelocity, ControlType.kMAXMotionVelocityControl,
-      ClosedLoopSlot.kSlot1);
       System.out.println("Algae High");
     }
     public void algaeHigh(double speed) {
@@ -140,15 +138,12 @@ public class Algae extends SubsystemBase {
     public void algaeLow() {
       armClosedLoopController.setReference(targetPositionLow, ControlType.kMAXMotionPositionControl,
       ClosedLoopSlot.kSlot0);
-      armClosedLoopController.setReference(targetVelocity, ControlType.kMAXMotionVelocityControl,
-      ClosedLoopSlot.kSlot1);
       System.out.println("Algae Low");
     }
     public void algaeProcessor() {
       armClosedLoopController.setReference(targetPositionProcessor, ControlType.kMAXMotionPositionControl,
       ClosedLoopSlot.kSlot0);
-      armClosedLoopController.setReference(targetVelocity, ControlType.kMAXMotionVelocityControl,
-      ClosedLoopSlot.kSlot1);
+      System.out.println("Algae Processor");
     }
     // public void algaeStop() {
     //   armClosedLoopController.setReference(targetPositionLow, ControlType.kMAXMotionPositionControl,
@@ -169,8 +164,9 @@ public class Algae extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("Algae Encoder", (encoder.getPosition()));
+    
   }
-
+  
   
 
 }
