@@ -1,4 +1,3 @@
-
 package frc.robot.generated;
 
 import static edu.wpi.first.units.Units.*;
@@ -91,10 +90,8 @@ public class ChassisTunerConstants {
     private static final boolean kInvertLeftSide = false;
     private static final boolean kInvertRightSide = true;
 
-    private static final int kPigeonId = 10;
-    private static final int kChassisPigeonId = 9;
-    
-    public static final int kCANdleID = 19;
+    private static final int kPigeonId = 9;
+    public static final int kCANdleID = 61;
     // These are only used for simulation
     private static final MomentOfInertia kSteerInertia = KilogramSquareMeters.of(0.01);
     private static final MomentOfInertia kDriveInertia = KilogramSquareMeters.of(0.01);
@@ -135,10 +132,6 @@ public class ChassisTunerConstants {
     private static final int kFrontLeftDriveMotorId = 51;
     private static final int kFrontLeftSteerMotorId = 52;
     private static final int kFrontLeftEncoderId = 53;
-    //frontLeft Chassis
-    private static final int kFrontLeftDriveMotorChassisId = 0;
-    private static final int kFrontLeftSteerMotorChassisId = 0;
-    private static final int kFrontLeftEncoderChassisId = 0;
     // private static final Angle kFrontLeftEncoderOffset = Rotations.of(0.33935546875);
     private static final Angle kFrontLeftEncoderOffset = Rotations.of(0.338379);
     private static final boolean kFrontLeftSteerMotorInverted = false;
@@ -211,7 +204,6 @@ public class ChassisTunerConstants {
      * This should only be called once in your robot program,.
      */
     public static CommandSwerveDrivetrain createDrivetrain() {
-        System.out.println(">>>>>>>>>>>>>>chassis createDrivetrain");
         return new CommandSwerveDrivetrain(
             DrivetrainConstants, FrontLeft, FrontRight, BackLeft, BackRight
         );
