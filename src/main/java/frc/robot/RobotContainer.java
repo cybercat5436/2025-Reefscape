@@ -21,6 +21,7 @@ import com.revrobotics.spark.SparkBase;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -73,6 +74,8 @@ public class RobotContainer {
 
     private final CommandXboxController joystick = new CommandXboxController(0);
     private final CommandXboxController joystick2 = new CommandXboxController(1);
+    private final Joystick reefPositionJoystick = new Joystick(2);
+    private final Joystick reefLevelJoystick = new Joystick(3);
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private final LimeLight limeLightFront = new LimeLight("limelight-front");
     // private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, drivetrain);
@@ -347,6 +350,40 @@ public class RobotContainer {
 
         //joystick.povRight().onTrue(new ParallelRaceGroup(blinkLight, new WaitCommand(2.25)));
         //joystick.povRight().onTrue(new ColorBlinkCommand(AvailableColors.Red, candleSystem));
+        Trigger button1 = new Trigger(() -> reefPositionJoystick.getRawButton(1));
+        button1.onTrue(Commands.print("*$%^&** button 1"));
+        Trigger button2 = new Trigger(() -> reefPositionJoystick.getRawButton(2));
+        button2.onTrue(Commands.print("*$%^&** button 2"));
+        Trigger button3 = new Trigger(() -> reefPositionJoystick.getRawButton(3));
+        button3.onTrue(Commands.print("*$%^&** button 3"));
+        Trigger button4 = new Trigger(() -> reefPositionJoystick.getRawButton(4));
+        button4.onTrue(Commands.print("*$%^&** button 4"));
+        Trigger button5 = new Trigger(() -> reefPositionJoystick.getRawButton(5));
+        button5.onTrue(Commands.print("*$%^&** button 5"));
+        Trigger button6 = new Trigger(() -> reefPositionJoystick.getRawButton(6));
+        button6.onTrue(Commands.print("*$%^&** button 6"));
+        Trigger button7 = new Trigger(() -> reefPositionJoystick.getRawButton(7));
+        button7.onTrue(Commands.print("*$%^&** button 7"));
+        Trigger button8 = new Trigger(() -> reefPositionJoystick.getRawButton(8));
+        button8.onTrue(Commands.print("*$%^&** button 8"));
+        Trigger button9 = new Trigger(() -> reefPositionJoystick.getRawButton(9));
+        button9.onTrue(Commands.print("*$%^&** button 9"));
+        Trigger button10 = new Trigger(() -> reefPositionJoystick.getRawButton(10));
+        button10.onTrue(Commands.print("*$%^&** button 10"));
+        Trigger button11 = new Trigger(() -> reefPositionJoystick.getRawButton(11));
+        button11.onTrue(Commands.print("*$%^&** button 11"));
+        Trigger button12 = new Trigger(() -> reefPositionJoystick.getRawButton(12));
+        button12.onTrue(Commands.print("*$%^&** button 12"));
+
+       
+        Trigger buttonLevel1Trigger = new Trigger(() -> reefLevelJoystick.getRawButton(1));
+        buttonLevel1Trigger.onTrue(Commands.print("*$%^&** button 1"));
+        Trigger buttonLevel2Trigger = new Trigger(() -> reefLevelJoystick.getRawButton(2));
+        buttonLevel2Trigger.onTrue(Commands.print("*$%^&** button 2"));
+        Trigger buttonLevel3Trigger = new Trigger(() -> reefLevelJoystick.getRawButton(3));
+        buttonLevel3Trigger.onTrue(Commands.print("*$%^&** button 3"));
+        Trigger buttonLevel4Trigger = new Trigger(() -> reefLevelJoystick.getRawButton(4));
+        buttonLevel4Trigger.onTrue(Commands.print("*$%^&** button 4"));
     }
 
 
