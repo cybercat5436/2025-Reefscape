@@ -11,6 +11,8 @@ import java.time.temporal.TemporalAccessor;
 
 import javax.sound.sampled.SourceDataLine;
 
+import org.photonvision.PhotonCamera;
+
 import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -46,6 +48,7 @@ import frc.robot.subsystems.CANdleSystem.AnimationTypes;
 import frc.robot.subsystems.CANdleSystem.AvailableColors;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.LimeLight;
+import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.PoseUpdater;
 
 public class RobotContainer {
@@ -70,18 +73,19 @@ public class RobotContainer {
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
    
     private final Telemetry logger = new Telemetry(maxSpeed);
-
+    private final PhotonVision photonVision = new PhotonVision();
     private final CommandXboxController joystick = new CommandXboxController(0);
     private final CommandXboxController joystick2 = new CommandXboxController(1);
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private final LimeLight limeLightFront = new LimeLight("limelight-front");
     // private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, drivetrain);
-    private final AutoAlign autoAlign = new AutoAlign(drivetrain,limeLightFront);
+    private final AutoAlign autoAlign = new AutoAlign(drivetrain,limeLightFront,photonVision);
     private SendableChooser<Command> autonChooser;
     // public final Climber climber = new Climber();
     public final Climber2 climber2 = new Climber2();
     public final GamePieceDetector coralSensor = new GamePieceDetector(35000, GamePieceDetector.Sensors.coral);
     public final GamePieceDetector algaeSensor = new GamePieceDetector(25000, GamePieceDetector.Sensors.algae, 0.1);
+    
     public final Coral coral = new Coral();
     public final Algae algae = new Algae();
     public final Elevator elevator = new Elevator();
@@ -296,6 +300,9 @@ public class RobotContainer {
 
         // reset the field-centric heading on left bumper press
         joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+    
+        joystick.y().whileTrue(new AutoAlign(drivetrain, limeLightFront, photonVision));
+
         // climber commands
         
         drivetrain.registerTelemetry(logger::telemeterize);

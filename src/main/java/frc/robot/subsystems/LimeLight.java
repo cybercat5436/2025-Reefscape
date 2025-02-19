@@ -180,7 +180,9 @@ public class LimeLight extends SubsystemBase {
 public double getVisionTargetVerticalError(){
   return tyLocal.getDouble(0);
 }
-
+public double getVisiontX(){
+  return txLocal.getDouble(0);
+}
 public double getVisionTargetSkew(){
   return tsLocal.getDouble(0);
 }
