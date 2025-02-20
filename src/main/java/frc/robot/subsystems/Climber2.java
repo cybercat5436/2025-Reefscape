@@ -10,6 +10,7 @@ import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.RelativeEncoder;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -22,7 +23,11 @@ public class Climber2 extends SubsystemBase {
     private final DutyCycleOut rightOut = new DutyCycleOut(0);
     private double rightEncoderValue;
     private double leftEncoderValue;
-    private double climberEncoderLimit = 0.5;
+    private RelativeEncoder leftClimberEncoder;
+    private RelativeEncoder rightClimberEncoder;
+    private double leftClimberEncoderLimit = -0.5;
+    private double rightClimberEncoderLimit = 0.5;
+
     /** Creates a new Climber. */
   public Climber2() {
     var leftConfiguration = new TalonFXConfiguration();
@@ -47,6 +52,11 @@ public class Climber2 extends SubsystemBase {
  public void leftClimb(double speed) {
   leftOut.Output = speed;
   leftClimber.setControl(leftOut);
+
+  if((leftEncoderValue < leftClimberEncoderLimit) && (speed < 0)){
+    speed = 0.0;
+  }
+  leftClimber.setControl(leftOut.withOutput(speed));
   SmartDashboard.putNumber("ClimberLeft2", leftClimber.get());
   System.out.println("left climbing with speed " + speed);
  }
@@ -54,6 +64,10 @@ public class Climber2 extends SubsystemBase {
  public void rightClimb(double speed) {
   rightOut.Output = speed;
   rightClimber.setControl(rightOut);
+  if((rightEncoderValue > rightClimberEncoderLimit) && (speed > 0)){
+    speed = 0.0;
+  }
+  rightClimber.setControl(rightOut.withOutput(speed));
   SmartDashboard.putNumber("ClimberRight2", rightClimber.get());
   System.out.println("right climbing with speed " + speed);
  }
@@ -66,28 +80,16 @@ leftOut.Output = 0;
 rightOut.Output = 0;
 leftClimber.setControl(leftOut);
 rightClimber.setControl(rightOut);
-SmartDashboard.putNumber("ClimberLeft", leftClimber.get());
-  SmartDashboard.putNumber("ClimberRight", rightClimber.get());
-  System.out.println("Stopped climbing ");
+System.out.println("Stopped climbing ");
 }
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
+@Override
+public void periodic() {
+  // This method will be called once per scheduler run
+  
+  SmartDashboard.putNumber("ClimberLeft", leftClimber.getPosition().getValueAsDouble());
+  SmartDashboard.putNumber("ClimberRight", rightClimber.getPosition().getValueAsDouble(c);
   }
 
-public void moveRightClimber(double speed){
-  if(rightEncoderValue < climberEncoderLimit && speed < 0){
-    speed = 0.0;
-  }
-
-
-}
-public void moveLeftClimber(double speed){
-
-  if(leftEncoderValue < climberEncoderLimit && speed < 0){
-    speed = 0.0;
-  }
-}
 
 }
