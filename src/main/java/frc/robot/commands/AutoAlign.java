@@ -43,7 +43,7 @@ public class AutoAlign extends Command {
   double yError;
   private double targetYaw;
   private double targetArea;
-  private double horizontalThreshold = 0.2;
+  private double horizontalThreshold = 0.1;
   private double VerticalThreshold = 1;
   private Timer timer = new Timer();
   private double robotYError;
@@ -59,8 +59,8 @@ public class AutoAlign extends Command {
   private boolean isXAligned;
   private boolean isRotationAligned;
   private boolean isTimedOut;
-  private double kPX = 0.35;
-  private double kPY = 0.3;
+  private double kPX = 0.15;
+  private double kPY = 0.1;
   private double kDY = 0;
   private double rotationkP = 0.75;//0.75
   private double currentArea;
@@ -95,8 +95,8 @@ public class AutoAlign extends Command {
     System.out.println("starting auto align");
 
 
-    targetYaw = -23.55;
-    targetArea = 12;//Area target
+    targetYaw = -19.2;
+    targetArea = 9.5;//Area target
     targetRotationAngle = -120;
     
     previousYError = 0;
@@ -148,6 +148,12 @@ public class AutoAlign extends Command {
     // To-Do May need to switch robot drive from robot centric to field centric, intial setting to fieldcentric 
     //happens in robotcontainer
     timer.stop();
+    commandSwerveDrivetrain.setControl(
+        robotCentricDrive
+        .withVelocityX(0) 
+        .withVelocityY(0)
+        .withRotationalRate(0)
+    );
     
     if(isYAligned) {
       System.out.println("Robot Y Aligned");

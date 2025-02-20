@@ -133,6 +133,7 @@ public class RobotContainer {
     private void registerNamedCommands(){
         NamedCommands.registerCommand("printSomething", new InstantCommand(() -> System.out.println(">>>>>>>>>>>>>Printing Something")));
         NamedCommands.registerCommand("autoCoralHigh", autoCoralHigh);
+        NamedCommands.registerCommand("autoAlign", autoAlign);
 
 
 

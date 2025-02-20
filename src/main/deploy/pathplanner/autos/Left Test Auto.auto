@@ -19,6 +19,12 @@
         {
           "type": "named",
           "data": {
+            "name": "autoAlign"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "autoCoralHigh"
           }
         }

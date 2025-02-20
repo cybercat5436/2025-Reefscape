@@ -25,7 +25,7 @@ public class Elevator extends SubsystemBase {
   private double L1 = 0;
   private double L2 = 26.5;
   private double L3 = 65.64;
-  private double L4 = 129;
+  private double L4 = 128;
   private final TalonFXS elevator = new TalonFXS(12);
   public Elevator() {
     var talonFXSConfigs = new TalonFXSConfiguration();
