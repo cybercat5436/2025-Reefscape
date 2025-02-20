@@ -62,7 +62,7 @@ rightOut.Output = 0;
 leftClimber.setControl(leftOut);
 rightClimber.setControl(rightOut);
 SmartDashboard.putNumber("ClimberLeft", leftClimber.get());
-  SmartDashboard.putNumber("ClimberRight", rightClimber.get());
+SmartDashboard.putNumber("ClimberRight", rightClimber.get());
   System.out.println("Stopped climbing ");
 }
 

@@ -122,7 +122,9 @@ public class AutoAlign extends Command {
     robotYError = targetYaw - currentYaw;
     robotYErrorChange = robotYError - previousYError;
     robotXError = currentArea == 0 ? 0.0 : targetArea - currentArea;
-    rotationError = targetRotation - currentRotation;
+    rotationError = boundAngle(targetRotation - currentRotation);
+
+    
 
     xSpeed = kPX * Math.min(maxSpeed, Math.abs(robotXError)) * Math.signum(robotXError);
     ySpeed = kPY * Math.min(maxSpeed, Math.abs(robotYError)) * Math.signum(robotYError);
@@ -142,6 +144,16 @@ public class AutoAlign extends Command {
     SmartDashboard.putNumber("Auto align YSpeed", ySpeed);
     SmartDashboard.putNumber("Robot Y Error", robotYError);
     SmartDashboard.putNumber("Robot X Error", robotXError);
+  }
+
+  private double boundAngle(double angleIn) {
+    if(angleIn <= -180) {
+      angleIn = angleIn + 360;
+    }
+    if(angleIn > 180) {
+      angleIn = angleIn - 360;
+    }
+    return angleIn;
   }
 
   // Called once the command ends or is interrupted.
