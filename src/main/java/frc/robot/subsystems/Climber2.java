@@ -20,7 +20,10 @@ public class Climber2 extends SubsystemBase {
     private final TalonFX leftClimber = new TalonFX(16);
     private final DutyCycleOut leftOut = new DutyCycleOut(0);
     private final DutyCycleOut rightOut = new DutyCycleOut(0);
-  /** Creates a new Climber. */
+    private double rightEncoderValue;
+    private double leftEncoderValue;
+    private double climberEncoderLimit = 0.5;
+    /** Creates a new Climber. */
   public Climber2() {
     var leftConfiguration = new TalonFXConfiguration();
     var rightConfiguration = new TalonFXConfiguration();
@@ -33,6 +36,8 @@ public class Climber2 extends SubsystemBase {
 
     rightClimber.getConfigurator().apply(rightConfiguration);
     leftClimber.getConfigurator().apply(leftConfiguration);
+
+    
   }
 /**
  * This method makes the robot climb and score LOTS of points
@@ -70,4 +75,19 @@ SmartDashboard.putNumber("ClimberLeft", leftClimber.get());
   public void periodic() {
     // This method will be called once per scheduler run
   }
+
+public void moveRightClimber(double speed){
+  if(rightEncoderValue < climberEncoderLimit && speed < 0){
+    speed = 0.0;
+  }
+
+
+}
+public void moveLeftClimber(double speed){
+
+  if(leftEncoderValue < climberEncoderLimit && speed < 0){
+    speed = 0.0;
+  }
+}
+
 }
