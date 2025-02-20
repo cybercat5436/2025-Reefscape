@@ -39,6 +39,12 @@ public class PhotonVision extends SubsystemBase {
                      targetVisible = true;
                      observedArea = target.getArea();
                  }
+                 if (target.getFiducialId() == 21) {
+                    // Found Tag 20, record its information
+                    observedYaw = target.getYaw();
+                    targetVisible = true;
+                    observedArea = target.getArea();
+                }
              }
          }
      }

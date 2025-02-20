@@ -93,6 +93,7 @@ public class RobotContainer {
     private SequentialCommandGroup autoCoralHigh = new SequentialCommandGroup(
         new InstantCommand(() -> elevator.raiseLevel4())
         ,Commands.waitSeconds(2.5)
+        ,Commands.print("Auto Coral High")
         .andThen(new InstantCommand(() -> coral.backward(1)))
         , Commands.waitSeconds(.5)
          .andThen(new InstantCommand(() -> coral.stopMotor())))
@@ -205,9 +206,9 @@ public class RobotContainer {
         // joystick2.povUp()
         //     .whileTrue(new InstantCommand(() -> algae.algaeHigh(0.5)).repeatedly())
         //     .onFalse(new InstantCommand(() -> algae.algaeStop()));
-        // joystick2.povDown()
-        //     .whileTrue(new InstantCommand(() -> algae.algaeHigh(-0.3)).repeatedly())
-        //     .onFalse(new InstantCommand(() -> algae.algaeStop()));
+        joystick2.povDown()
+            .whileTrue(new InstantCommand(() -> algae.algaeHigh(-0.3)).repeatedly())
+            .onFalse(new InstantCommand(() -> algae.algaeStop()));
         joystick2.povUp()
             .onTrue(new InstantCommand(() -> algae.algaeHigh()))
             .onFalse(new InstantCommand(() -> algae.algaeStop()));

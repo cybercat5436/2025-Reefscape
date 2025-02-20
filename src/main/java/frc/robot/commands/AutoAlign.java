@@ -71,7 +71,7 @@ public class AutoAlign extends Command {
   private double rotationError;
   private double currentRotation;
   private double rotationSpeed;
-   
+  
 
   public AutoAlign(CommandSwerveDrivetrain commandSwerveDrivetrain, LimeLight limeLight, PhotonVision photonVision) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -94,11 +94,14 @@ public class AutoAlign extends Command {
     timer.start();
     System.out.println("starting auto align");
 
-
+    //ID 20
     targetYaw = -19.2;
     targetArea = 9.5;//Area target
-    targetRotationAngle = -120;
-    
+    // targetRotation = -120;
+
+    //ID 21
+    targetRotation = 180;
+
     previousYError = 0;
 
     SmartDashboard.putNumber("Robot Y Error", robotYError);
@@ -116,7 +119,6 @@ public class AutoAlign extends Command {
     currentRotation =commandSwerveDrivetrain.getState().Pose.getRotation().getDegrees();
     currentArea = photonVision.observedArea;
     currentYaw = photonVision.observedYaw;
-    targetRotation = -120;
     robotYError = targetYaw - currentYaw;
     robotYErrorChange = robotYError - previousYError;
     robotXError = currentArea == 0 ? 0.0 : targetArea - currentArea;
@@ -163,6 +165,8 @@ public class AutoAlign extends Command {
       System.out.println("Robot interupted");
     }else if (isXAligned){
       System.out.println("Robot X Aligned");
+    }else if(isRotationAligned){
+      System.out.println("Rotaion Aligned");
     }
       
     
@@ -189,6 +193,20 @@ public class AutoAlign extends Command {
      isXAligned = XDistanceError < VerticalThreshold;
      isRotationAligned = RotationError < 2;
     //  isTimedOut = timer.get() > timeThreshold;
+    //  isYAligned = (YDistanceError < horizontalThreshold) || isYAligned;
+    //  isXAligned = (XDistanceError < VerticalThreshold) || isXAligned;
+    //  isRotationAligned = (RotationError < 2) || isRotationAligned;
+    // if(isYAligned && kPY != 0){
+    //   kPY = 0;
+    //   System.out.println("KP Y is 0");
+    // }
+    // if(isXAligned && kPX != 0){
+    //   kPX = 0;
+    // }
+    // if(isRotationAligned && rotationkP != 0){
+    //   rotationkP = 0;
+    // }
+
     return  isTimedOut || isXAligned && isYAligned && isRotationAligned;
     
   }
