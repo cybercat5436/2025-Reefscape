@@ -78,7 +78,7 @@ public class RobotContainer {
     private final CommandXboxController joystick2 = new CommandXboxController(1);
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private final LimeLight limeLightFront = new LimeLight("limelight-front");
-    // private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, drivetrain);
+    private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, drivetrain);
     private final AutoAlign autoAlign = new AutoAlign(drivetrain,limeLightFront,photonVision);
     private SendableChooser<Command> autonChooser;
     // public final Climber climber = new Climber();
@@ -115,10 +115,10 @@ public class RobotContainer {
     public RobotContainer(){
         // autonChooser.addOption("Complex Auto", m_complexAuto);
         configureBindings();
-        // poseUpdater.enable();
+        poseUpdater.enable();
         registerNamedCommands();
         autonChooser = AutoBuilder.buildAutoChooser();
-       SmartDashboard.putData("Auton Chooser", autonChooser);
+        SmartDashboard.putData("Auton Chooser", autonChooser);
     }
 
     

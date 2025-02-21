@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import com.ctre.phoenix6.SignalLogger;
 
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -22,6 +23,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.LimelightHelpers;
 import frc.robot.LimelightHelpers.LimelightResults;
 import frc.robot.Telemetry;
 
@@ -175,18 +177,50 @@ public class PoseUpdater extends SubsystemBase {
   }
   @Override
   public void periodic() {
-    LimelightResults limelightResults = limeLightFront.getLatestResults();
-    // This method will be called once per scheduler run
-    isTargetVisible = limeLightFront.getVisionTargetStatus();
-    SignalLogger.writeDouble("LimeLight Front/Vision Area", limeLightFront.getVisionArea(), "mm^2");
-    
-    // Calculate error
-    if (limelightResults.botpose_tagcount > 0) {
-      System.out.println("Position is being updated");
+    if (!isEnabled) return;
+    double robotYaw = commandSwerveDrivetrain.getState().Pose.getRotation().getDegrees();
+    SmartDashboard.putNumber("Yaw from Pose", robotYaw);
+    if(DriverStation.isDisabled()){
+      LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue(limeLightFront.limelightName);
 
-      // update pose if active  
-      if (isEnabled) {
-        commandSwerveDrivetrain.addVisionMeasurement(limelightResults.getBotPose2d(), limelightResults.timestamp_LIMELIGHT_publish);
+      Boolean doRejectUpdate = false;
+
+      if (limelightMeasurement == null) return;
+
+      //SmartDashboard.putNumber("Limelight Measured Heading", limelightMeasurement.pose.getRotation().getDegrees());
+      if(limelightMeasurement.tagCount == 1 && limelightMeasurement.rawFiducials.length == 1) {
+        if(limelightMeasurement.rawFiducials[0].ambiguity > .7)
+        {
+          doRejectUpdate = true;
+        }
+        if(limelightMeasurement.rawFiducials[0].distToCamera > 3)
+        {
+          doRejectUpdate = true;
+        }
+      }
+      if(limelightMeasurement.tagCount == 0)
+      {
+        doRejectUpdate = true;
+      }
+
+      if(!doRejectUpdate)
+      {
+        commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,.25));
+        commandSwerveDrivetrain.resetPose(limelightMeasurement.pose);
+      }
+
+    } else {
+      isTargetVisible = limeLightFront.getVisionTargetStatus();
+      if (LimelightHelpers.getTargetCount(limeLightFront.limelightName) > 0) {
+          LimelightHelpers.SetRobotOrientation(limeLightFront.limelightName, robotYaw, 0.0, 0.0, 0.0, 0.0, 0.0);          LimelightHelpers.PoseEstimate limelightMeasurement2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limeLightFront.limelightName);
+
+          commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 99999999));
+          commandSwerveDrivetrain.addVisionMeasurement(
+              limelightMeasurement2.pose,
+              limelightMeasurement2.timestampSeconds
+          );
+        SmartDashboard.putNumber("Limelight Measured X", limelightMeasurement2.pose.getX());
+        SmartDashboard.putNumber("Limelight Measured Y", limelightMeasurement2.pose.getY());
       }
     }
   }
