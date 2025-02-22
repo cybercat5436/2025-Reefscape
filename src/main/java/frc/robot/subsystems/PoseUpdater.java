@@ -205,8 +205,13 @@ public class PoseUpdater extends SubsystemBase {
 
       if(!doRejectUpdate)
       {
-        commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,.25));
-        commandSwerveDrivetrain.resetPose(limelightMeasurement.pose);
+        // commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,.25));
+        // commandSwerveDrivetrain.resetPose(limelightMeasurement.pose);
+        commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,9999999));
+        commandSwerveDrivetrain.addVisionMeasurement(
+          limelightMeasurement.pose,
+          limelightMeasurement.timestampSeconds
+      );
       }
 
     } else {
