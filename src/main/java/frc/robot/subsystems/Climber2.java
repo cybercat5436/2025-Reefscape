@@ -25,8 +25,8 @@ public class Climber2 extends SubsystemBase {
     private double leftEncoderValue;
     private RelativeEncoder leftClimberEncoder;
     private RelativeEncoder rightClimberEncoder;
-    private double leftClimberEncoderLimit = -0.5;
-    private double rightClimberEncoderLimit = 0.5;
+    private double ClimberEncoderLimitUp = 0;
+    private double ClimberEncoderLimitDown = -10;
 
     /** Creates a new Climber. */
   public Climber2() {
@@ -34,7 +34,7 @@ public class Climber2 extends SubsystemBase {
     var rightConfiguration = new TalonFXConfiguration();
   
     leftConfiguration.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-    rightConfiguration.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    rightConfiguration.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
     leftConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     rightConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -50,21 +50,21 @@ public class Climber2 extends SubsystemBase {
   * 
   */
  public void leftClimb(double speed) {
-  leftOut.Output = speed;
-  leftClimber.setControl(leftOut);
-
-  if((leftEncoderValue < leftClimberEncoderLimit) && (speed < 0)){
+  if((leftEncoderValue >= ClimberEncoderLimitUp) && (speed > 0)){
+    speed = 0.0;
+  }
+  if((leftEncoderValue <= ClimberEncoderLimitDown) && (speed < 0)){
     speed = 0.0;
   }
   leftClimber.setControl(leftOut.withOutput(speed));
   SmartDashboard.putNumber("ClimberLeft2", leftClimber.get());
   System.out.println("left climbing with speed " + speed);
  }
-
  public void rightClimb(double speed) {
-  rightOut.Output = speed;
-  rightClimber.setControl(rightOut);
-  if((rightEncoderValue > rightClimberEncoderLimit) && (speed > 0)){
+  if((rightEncoderValue >= ClimberEncoderLimitUp) && (speed > 0)){
+    speed = 0.0;
+  }
+  if((rightEncoderValue <= ClimberEncoderLimitDown) && (speed < 0)){
     speed = 0.0;
   }
   rightClimber.setControl(rightOut.withOutput(speed));
@@ -88,7 +88,7 @@ public void periodic() {
   // This method will be called once per scheduler run
   
   SmartDashboard.putNumber("ClimberLeft", leftClimber.getPosition().getValueAsDouble());
-  SmartDashboard.putNumber("ClimberRight", rightClimber.getPosition().getValueAsDouble(c);
+  SmartDashboard.putNumber("ClimberRight", rightClimber.getPosition().getValueAsDouble());
   }
 
 
