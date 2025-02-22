@@ -1,0 +1,75 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 4.88475,
+        "y": 4.99025
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 4.485,
+        "y": 6.472250000000001
+      },
+      "isLocked": false,
+      "linkedName": "Left Path 1 MT2 end"
+    },
+    {
+      "anchor": {
+        "x": 1.755,
+        "y": 5.234
+      },
+      "prevControl": {
+        "x": 2.08649923021044,
+        "y": 5.120118632202982
+      },
+      "nextControl": {
+        "x": 1.379258072159848,
+        "y": 5.3630802535316935
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 0.507,
+        "y": 6.530749999999999
+      },
+      "prevControl": {
+        "x": 1.1915778688524592,
+        "y": 5.720940573770492
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Left Path 2 MT2 end"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1.0198425196850367,
+      "rotationDegrees": 129.56969435559066
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 2.0,
+    "maxAcceleration": 2.0,
+    "maxAngularVelocity": 300.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 125.00000000000001
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -119.99999999999999
+  },
+  "useDefaultConstraints": true
+}

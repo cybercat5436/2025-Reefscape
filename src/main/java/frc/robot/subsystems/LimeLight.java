@@ -51,10 +51,10 @@ public class LimeLight extends SubsystemBase {
 
     // Change the camera pose relative to robot center (x forward, y left, z up, degrees)
     LimelightHelpers.setCameraPose_RobotSpace(limelightName,
-    0.2,    // Forward offset (meters)
-    -0.25,    // Side offset (meters)
-    0.64,    // Height offset (meters)
-    90,    // Roll (degrees)
+    0.02,    // Forward offset (meters)
+    -0.3,    // Side offset (meters)
+    0.65,    // Height offset (meters)
+    -90,    // Roll (degrees)
     0.0,   // Pitch (degrees)
     0.0     // Yaw (degrees)
     );

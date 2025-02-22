@@ -46,6 +46,7 @@ public class PoseUpdater extends SubsystemBase {
   public final int CYCLE_LOCKOUT = 20;  // 50 cycles per second
   public double totalAdjustment = 0;
   public int numAdjustments = 0;
+  public int poseCount;
 
   public PoseUpdater(LimeLight limeLightFront, CommandSwerveDrivetrain swerveSubsystem) {
     this.limeLightFront = limeLightFront;
@@ -208,6 +209,7 @@ public class PoseUpdater extends SubsystemBase {
         // commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,.25));
         // commandSwerveDrivetrain.resetPose(limelightMeasurement.pose);
         commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,9999999));
+        poseCount ++;
         commandSwerveDrivetrain.addVisionMeasurement(
           limelightMeasurement.pose,
           limelightMeasurement.timestampSeconds
@@ -220,6 +222,7 @@ public class PoseUpdater extends SubsystemBase {
           LimelightHelpers.SetRobotOrientation(limeLightFront.limelightName, robotYaw, 0.0, 0.0, 0.0, 0.0, 0.0);          LimelightHelpers.PoseEstimate limelightMeasurement2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limeLightFront.limelightName);
 
           commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 99999999));
+          poseCount ++;
           commandSwerveDrivetrain.addVisionMeasurement(
               limelightMeasurement2.pose,
               limelightMeasurement2.timestampSeconds
@@ -265,6 +268,7 @@ public class PoseUpdater extends SubsystemBase {
     builder.addDoubleProperty("Distance Estimate", () -> distanceEstimate, null);
     builder.addBooleanProperty("isEnabled", () -> isEnabled, null);
     builder.addDoubleProperty("totalAdjustment",() -> totalAdjustment, null);
+    builder.addDoubleProperty("pose Count",() -> poseCount, null);
   }
 
 }

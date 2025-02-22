@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.*;
 
 import java.lang.annotation.Repeatable;
 import java.time.temporal.TemporalAccessor;
+import java.util.jar.Attributes.Name;
 
 import javax.sound.sampled.SourceDataLine;
 
@@ -15,6 +16,7 @@ import org.photonvision.PhotonCamera;
 
 import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.fasterxml.jackson.databind.util.Named;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -37,6 +39,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.AutoAlign;
+import frc.robot.commands.CoralIntakeWithDetection;
 import frc.robot.generated.TunerConstants;
 // import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Climber2;
@@ -141,9 +144,11 @@ public class RobotContainer {
         NamedCommands.registerCommand("printSomething", new InstantCommand(() -> System.out.println(">>>>>>>>>>>>>Printing Something")));
         NamedCommands.registerCommand("autoCoralHigh", autoCoralHigh);
         NamedCommands.registerCommand("autoAlign", autoAlign);
-
-
-
+        NamedCommands.registerCommand("raiseArmHigh", new InstantCommand(() -> elevator.raiseLevel4()));
+        NamedCommands.registerCommand("shootCoral", new InstantCommand(() -> coral.backward(1)).andThen(Commands.waitSeconds(0.3)).andThen(new InstantCommand(() -> coral.stopMotor())));
+        NamedCommands.registerCommand("lowerElevator", new InstantCommand(() -> elevator.raiseLevel1()).andThen(Commands.waitSeconds(2).andThen(new InstantCommand(() -> elevator.stopElevator()))));
+        NamedCommands.registerCommand("coralIntake", new CoralIntakeWithDetection(coral, coralSensor));
+        NamedCommands.registerCommand("stopCoralIntake", new InstantCommand(() -> coral.forward(0)));
     }
 
 
