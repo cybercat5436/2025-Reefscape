@@ -161,7 +161,7 @@ public class RobotContainer {
 
 
         coralIntakeTrigger
-            .whileTrue(new InstantCommand(() -> coral.forward(1)))
+            .whileTrue(new InstantCommand(() -> coral.backward(1)))
             .onFalse(new InstantCommand(() -> coral.stopMotor()));
         
         algaeIntakeTrigger
@@ -169,7 +169,7 @@ public class RobotContainer {
             .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
 
         joystick2.leftBumper()
-           .whileTrue(new InstantCommand(() -> coral.backward(1)))
+           .whileTrue(new InstantCommand(() -> coral.forward(1)))
            .onFalse(new InstantCommand(() -> coral.stopMotor())); 
         joystick2.rightBumper()
            .whileTrue(new InstantCommand(() -> algae.intakeBall(-1)))
@@ -214,21 +214,21 @@ public class RobotContainer {
         // joystick2.povLeft()
         // .onTrue(autoCoralHigh);
 
-        // joystick2.povUp()
-        //     .whileTrue(new InstantCommand(() -> algae.algaeHigh(0.5)).repeatedly())
-        //     .onFalse(new InstantCommand(() -> algae.algaeStop()));
-        joystick2.povDown()
+        joystick2.povUp()
             .whileTrue(new InstantCommand(() -> algae.algaeHigh(-0.3)).repeatedly())
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
-        joystick2.povUp()
-            .onTrue(new InstantCommand(() -> algae.algaeHigh()))
+        joystick2.povDown()
+            .whileTrue(new InstantCommand(() -> algae.algaeHigh(0.3)))
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
-        joystick2.povRight()
-            .onTrue(new InstantCommand(() -> algae.algaeLow()))
-            .onFalse(new InstantCommand(() -> algae.algaeStop()));
-        joystick2.povLeft()
-            .onTrue(new InstantCommand(() -> algae.algaeProcessor()))
-            .onFalse(new InstantCommand(() -> algae.algaeStop()));
+        // joystick2.povUp()
+        //     .onTrue(new InstantCommand(() -> algae.algaeHigh()))
+        //     .onFalse(new InstantCommand(() -> algae.algaeStop()));
+        // joystick2.povRight()
+        //     .onTrue(new InstantCommand(() -> algae.algaeLow()))
+        //     .onFalse(new InstantCommand(() -> algae.algaeStop()));
+        // joystick2.povLeft()
+        //     .onTrue(new InstantCommand(() -> algae.algaeProcessor()))
+        //     .onFalse(new InstantCommand(() -> algae.algaeStop()));
             
         
         
