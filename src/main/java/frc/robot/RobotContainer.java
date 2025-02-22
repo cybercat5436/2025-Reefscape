@@ -23,6 +23,7 @@ import com.revrobotics.spark.SparkBase;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -46,10 +47,12 @@ import frc.robot.subsystems.Coral;
 import frc.robot.subsystems.GamePieceDetector;
 import frc.robot.subsystems.CANdleSystem.AnimationTypes;
 import frc.robot.subsystems.CANdleSystem.AvailableColors;
+import frc.robot.subsystems.ReefController.ReefPosition;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.LimeLight;
 import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.PoseUpdater;
+import frc.robot.subsystems.ReefController;
 
 public class RobotContainer {
     private double maxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.35; // kSpeedAt12Volts desired top speed
@@ -76,6 +79,9 @@ public class RobotContainer {
     private final PhotonVision photonVision = new PhotonVision();
     private final CommandXboxController joystick = new CommandXboxController(0);
     private final CommandXboxController joystick2 = new CommandXboxController(1);
+    private final Joystick reefPositionJoystick = new Joystick(2);
+    private final Joystick reefLevelJoystick = new Joystick(3);
+    private final ReefController reefController = new ReefController();
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private final LimeLight limeLightFront = new LimeLight("limelight-front");
     // private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, drivetrain);
@@ -356,7 +362,47 @@ public class RobotContainer {
 
         //joystick.povRight().onTrue(new ParallelRaceGroup(blinkLight, new WaitCommand(2.25)));
         //joystick.povRight().onTrue(new ColorBlinkCommand(AvailableColors.Red, candleSystem));
+        Trigger button1 = new Trigger(() -> reefPositionJoystick.getRawButton(1));
+        button1.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.A)));
+        Trigger button2 = new Trigger(() -> reefPositionJoystick.getRawButton(2));
+        button2.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.B)));
+        Trigger button3 = new Trigger(() -> reefPositionJoystick.getRawButton(3));
+        button3.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.C)));
+        Trigger button4 = new Trigger(() -> reefPositionJoystick.getRawButton(4));
+        button4.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.D)));
+        Trigger button5 = new Trigger(() -> reefPositionJoystick.getRawButton(5));
+        button5.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.E)));
+        Trigger button6 = new Trigger(() -> reefPositionJoystick.getRawButton(6));
+        button6.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.F)));
+        Trigger button7 = new Trigger(() -> reefPositionJoystick.getRawButton(7));
+        button7.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.G)));
+        Trigger button8 = new Trigger(() -> reefPositionJoystick.getRawButton(8));
+        button8.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.H)));
+        Trigger button9 = new Trigger(() -> reefPositionJoystick.getRawButton(9));
+        button9.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.I)));
+        Trigger button10 = new Trigger(() -> reefPositionJoystick.getRawButton(10));
+        button10.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.J)));
+        Trigger button11 = new Trigger(() -> reefPositionJoystick.getRawButton(11));
+        button11.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.K)));
+        Trigger button12 = new Trigger(() -> reefPositionJoystick.getRawButton(12));
+        button12.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.L)));
+
+       
+        Trigger buttonLevel1Trigger = new Trigger(() -> reefLevelJoystick.getRawButton(1));
+        buttonLevel1Trigger.onTrue(new InstantCommand(() ->reefController.setTargetReefLevel(1)));
+        Trigger buttonLevel2Trigger = new Trigger(() -> reefLevelJoystick.getRawButton(2));
+        buttonLevel2Trigger.onTrue(new InstantCommand(() ->reefController.setTargetReefLevel(2)));
+        Trigger buttonLevel3Trigger = new Trigger(() -> reefLevelJoystick.getRawButton(3));
+        buttonLevel3Trigger.onTrue(new InstantCommand(() ->reefController.setTargetReefLevel(3)));
+        Trigger buttonLevel4Trigger = new Trigger(() -> reefLevelJoystick.getRawButton(4));
+        buttonLevel4Trigger.onTrue(new InstantCommand(() ->reefController.setTargetReefLevel(4)));
+
+        reefController.setTargetReefPosition(ReefPosition.H);
+        System.out.println(reefController.getTargetReefPosition() + "#$%^&^(^%$#$%^&*(*&^))");
+        System.out.println(reefController.getTargetRobotPose());
+
     }
+    
 
 
     public Command getAutonomousCommand() {
