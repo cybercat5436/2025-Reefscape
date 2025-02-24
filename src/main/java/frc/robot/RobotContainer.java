@@ -6,21 +6,39 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.io.IOException;
+import org.json.simple.parser.ParseException;
 import java.lang.annotation.Repeatable;
 import java.time.temporal.TemporalAccessor;
+import java.util.List;
+import java.util.Optional;
+import java.util.jar.Attributes.Name;
 
 import javax.sound.sampled.SourceDataLine;
 
+import org.photonvision.PhotonCamera;
+
 import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.fasterxml.jackson.databind.util.Named;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.path.PathPlannerPath;
 import com.revrobotics.spark.SparkBase;
 
+import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.simulation.DriverStationSim;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -34,6 +52,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.AutoAlign;
+import frc.robot.commands.CoralIntakeWithDetection;
 import frc.robot.generated.TunerConstants;
 // import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Climber2;
@@ -44,9 +63,12 @@ import frc.robot.subsystems.Coral;
 import frc.robot.subsystems.GamePieceDetector;
 import frc.robot.subsystems.CANdleSystem.AnimationTypes;
 import frc.robot.subsystems.CANdleSystem.AvailableColors;
+import frc.robot.subsystems.ReefController.ReefPosition;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.LimeLight;
+import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.PoseUpdater;
+import frc.robot.subsystems.ReefController;
 
 public class RobotContainer {
     private double maxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.35; // kSpeedAt12Volts desired top speed
@@ -70,18 +92,22 @@ public class RobotContainer {
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
    
     private final Telemetry logger = new Telemetry(maxSpeed);
-
+    private final PhotonVision photonVision = new PhotonVision();
     private final CommandXboxController joystick = new CommandXboxController(0);
     private final CommandXboxController joystick2 = new CommandXboxController(1);
+    private final Joystick reefPositionJoystick = new Joystick(2);
+    private final Joystick reefLevelJoystick = new Joystick(3);
+    private final ReefController reefController = new ReefController();
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private final LimeLight limeLightFront = new LimeLight("limelight-front");
-    // private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, drivetrain);
-    private final AutoAlign autoAlign = new AutoAlign(drivetrain,limeLightFront);
+    private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, drivetrain);
+    private final AutoAlign autoAlign = new AutoAlign(drivetrain,limeLightFront,photonVision);
     private SendableChooser<Command> autonChooser;
     // public final Climber climber = new Climber();
     public final Climber2 climber2 = new Climber2();
     public final GamePieceDetector coralSensor = new GamePieceDetector(35000, GamePieceDetector.Sensors.coral);
     public final GamePieceDetector algaeSensor = new GamePieceDetector(25000, GamePieceDetector.Sensors.algae, 0.1);
+    
     public final Coral coral = new Coral();
     public final Algae algae = new Algae();
     public final Elevator elevator = new Elevator();
@@ -89,6 +115,7 @@ public class RobotContainer {
     private SequentialCommandGroup autoCoralHigh = new SequentialCommandGroup(
         new InstantCommand(() -> elevator.raiseLevel4())
         ,Commands.waitSeconds(2.5)
+        ,Commands.print("Auto Coral High")
         .andThen(new InstantCommand(() -> coral.backward(1)))
         , Commands.waitSeconds(.5)
          .andThen(new InstantCommand(() -> coral.stopMotor())))
@@ -110,10 +137,11 @@ public class RobotContainer {
     public RobotContainer(){
         // autonChooser.addOption("Complex Auto", m_complexAuto);
         configureBindings();
-        // poseUpdater.enable();
+        poseUpdater.enable();
         registerNamedCommands();
+        testReefController();
         autonChooser = AutoBuilder.buildAutoChooser();
-       SmartDashboard.putData("Auton Chooser", autonChooser);
+        SmartDashboard.putData("Auton Chooser", autonChooser);
     }
 
     
@@ -129,9 +157,12 @@ public class RobotContainer {
     private void registerNamedCommands(){
         NamedCommands.registerCommand("printSomething", new InstantCommand(() -> System.out.println(">>>>>>>>>>>>>Printing Something")));
         NamedCommands.registerCommand("autoCoralHigh", autoCoralHigh);
-
-
-
+        NamedCommands.registerCommand("autoAlign", autoAlign);
+        NamedCommands.registerCommand("raiseArmHigh", new InstantCommand(() -> elevator.raiseLevel4()));
+        NamedCommands.registerCommand("shootCoral", new InstantCommand(() -> coral.backward(1)).andThen(Commands.waitSeconds(0.3)).andThen(new InstantCommand(() -> coral.stopMotor())));
+        NamedCommands.registerCommand("lowerElevator", new InstantCommand(() -> elevator.raiseLevel1()).andThen(Commands.waitSeconds(2).andThen(new InstantCommand(() -> elevator.stopElevator()))));
+        NamedCommands.registerCommand("coralIntake", new CoralIntakeWithDetection(coral, coralSensor));
+        NamedCommands.registerCommand("stopCoralIntake", new InstantCommand(() -> coral.forward(0)));
     }
 
 
@@ -144,7 +175,7 @@ public class RobotContainer {
 
 
         coralIntakeTrigger
-            .whileTrue(new InstantCommand(() -> coral.forward(1)))
+            .whileTrue(new InstantCommand(() -> coral.backward(1)))
             .onFalse(new InstantCommand(() -> coral.stopMotor()));
         
         algaeIntakeTrigger
@@ -152,7 +183,7 @@ public class RobotContainer {
             .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
 
         joystick2.leftBumper()
-           .whileTrue(new InstantCommand(() -> coral.backward(1)))
+           .whileTrue(new InstantCommand(() -> coral.forward(1)))
            .onFalse(new InstantCommand(() -> coral.stopMotor())); 
         joystick2.rightBumper()
            .whileTrue(new InstantCommand(() -> algae.intakeBall(-1)))
@@ -197,21 +228,21 @@ public class RobotContainer {
         // joystick2.povLeft()
         // .onTrue(autoCoralHigh);
 
-        // joystick2.povUp()
-        //     .whileTrue(new InstantCommand(() -> algae.algaeHigh(0.5)).repeatedly())
-        //     .onFalse(new InstantCommand(() -> algae.algaeStop()));
-        // joystick2.povDown()
-        //     .whileTrue(new InstantCommand(() -> algae.algaeHigh(-0.3)).repeatedly())
-        //     .onFalse(new InstantCommand(() -> algae.algaeStop()));
         joystick2.povUp()
-            .onTrue(new InstantCommand(() -> algae.algaeHigh()))
+            .whileTrue(new InstantCommand(() -> algae.algaeHigh(-0.3)).repeatedly())
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
-        joystick2.povRight()
-            .onTrue(new InstantCommand(() -> algae.algaeLow()))
+        joystick2.povDown()
+            .whileTrue(new InstantCommand(() -> algae.algaeHigh(0.3)))
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
-        joystick2.povLeft()
-            .onTrue(new InstantCommand(() -> algae.algaeProcessor()))
-            .onFalse(new InstantCommand(() -> algae.algaeStop()));
+        // joystick2.povUp()
+        //     .onTrue(new InstantCommand(() -> algae.algaeHigh()))
+        //     .onFalse(new InstantCommand(() -> algae.algaeStop()));
+        // joystick2.povRight()
+        //     .onTrue(new InstantCommand(() -> algae.algaeLow()))
+        //     .onFalse(new InstantCommand(() -> algae.algaeStop()));
+        // joystick2.povLeft()
+        //     .onTrue(new InstantCommand(() -> algae.algaeProcessor()))
+        //     .onFalse(new InstantCommand(() -> algae.algaeStop()));
             
         
         
@@ -296,6 +327,9 @@ public class RobotContainer {
 
         // reset the field-centric heading on left bumper press
         joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+    
+        joystick.y().whileTrue(new AutoAlign(drivetrain, limeLightFront, photonVision));
+
         // climber commands
         
         drivetrain.registerTelemetry(logger::telemeterize);
@@ -347,12 +381,123 @@ public class RobotContainer {
 
         //joystick.povRight().onTrue(new ParallelRaceGroup(blinkLight, new WaitCommand(2.25)));
         //joystick.povRight().onTrue(new ColorBlinkCommand(AvailableColors.Red, candleSystem));
+        Trigger button1 = new Trigger(() -> reefPositionJoystick.getRawButton(1));
+        button1.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.A)));
+        Trigger button2 = new Trigger(() -> reefPositionJoystick.getRawButton(2));
+        button2.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.B)));
+        Trigger button3 = new Trigger(() -> reefPositionJoystick.getRawButton(3));
+        button3.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.C)));
+        Trigger button4 = new Trigger(() -> reefPositionJoystick.getRawButton(4));
+        button4.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.D)));
+        Trigger button5 = new Trigger(() -> reefPositionJoystick.getRawButton(5));
+        button5.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.E)));
+        Trigger button6 = new Trigger(() -> reefPositionJoystick.getRawButton(6));
+        button6.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.F)));
+        Trigger button7 = new Trigger(() -> reefPositionJoystick.getRawButton(7));
+        button7.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.G)));
+        Trigger button8 = new Trigger(() -> reefPositionJoystick.getRawButton(8));
+        button8.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.H)));
+        Trigger button9 = new Trigger(() -> reefPositionJoystick.getRawButton(9));
+        button9.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.I)));
+        Trigger button10 = new Trigger(() -> reefPositionJoystick.getRawButton(10));
+        button10.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.J)));
+        Trigger button11 = new Trigger(() -> reefPositionJoystick.getRawButton(11));
+        button11.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.K)));
+        Trigger button12 = new Trigger(() -> reefPositionJoystick.getRawButton(12));
+        button12.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.L)));
+
+       
+        Trigger buttonLevel1Trigger = new Trigger(() -> reefLevelJoystick.getRawButton(1));
+        buttonLevel1Trigger.onTrue(new InstantCommand(() ->reefController.setTargetReefLevel(1)));
+        Trigger buttonLevel2Trigger = new Trigger(() -> reefLevelJoystick.getRawButton(2));
+        buttonLevel2Trigger.onTrue(new InstantCommand(() ->reefController.setTargetReefLevel(2)));
+        Trigger buttonLevel3Trigger = new Trigger(() -> reefLevelJoystick.getRawButton(3));
+        buttonLevel3Trigger.onTrue(new InstantCommand(() ->reefController.setTargetReefLevel(3)));
+        Trigger buttonLevel4Trigger = new Trigger(() -> reefLevelJoystick.getRawButton(4));
+        buttonLevel4Trigger.onTrue(new InstantCommand(() ->reefController.setTargetReefLevel(4)));
+
+
+
     }
 
+    private void testReefController(){
+        reefController.setTargetReefPosition(ReefPosition.I);
+        System.out.println(reefController.toString());
+
+        reefController.setTargetReefPosition(ReefPosition.K);
+        System.out.println(reefController.toString());
+
+        reefController.setTargetReefPosition(ReefPosition.L);
+        System.out.println(reefController.toString());
+
+        reefController.setTargetReefPosition(ReefPosition.G);
+        System.out.println(reefController.toString());
+        
+        reefController.setTargetReefPosition(ReefPosition.H);
+        System.out.println(reefController.toString());        
+    }
+    
+
+    public void setOdometryPoseFromSelectedAuto(String autonName){
+        System.out.println("~~~~Setting pose from Selected Auto: " + autonName);
+        Pose2d startPose = new Pose2d();
+        
+        try {
+    
+          List<PathPlannerPath> paths = PathPlannerAuto.getPathGroupFromAutoFile(autonName);
+          startPose = getFirstPose(paths);
+    
+        } catch (IOException e){
+          // Exception thrown if starting pose is null in PathPlanner Auton file
+          System.out.println("IOException No starting pose detected in Auton file!");
+        } catch (ParseException e){
+            // Exception thrown if starting pose is null in PathPlanner Auton file
+            System.out.println("ParseException No starting pose detected in Auton file!");
+        }
+        System.out.println("~~~~ New starting pose: " + startPose.toString());
+        drivetrain.resetPose(startPose);
+    }
+
+    public Alliance getAlliance(){
+        if(!DriverStation.isDSAttached()){
+            // System.out.println("~~~~~" + DriverStationSim.getAllianceStationId());
+            // *** NOTE: if using simGUI set alliance manually here ****
+            // System.out.println(String.format("isRedAlliance: %s", 
+            // NetworkTableInstance.getDefault().getTable("FMSInfo").getEntry("IsRedAlliance").getBoolean(false)
+            // ));
+            boolean isRed = NetworkTableInstance.getDefault().getTable("FMSInfo").getEntry("IsRedAlliance").getBoolean(false);
+            return isRed? Alliance.Red : Alliance.Blue;
+        }
+        return DriverStation.getAlliance().orElse(Alliance.Blue);
+    }
+
+    private Pose2d getFirstPose(List<PathPlannerPath> paths){
+        Pose2d firstPose = new Pose2d();
+        // Guard against empty paths list
+        if(paths.isEmpty()){
+            System.out.println("Auto has no paths, returing origin");
+            return new Pose2d();
+        }
+
+
+        System.out.println("~~~~ Is Driver Station Attached: " + DriverStation.isDSAttached());
+        // figure out if path flipping has to happen
+        boolean shouldFlip = (getAlliance() == DriverStation.Alliance.Red);
+        System.out.println("~~~~~ Should Flip Path: " + shouldFlip);
+
+        PathPlannerPath firstPath = shouldFlip ? paths.get(0).flipPath() : paths.get(0);
+        // get the ideal starting state
+        var firstRotation = firstPath.getIdealStartingState().rotation();
+        // use position from first pose and add ideal starting state
+        firstPose = new Pose2d(firstPath.getAllPathPoints().get(0).position, firstRotation);
+
+        return firstPose;
+    }
+        
 
     public Command getAutonomousCommand() {
         //return Commands.print("No autonomous command configured");
-        System.out.println(autonChooser.getSelected().getName());
+        
         return autonChooser.getSelected();
         
     }

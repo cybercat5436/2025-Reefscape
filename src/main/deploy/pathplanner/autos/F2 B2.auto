@@ -26,6 +26,6 @@
     }
   },
   "resetOdom": true,
-  "folder": "Calibration",
+  "folder": null,
   "choreoAuto": false
 }

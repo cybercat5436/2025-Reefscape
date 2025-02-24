@@ -7,13 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "4M rotation"
+            "pathName": "half meter toward 21"
           }
         }
       ]
     }
   },
-  "resetOdom": true,
+  "resetOdom": false,
   "folder": null,
   "choreoAuto": false
 }

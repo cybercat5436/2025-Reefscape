@@ -8,28 +8,42 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.220283325560434,
-        "y": 5.378537880169855
+        "x": 6.3534836065573765,
+        "y": 5.2897028688524586
       },
       "isLocked": false,
       "linkedName": "Left Path 1 start"
     },
     {
       "anchor": {
-        "x": 5.0468237704918035,
-        "y": 4.90609631147541
+        "x": 4.88475,
+        "y": 4.99025
       },
       "prevControl": {
-        "x": 5.322376825199264,
-        "y": 5.023180854999318
+        "x": 5.556061475409837,
+        "y": 5.134102459016393
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Left Path 1 end"
+      "linkedName": "Left Path 1 MT2 end"
     }
   ],
   "rotationTargets": [],
-  "constraintZones": [],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0.799640287769781,
+      "maxWaypointRelativePos": 1.0,
+      "constraints": {
+        "maxVelocity": 1.0,
+        "maxAcceleration": 1.0,
+        "maxAngularVelocity": 300.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {

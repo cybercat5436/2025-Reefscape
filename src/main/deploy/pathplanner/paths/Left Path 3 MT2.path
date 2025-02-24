@@ -3,32 +3,37 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.0468237704918035,
-        "y": 4.90609631147541
+        "x": 0.507,
+        "y": 6.530749999999999
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.442911464262193,
-        "y": 4.6517837889472835
+        "x": 1.0742646965801526,
+        "y": 6.114329245750675
       },
       "isLocked": false,
-      "linkedName": "Left Path 1 end"
+      "linkedName": "Left Path 2 MT2 end"
     },
     {
       "anchor": {
-        "x": 1.402561475409836,
-        "y": 7.255686475409835
+        "x": 3.4807500000000005,
+        "y": 4.8245
       },
       "prevControl": {
-        "x": 1.1719081031222323,
-        "y": 7.352117911427122
+        "x": 2.9161510028233035,
+        "y": 5.087776836170126
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Left Path 2 end"
+      "linkedName": null
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.32472440944880354,
+      "rotationDegrees": -45.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -42,13 +47,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 125.00000000000001
+    "rotation": -57.2004687273808
   },
   "reversed": false,
-  "folder": "Left Auton",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -119.99999999999999
+    "rotation": 125.00000000000001
   },
   "useDefaultConstraints": true
 }

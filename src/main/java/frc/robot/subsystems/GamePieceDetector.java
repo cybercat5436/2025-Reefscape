@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class GamePieceDetector extends SubsystemBase {
   /** Creates a new CoralSensor. */ 
 
-private boolean isGamePieceClose;
+public boolean isGamePieceClose;
 private double signalStrengthThreshhold;
 private double distanceThreshold = 0;
 private CANrange sensorUsed;

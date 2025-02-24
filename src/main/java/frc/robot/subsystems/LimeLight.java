@@ -47,10 +47,21 @@ public class LimeLight extends SubsystemBase {
     tzLocal = tableLimelight.getEntry("tz");
     tLongLocal = tableLimelight.getEntry("tlong");
     limelightName = networkTableName;
-}
+    LimelightHelpers.setPipelineIndex(limelightName, 0);
+
+    // Change the camera pose relative to robot center (x forward, y left, z up, degrees)
+    LimelightHelpers.setCameraPose_RobotSpace(limelightName,
+    0.02,    // Forward offset (meters)
+    -0.3,    // Side offset (meters)
+    0.65,    // Height offset (meters)
+    -90,    // Roll (degrees)
+    0.0,   // Pitch (degrees)
+    0.0     // Yaw (degrees)
+    );
+  }
 
 
-@Override
+/*@Override
   public void periodic() {
     horizontalError = getVisionTargetHorizontalError();
     verticalError = getVisionTargetVerticalError();
@@ -62,16 +73,15 @@ public class LimeLight extends SubsystemBase {
     LimelightResults limelightResults = LimelightHelpers.getLatestResults(limelightName);
     positionStandardDeviations = limelightResults.standardDeviations;
     if (positionStandardDeviations.length > 2) {
-      System.out.println("Standard deviation of limelight measurement (MegaTag2) " + positionStandardDeviations[0]+" "+positionStandardDeviations[1]);
+      //System.out.println("Standard deviation of limelight measurement (MegaTag2) " + positionStandardDeviations[0]+" "+positionStandardDeviations[1]);
     } else {
-      System.out.println("No position measurement (MegaTag2)");
+      //System.out.println("No position measurement (MegaTag2)");
     }
-    System.out.println("Time of Limelight publishing measurement: (ms since Limelight boot) " + limelightResults.timestamp_LIMELIGHT_publish + " Rio receipt time: " + limelightResults.timestamp_RIOFPGA_capture);
-    System.out.println("Number of tags visible:"+limelightResults.botpose_tagcount);
-
+    //System.out.println("Time of Limelight publishing measurement: (ms since Limelight boot) " + limelightResults.timestamp_LIMELIGHT_publish + " Rio receipt time: " + limelightResults.timestamp_RIOFPGA_capture);
+    //System.out.println("Number of tags visible:"+limelightResults.botpose_tagcount);
     }
     SmartDashboard.putNumber("tx", getVisionTargetHorizontalError());
-  }
+  }*/
   
   public LimelightResults getLatestResults() {
     return LimelightHelpers.getLatestResults(limelightName);
