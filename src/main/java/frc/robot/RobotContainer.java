@@ -33,6 +33,8 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
@@ -456,6 +458,19 @@ public class RobotContainer {
         drivetrain.resetPose(startPose);
     }
 
+    public Alliance getAlliance(){
+        if(!DriverStation.isDSAttached()){
+            // System.out.println("~~~~~" + DriverStationSim.getAllianceStationId());
+            // *** NOTE: if using simGUI set alliance manually here ****
+            // System.out.println(String.format("isRedAlliance: %s", 
+            // NetworkTableInstance.getDefault().getTable("FMSInfo").getEntry("IsRedAlliance").getBoolean(false)
+            // ));
+            boolean isRed = NetworkTableInstance.getDefault().getTable("FMSInfo").getEntry("IsRedAlliance").getBoolean(false);
+            return isRed? Alliance.Red : Alliance.Blue;
+        }
+        return DriverStation.getAlliance().orElse(Alliance.Blue);
+    }
+
     private Pose2d getFirstPose(List<PathPlannerPath> paths){
         Pose2d firstPose = new Pose2d();
         // Guard against empty paths list
@@ -467,20 +482,7 @@ public class RobotContainer {
 
         System.out.println("~~~~ Is Driver Station Attached: " + DriverStation.isDSAttached());
         // figure out if path flipping has to happen
-        boolean shouldFlip = false;
-        if(!DriverStation.isDSAttached()){
-            // System.out.println("~~~~~" + DriverStationSim.getAllianceStationId());
-            shouldFlip = false;
-        }else{
-            Optional<Alliance> alliance = DriverStation.getAlliance();
-            if(alliance.isPresent()){
-                if(alliance.get() == DriverStation.Alliance.Red){
-                    shouldFlip = true;
-                }
-            }
-        }
-        
-        
+        boolean shouldFlip = (getAlliance() == DriverStation.Alliance.Red);
         System.out.println("~~~~~ Should Flip Path: " + shouldFlip);
 
         PathPlannerPath firstPath = shouldFlip ? paths.get(0).flipPath() : paths.get(0);
