@@ -26,7 +26,13 @@ public class Robot extends TimedRobot {
   public void disabledInit() {}
 
   @Override
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() {
+    if (m_autonomousCommand != m_robotContainer.getAutonomousCommand()){
+      m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+      System.out.println("~~~ New Auto Selected: " + m_autonomousCommand.getName() + " --> resetting odometry....");
+      m_robotContainer.setOdometryPoseFromSelectedAuto(m_autonomousCommand.getName());
+    }
+  }
 
   @Override
   public void disabledExit() {}
@@ -34,6 +40,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    System.out.println("~~~~ Starting Auton: " + m_autonomousCommand.getName());
 
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
