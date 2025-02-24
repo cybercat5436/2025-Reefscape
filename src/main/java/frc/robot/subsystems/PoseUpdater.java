@@ -4,36 +4,29 @@
 
 package frc.robot.subsystems;
 
-import java.lang.reflect.Array;
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.Odometry;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
-import frc.robot.LimelightHelpers.LimelightResults;
-import frc.robot.Telemetry;
 
 public class PoseUpdater extends SubsystemBase {
   /** Creates a new PoseUpdater. */
-  private final LimeLight limeLightFront;
+  private final LimeLight limeLight;
+  private final LimeLight limeLightFrontRight;
+  private List<LimeLight> limeLights = new ArrayList<>();
   private final CommandSwerveDrivetrain commandSwerveDrivetrain;
 
   private double tx;
@@ -52,18 +45,21 @@ public class PoseUpdater extends SubsystemBase {
   public int numAdjustments = 0;
   public int poseCount;
 
-  public PoseUpdater(LimeLight limeLightFront, CommandSwerveDrivetrain swerveSubsystem) {
-    this.limeLightFront = limeLightFront;
+  public PoseUpdater(LimeLight limeLightFront, LimeLight limeLightFrontRight, CommandSwerveDrivetrain swerveSubsystem) {
+    this.limeLight = limeLightFront;
+    this.limeLightFrontRight = limeLightFrontRight;
     this.commandSwerveDrivetrain = swerveSubsystem;
     txLocal = limeLightFront.txLocal;
     taLocal = limeLightFront.taLocal;
     cyclesSinceLocked = 0;
+    limeLights.clear();
+    limeLights.add(limeLightFront);
+    limeLights.add(limeLightFrontRight);
 
     //Register the sendables
     SendableRegistry.addLW(this, this.getClass().getSimpleName(), this.getClass().getSimpleName());
     SmartDashboard.putData(this);
   }
-
 
   public double getDistanceEstimate(double ta) {
     // 3m: Ta = 0.5
@@ -115,65 +111,8 @@ public class PoseUpdater extends SubsystemBase {
     // yError = sightDist * tan(tx)
     double yOffset = sightDist * Math.tan(Math.toRadians(tx));
     return yOffset;
-    
   }
 
- /*  public void updateOdometry(double offsetValue) {
-    // Transform2d transform2d = new Transform2d(new Translation2d(0,yError),new Rotation2d());
-    System.out.println("inside update odometry");
-    Pose2d currentPose = swerveSubsystem.getOdometry().getPoseMeters();
-    numAdjustments++;
-    
-    // figure out correct sign for error
-    boolean shouldInvert = false;  // assumes blue
-    Optional<Alliance> alliance = DriverStation.getAlliance();
-    if(alliance.isPresent()){
-      if(alliance.get() == DriverStation.Alliance.Red){
-        shouldInvert = true;
-      }
-    }
-    if (shouldInvert){
-      offsetValue *= -1;
-    }
-
-    // clamp the total adjustment to 0.25m
-    double maxAdjustment = 0.25;
-    if ((totalAdjustment + offsetValue) > maxAdjustment){
-      offsetValue = maxAdjustment - totalAdjustment;
-    } else if ((totalAdjustment + offsetValue) < -maxAdjustment){
-      offsetValue = -maxAdjustment - totalAdjustment;
-    }
-    totalAdjustment += offsetValue;
-    
-
-    Translation2d translationAdjustment = new Translation2d(0, offsetValue);
-    Translation2d translation2d = currentPose.getTranslation().plus(translationAdjustment);
-    
-    // These are from Tuesday, when the x coordinate was changing.  Note:  Rotation being set to 0
-   // Pose2d newPose = new Pose2d(translation2d, new Rotation2d());
-    Pose2d newPose = new Pose2d(translation2d, currentPose.getRotation());
-    printInfo(currentPose, newPose);
-    swerveSubsystem.getOdometry().resetPosition(swerveSubsystem.getRotation2d(), swerveSubsystem.getModulePositions(), newPose);
-    
-    // This is proposed method where rotation is preserved from pose
-    // Pose2d newPose = new Pose2d(translation2d, currentPose.getRotation());
-    // swerveSubsystem.resetOdometry(newPose);
-  }
-  public void undoTotalAdjustment() {
-
-    System.out.println("inside undoTotalAdjustment");
-    Pose2d currentPose = swerveSubsystem.getOdometry().getPoseMeters();
-    Translation2d translationTotalAdjustment = new Translation2d(0, -totalAdjustment);
-    Translation2d translation2d = currentPose.getTranslation().plus(translationTotalAdjustment);
-    Pose2d newPose = new Pose2d(translation2d, currentPose.getRotation());
-    printInfo(currentPose, newPose);
-    swerveSubsystem.getOdometry().resetPosition(swerveSubsystem.getRotation2d(), swerveSubsystem.getModulePositions(), newPose);
-  }
-  public void resetTotalAdjustment() {
-    System.out.println("Total Adjustment zeroed.....");
-    totalAdjustment = 0;
-
-  }*/
   public void enable() {
     isEnabled = true;
   }
@@ -189,20 +128,27 @@ public class PoseUpdater extends SubsystemBase {
   public void periodic() {
     if (!isEnabled || commandSwerveDrivetrain.getState().Pose == null) return;
 
-    
     // ~~~~~~~~~~~~~~~~~   Only use MT2    ~~~~~~~~~~~~~~~~~
     double robotYaw = commandSwerveDrivetrain.getState().Pose.getRotation().getDegrees();
-    isTargetVisible = limeLightFront.getVisionTargetStatus();
-    if (LimelightHelpers.getTargetCount(limeLightFront.limelightName) > 0) {
+    for(LimeLight ll: limeLights){
+      updatePoseEstimator(ll, robotYaw);
+    }
+    
+  }
+
+  private void updatePoseEstimator(LimeLight limeLight, double robotYaw){
+    
+    isTargetVisible = limeLight.getVisionTargetStatus();
+    if (LimelightHelpers.getTargetCount(limeLight.limelightName) > 0) {
       
       boolean doRejectUpdate = false;  // initialize rough filter
 
       // Send gyro and get MT2 field estimate
-      LimelightHelpers.SetRobotOrientation(limeLightFront.limelightName, robotYaw, 0.0, 0.0, 0.0, 0.0, 0.0);
-      LimelightHelpers.PoseEstimate limelightMeasurement2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limeLightFront.limelightName);
+      LimelightHelpers.SetRobotOrientation(limeLight.limelightName, robotYaw, 0.0, 0.0, 0.0, 0.0, 0.0);
+      LimelightHelpers.PoseEstimate limelightMeasurementMT2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limeLight.limelightName);
 
       // only accept vision measurements that are within 1m of current pose
-      double distVisionToCurrent = commandSwerveDrivetrain.getState().Pose.getTranslation().getDistance(limelightMeasurement2.pose.getTranslation());
+      double distVisionToCurrent = commandSwerveDrivetrain.getState().Pose.getTranslation().getDistance(limelightMeasurementMT2.pose.getTranslation());
       if(distVisionToCurrent > 1.0){
         doRejectUpdate = true;
       }
@@ -218,11 +164,12 @@ public class PoseUpdater extends SubsystemBase {
         commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 99999999));
         poseCount++;  // count how many vision targets are passed to poseestimator
         commandSwerveDrivetrain.addVisionMeasurement(
-            limelightMeasurement2.pose,
-            limelightMeasurement2.timestampSeconds
+            limelightMeasurementMT2.pose,
+            limelightMeasurementMT2.timestampSeconds
         );
       }
     }
+  }
 
 
     // ~~~~~~~~~~~~~~~~~   The code below splits between MT1 and MT2    ~~~~~~~~~~~~~~~~~
@@ -282,7 +229,6 @@ public class PoseUpdater extends SubsystemBase {
     //     SmartDashboard.putNumber("Limelight Measured Y", limelightMeasurement2.pose.getY());
     //   }
     // }
-  }
 
   
 
@@ -297,12 +243,14 @@ public class PoseUpdater extends SubsystemBase {
       
       // without this distance filter you can get diverging pose corrections (swirls off map)
       if(distVisionToCurrent <= 1.0){
-        commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,9999999));
-        poseCount ++;
-        commandSwerveDrivetrain.addVisionMeasurement(
-          visionPose,
-          Utils.fpgaToCurrentTime(Timer.getFPGATimestamp())
-        );
+        for(LimeLight ll: limeLights){
+          commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,9999999));
+          poseCount++;
+          commandSwerveDrivetrain.addVisionMeasurement(
+            visionPose,
+            Utils.fpgaToCurrentTime(Timer.getFPGATimestamp())
+          );
+        }
       }
     }
   }
@@ -326,7 +274,6 @@ public class PoseUpdater extends SubsystemBase {
     return yError;
   }
 
-
   private void printInfo(Pose2d currentPose, Pose2d newPose){
     double adjustment = currentPose.getY() - newPose.getY();
     System.out.println(String.format("Adjusting by %.2f",adjustment));
@@ -339,10 +286,6 @@ public class PoseUpdater extends SubsystemBase {
     // TODO Auto-generated method stub
     super.initSendable(builder);
     // builder.addDoubleArrayProperty("tx-ta", () -> new double[] {tx, ta}, null);
-    builder.addDoubleProperty("Y Error", () -> yError, null);
-    builder.addDoubleProperty("Distance Estimate", () -> distanceEstimate, null);
-    builder.addBooleanProperty("isEnabled", () -> isEnabled, null);
-    builder.addDoubleProperty("totalAdjustment",() -> totalAdjustment, null);
     builder.addDoubleProperty("pose Count",() -> poseCount, null);
   }
 
