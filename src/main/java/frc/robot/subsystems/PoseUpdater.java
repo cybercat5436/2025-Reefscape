@@ -8,6 +8,7 @@ import java.lang.reflect.Array;
 import java.util.Optional;
 
 import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.Utils;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -15,12 +16,15 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.Odometry;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
@@ -176,62 +180,133 @@ public class PoseUpdater extends SubsystemBase {
   public void disable() {
     isEnabled = false;
   }
+
+  public void resetPoseCount(){
+    poseCount = 0;
+  }
+
   @Override
   public void periodic() {
-    if (!isEnabled) return;
+    if (!isEnabled || commandSwerveDrivetrain.getState().Pose == null) return;
+
+    
+    // ~~~~~~~~~~~~~~~~~   Only use MT2    ~~~~~~~~~~~~~~~~~
     double robotYaw = commandSwerveDrivetrain.getState().Pose.getRotation().getDegrees();
-    SmartDashboard.putNumber("Yaw from Pose", robotYaw);
-    if(DriverStation.isDisabled()){
-      LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue(limeLightFront.limelightName);
+    isTargetVisible = limeLightFront.getVisionTargetStatus();
+    if (LimelightHelpers.getTargetCount(limeLightFront.limelightName) > 0) {
+      
+      boolean doRejectUpdate = false;  // initialize rough filter
 
-      Boolean doRejectUpdate = false;
+      // Send gyro and get MT2 field estimate
+      LimelightHelpers.SetRobotOrientation(limeLightFront.limelightName, robotYaw, 0.0, 0.0, 0.0, 0.0, 0.0);
+      LimelightHelpers.PoseEstimate limelightMeasurement2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limeLightFront.limelightName);
 
-      if (limelightMeasurement == null) return;
-
-      //SmartDashboard.putNumber("Limelight Measured Heading", limelightMeasurement.pose.getRotation().getDegrees());
-      if(limelightMeasurement.tagCount == 1 && limelightMeasurement.rawFiducials.length == 1) {
-        if(limelightMeasurement.rawFiducials[0].ambiguity > .7)
-        {
-          doRejectUpdate = true;
-        }
-        if(limelightMeasurement.rawFiducials[0].distToCamera > 3)
-        {
-          doRejectUpdate = true;
-        }
-      }
-      if(limelightMeasurement.tagCount == 0)
-      {
+      // only accept vision measurements that are within 1m of current pose
+      double distVisionToCurrent = commandSwerveDrivetrain.getState().Pose.getTranslation().getDistance(limelightMeasurement2.pose.getTranslation());
+      if(distVisionToCurrent > 1.0){
         doRejectUpdate = true;
       }
 
-      if(!doRejectUpdate)
-      {
-        // commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,.25));
-        // commandSwerveDrivetrain.resetPose(limelightMeasurement.pose);
+      // only accept vision measurements when not rotating rapidly (CTRE recommendation)
+      double omegaRps = Units.radiansToRotations(commandSwerveDrivetrain.getState().Speeds.omegaRadiansPerSecond);
+      if(Math.abs(omegaRps) >= 2.0){
+        doRejectUpdate = true;
+      }
+
+      if(!doRejectUpdate){
+        // TODO: Update stddev numbers as a function of distance from target (distVisionToCurrent)
+        commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 99999999));
+        poseCount++;  // count how many vision targets are passed to poseestimator
+        commandSwerveDrivetrain.addVisionMeasurement(
+            limelightMeasurement2.pose,
+            limelightMeasurement2.timestampSeconds
+        );
+      }
+    }
+
+
+    // ~~~~~~~~~~~~~~~~~   The code below splits between MT1 and MT2    ~~~~~~~~~~~~~~~~~
+    // SmartDashboard.putNumber("Yaw from Pose", robotYaw);
+    // if(DriverStation.isDisabled()){
+    //   LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue(limeLightFront.limelightName);
+
+    //   Boolean doRejectUpdate = false;
+
+    //   if (limelightMeasurement == null) return;
+
+    //   //SmartDashboard.putNumber("Limelight Measured Heading", limelightMeasurement.pose.getRotation().getDegrees());
+    //   if(limelightMeasurement.tagCount == 1 && limelightMeasurement.rawFiducials.length == 1) {
+    //     if(limelightMeasurement.rawFiducials[0].ambiguity > .7)
+    //     {
+    //       doRejectUpdate = true;
+    //     }
+    //     if(limelightMeasurement.rawFiducials[0].distToCamera > 3)
+    //     {
+    //       doRejectUpdate = true;
+    //     }
+    //   }
+    //   if(limelightMeasurement.tagCount == 0)
+    //   {
+    //     doRejectUpdate = true;
+    //   }
+
+    //   // only accept vision measurements that are within 1m of current pose
+    //   if(commandSwerveDrivetrain.getState().Pose.getTranslation().getDistance(limelightMeasurement.pose.getTranslation()) > 1.0){
+    //     doRejectUpdate = true;
+    //   }
+
+    //   if(!doRejectUpdate)
+    //   {
+    //     // commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,.25));
+    //     // commandSwerveDrivetrain.resetPose(limelightMeasurement.pose);
+    //     commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,9999999));
+    //     poseCount ++;
+    //     commandSwerveDrivetrain.addVisionMeasurement(
+    //       limelightMeasurement.pose,
+    //       limelightMeasurement.timestampSeconds
+    //   );
+    //   }
+
+    // } else {
+    //   isTargetVisible = limeLightFront.getVisionTargetStatus();
+    //   if (LimelightHelpers.getTargetCount(limeLightFront.limelightName) > 0) {
+    //       LimelightHelpers.SetRobotOrientation(limeLightFront.limelightName, robotYaw, 0.0, 0.0, 0.0, 0.0, 0.0);          LimelightHelpers.PoseEstimate limelightMeasurement2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limeLightFront.limelightName);
+
+    //       commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 99999999));
+    //       poseCount ++;
+    //       commandSwerveDrivetrain.addVisionMeasurement(
+    //           limelightMeasurement2.pose,
+    //           limelightMeasurement2.timestampSeconds
+    //       );
+    //     SmartDashboard.putNumber("Limelight Measured X", limelightMeasurement2.pose.getX());
+    //     SmartDashboard.putNumber("Limelight Measured Y", limelightMeasurement2.pose.getY());
+    //   }
+    // }
+  }
+
+  
+
+  @Override
+  public void simulationPeriodic() {
+    // TODO Auto-generated method stub
+    super.simulationPeriodic();
+    if(DriverStation.isDisabled()){
+      var visionPose = new Pose2d(7.5, 5.5, Rotation2d.k180deg);
+      double distVisionToCurrent = commandSwerveDrivetrain.getState().Pose.getTranslation().getDistance(visionPose.getTranslation());
+      System.out.println(String.format("Distance Vision to Current %.2f", distVisionToCurrent));
+      
+      // without this distance filter you can get diverging pose corrections (swirls off map)
+      if(distVisionToCurrent <= 1.0){
         commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,9999999));
         poseCount ++;
         commandSwerveDrivetrain.addVisionMeasurement(
-          limelightMeasurement.pose,
-          limelightMeasurement.timestampSeconds
-      );
-      }
-
-    } else {
-      isTargetVisible = limeLightFront.getVisionTargetStatus();
-      if (LimelightHelpers.getTargetCount(limeLightFront.limelightName) > 0) {
-          LimelightHelpers.SetRobotOrientation(limeLightFront.limelightName, robotYaw, 0.0, 0.0, 0.0, 0.0, 0.0);          LimelightHelpers.PoseEstimate limelightMeasurement2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limeLightFront.limelightName);
-
-          commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 99999999));
-          poseCount ++;
-          commandSwerveDrivetrain.addVisionMeasurement(
-              limelightMeasurement2.pose,
-              limelightMeasurement2.timestampSeconds
-          );
-        SmartDashboard.putNumber("Limelight Measured X", limelightMeasurement2.pose.getX());
-        SmartDashboard.putNumber("Limelight Measured Y", limelightMeasurement2.pose.getY());
+          visionPose,
+          Utils.fpgaToCurrentTime(Timer.getFPGATimestamp())
+        );
       }
     }
   }
+
 
   public void startLockoutPeriod() {
     isLockedOut = true;
