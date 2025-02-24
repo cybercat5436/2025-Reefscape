@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -12,6 +13,9 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
+  private boolean didAutoChange = false;
+  private boolean didAllianceChange = false;
+  private Alliance m_alliance = Alliance.Blue;
 
   public Robot() {
     m_robotContainer = new RobotContainer();
@@ -26,7 +30,19 @@ public class Robot extends TimedRobot {
   public void disabledInit() {}
 
   @Override
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() {
+    didAutoChange = m_autonomousCommand != m_robotContainer.getAutonomousCommand();
+    didAllianceChange = m_alliance != m_robotContainer.getAlliance();
+    if (didAutoChange || didAllianceChange){
+      m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+      m_alliance = m_robotContainer.getAlliance();
+      System.out.println(String.format(
+        "~~~ Updating Auto to %s Alliance: %s --> resetting odometry....",
+        m_autonomousCommand.getName(), m_alliance.name()
+      ));
+      m_robotContainer.setOdometryPoseFromSelectedAuto(m_autonomousCommand.getName());
+    }
+  }
 
   @Override
   public void disabledExit() {}
@@ -34,6 +50,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    System.out.println("~~~~ Starting Auton: " + m_autonomousCommand.getName());
 
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();

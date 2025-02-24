@@ -6,8 +6,12 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.io.IOException;
+import org.json.simple.parser.ParseException;
 import java.lang.annotation.Repeatable;
 import java.time.temporal.TemporalAccessor;
+import java.util.List;
+import java.util.Optional;
 import java.util.jar.Attributes.Name;
 
 import javax.sound.sampled.SourceDataLine;
@@ -20,11 +24,20 @@ import com.fasterxml.jackson.databind.util.Named;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.path.PathPlannerPath;
 import com.revrobotics.spark.SparkBase;
 
+import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -126,6 +139,7 @@ public class RobotContainer {
         configureBindings();
         poseUpdater.enable();
         registerNamedCommands();
+        testReefController();
         autonChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auton Chooser", autonChooser);
     }
@@ -402,17 +416,88 @@ public class RobotContainer {
         Trigger buttonLevel4Trigger = new Trigger(() -> reefLevelJoystick.getRawButton(4));
         buttonLevel4Trigger.onTrue(new InstantCommand(() ->reefController.setTargetReefLevel(4)));
 
-        reefController.setTargetReefPosition(ReefPosition.H);
-        System.out.println(reefController.getTargetReefPosition() + "#$%^&^(^%$#$%^&*(*&^))");
-        System.out.println(reefController.getTargetRobotPose());
 
+
+    }
+
+    private void testReefController(){
+        reefController.setTargetReefPosition(ReefPosition.I);
+        System.out.println(reefController.toString());
+
+        reefController.setTargetReefPosition(ReefPosition.K);
+        System.out.println(reefController.toString());
+
+        reefController.setTargetReefPosition(ReefPosition.L);
+        System.out.println(reefController.toString());
+
+        reefController.setTargetReefPosition(ReefPosition.G);
+        System.out.println(reefController.toString());
+        
+        reefController.setTargetReefPosition(ReefPosition.H);
+        System.out.println(reefController.toString());        
     }
     
 
+    public void setOdometryPoseFromSelectedAuto(String autonName){
+        System.out.println("~~~~Setting pose from Selected Auto: " + autonName);
+        Pose2d startPose = new Pose2d();
+        
+        try {
+    
+          List<PathPlannerPath> paths = PathPlannerAuto.getPathGroupFromAutoFile(autonName);
+          startPose = getFirstPose(paths);
+    
+        } catch (IOException e){
+          // Exception thrown if starting pose is null in PathPlanner Auton file
+          System.out.println("IOException No starting pose detected in Auton file!");
+        } catch (ParseException e){
+            // Exception thrown if starting pose is null in PathPlanner Auton file
+            System.out.println("ParseException No starting pose detected in Auton file!");
+        }
+        System.out.println("~~~~ New starting pose: " + startPose.toString());
+        drivetrain.resetPose(startPose);
+    }
+
+    public Alliance getAlliance(){
+        if(!DriverStation.isDSAttached()){
+            // System.out.println("~~~~~" + DriverStationSim.getAllianceStationId());
+            // *** NOTE: if using simGUI set alliance manually here ****
+            // System.out.println(String.format("isRedAlliance: %s", 
+            // NetworkTableInstance.getDefault().getTable("FMSInfo").getEntry("IsRedAlliance").getBoolean(false)
+            // ));
+            boolean isRed = NetworkTableInstance.getDefault().getTable("FMSInfo").getEntry("IsRedAlliance").getBoolean(false);
+            return isRed? Alliance.Red : Alliance.Blue;
+        }
+        return DriverStation.getAlliance().orElse(Alliance.Blue);
+    }
+
+    private Pose2d getFirstPose(List<PathPlannerPath> paths){
+        Pose2d firstPose = new Pose2d();
+        // Guard against empty paths list
+        if(paths.isEmpty()){
+            System.out.println("Auto has no paths, returing origin");
+            return new Pose2d();
+        }
+
+
+        System.out.println("~~~~ Is Driver Station Attached: " + DriverStation.isDSAttached());
+        // figure out if path flipping has to happen
+        boolean shouldFlip = (getAlliance() == DriverStation.Alliance.Red);
+        System.out.println("~~~~~ Should Flip Path: " + shouldFlip);
+
+        PathPlannerPath firstPath = shouldFlip ? paths.get(0).flipPath() : paths.get(0);
+        // get the ideal starting state
+        var firstRotation = firstPath.getIdealStartingState().rotation();
+        // use position from first pose and add ideal starting state
+        firstPose = new Pose2d(firstPath.getAllPathPoints().get(0).position, firstRotation);
+
+        return firstPose;
+    }
+        
 
     public Command getAutonomousCommand() {
         //return Commands.print("No autonomous command configured");
-        System.out.println(autonChooser.getSelected().getName());
+        
         return autonChooser.getSelected();
         
     }
