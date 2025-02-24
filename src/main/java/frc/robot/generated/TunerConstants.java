@@ -52,8 +52,10 @@ public class TunerConstants {
     // The stator current at which the wheels start to slip;
     // This needs to be tuned to your individual robot
     private static final Current kSlipCurrent = Amps.of(120.0);
-    // Bot Offset is half of the robot length including bumpers
+    // Bot Offset is half of the robot length including bumpers (robot x direction)
     public static final double kBotOffset = 0.5;
+    public static final double kCoralYOffset = 0.3;  // y distance of coral arm relative to robot center (positive is towards left)
+    
     // Initial configs for the drive and steer motors and the azimuth encoder; these cannot be null.
     // Some configs will be overwritten; check the `with*InitialConfigs()` API documentation.
     private static final TalonFXConfiguration driveInitialConfigs = new TalonFXConfiguration();

@@ -126,6 +126,7 @@ public class RobotContainer {
         configureBindings();
         poseUpdater.enable();
         registerNamedCommands();
+        testReefController();
         autonChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auton Chooser", autonChooser);
     }
@@ -402,10 +403,25 @@ public class RobotContainer {
         Trigger buttonLevel4Trigger = new Trigger(() -> reefLevelJoystick.getRawButton(4));
         buttonLevel4Trigger.onTrue(new InstantCommand(() ->reefController.setTargetReefLevel(4)));
 
-        reefController.setTargetReefPosition(ReefPosition.H);
-        System.out.println(reefController.getTargetReefPosition() + "#$%^&^(^%$#$%^&*(*&^))");
-        System.out.println(reefController.getTargetRobotPose());
 
+
+    }
+
+    private void testReefController(){
+        reefController.setTargetReefPosition(ReefPosition.I);
+        System.out.println(reefController.toString());
+
+        reefController.setTargetReefPosition(ReefPosition.K);
+        System.out.println(reefController.toString());
+
+        reefController.setTargetReefPosition(ReefPosition.L);
+        System.out.println(reefController.toString());
+
+        reefController.setTargetReefPosition(ReefPosition.G);
+        System.out.println(reefController.toString());
+        
+        reefController.setTargetReefPosition(ReefPosition.H);
+        System.out.println(reefController.toString());        
     }
     
 
