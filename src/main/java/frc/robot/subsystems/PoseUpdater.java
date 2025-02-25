@@ -17,6 +17,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.Odometry;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -209,11 +210,16 @@ public class PoseUpdater extends SubsystemBase {
         // commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,.25));
         // commandSwerveDrivetrain.resetPose(limelightMeasurement.pose);
         commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,9999999));
-        poseCount ++;
-        commandSwerveDrivetrain.addVisionMeasurement(
-          limelightMeasurement.pose,
-          limelightMeasurement.timestampSeconds
-      );
+        LimelightHelpers.SetRobotOrientation(limeLightFront.limelightName, robotYaw, 0.0, 0.0, 0.0, 0.0, 0.0);          LimelightHelpers.PoseEstimate limelightMeasurement2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limeLightFront.limelightName);
+
+        poseCount++;
+        if (Math.pow((limelightMeasurement.pose.getX()-commandSwerveDrivetrain.getState().Pose.getX()),2)+Math.pow((limelightMeasurement.pose.getY()-commandSwerveDrivetrain.getState().Pose.getX()),2)>0.25){
+          commandSwerveDrivetrain.addVisionMeasurement(
+            limelightMeasurement.pose,
+            limelightMeasurement.timestampSeconds);
+        } else {
+          commandSwerveDrivetrain.resetPose(limelightMeasurement.pose);
+        }
       }
 
     } else {
