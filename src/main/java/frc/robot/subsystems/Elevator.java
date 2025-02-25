@@ -13,6 +13,7 @@ import com.ctre.phoenix6.hardware.TalonFXS;
 import com.ctre.phoenix6.signals.ExternalFeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorArrangementValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -24,12 +25,13 @@ public class Elevator extends SubsystemBase {
   final VoltageOut m_request = new VoltageOut(0);
   private double L1 = 0;
   private double L2 = 26.5;
-  private double L3 = 65.64;
+  private double L3 = 67.64;
   private double L4 = 128;
   private final TalonFXS elevator = new TalonFXS(12);
   public Elevator() {
     var talonFXSConfigs = new TalonFXSConfiguration();
     talonFXSConfigs.Commutation.MotorArrangement = MotorArrangementValue.Minion_JST;
+    talonFXSConfigs.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     talonFXSConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     talonFXSConfigs.ExternalFeedback.ExternalFeedbackSensorSource = ExternalFeedbackSensorSourceValue.Commutation;
     elevator.setPosition(0);

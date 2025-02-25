@@ -55,6 +55,12 @@
           }
         },
         {
+          "type": "path",
+          "data": {
+            "pathName": "Path Extension"
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "coralIntake"
