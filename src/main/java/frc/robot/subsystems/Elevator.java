@@ -23,9 +23,9 @@ public class Elevator extends SubsystemBase {
   MotionMagicVoltage m_motmag = new MotionMagicVoltage(0);
   final VoltageOut m_request = new VoltageOut(0);
   private double L1 = 0;
-  private double L2 = 26.5;
-  private double L3 = 65.64;
-  private double L4 = 128;
+  private double L2 = 5.3;
+  private double L3 = 13.128;
+  private double L4 = 25.6;
   private final TalonFXS elevator = new TalonFXS(12);
   public Elevator() {
     var talonFXSConfigs = new TalonFXSConfiguration();
@@ -44,9 +44,9 @@ public class Elevator extends SubsystemBase {
 
     // set Motion Magic settings
     var motionMagicConfigs = talonFXSConfigs.MotionMagic;
-    motionMagicConfigs.MotionMagicCruiseVelocity = 300; // 80 rps cruise velocity
-    motionMagicConfigs.MotionMagicAcceleration = 1000; // 160 rps/s acceleration (0.5 seconds)
-    motionMagicConfigs.MotionMagicJerk = 200; // 1600 rps/s^2 jerk (0.1 seconds)
+    motionMagicConfigs.MotionMagicCruiseVelocity = 100; // 80 rps cruise velocity
+    motionMagicConfigs.MotionMagicAcceleration = 300; // 160 rps/s acceleration (0.5 seconds)
+    motionMagicConfigs.MotionMagicJerk = 100; // 1600 rps/s^2 jerk (0.1 seconds)
 
     elevator.getConfigurator().apply(talonFXSConfigs, 0.050);
   }

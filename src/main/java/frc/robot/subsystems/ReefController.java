@@ -110,6 +110,18 @@ public class ReefController extends SubsystemBase {
     return reefLevel;
   }
 
+  public Pose2d getTagPose(int tagID, double forward, double left){
+    double botYOffset = 0.3;
+    Pose2d tagPose2d = aprilTagFieldLayout.getTagPose(tagId).isPresent()?aprilTagFieldLayout.getTagPose(tagId).get().toPose2d():new Pose2d();
+    // Translation2d tragetVector = new Translation2d(forward,left,);
+    System.out.println(tagPose2d + " $%^");
+    var botOffset = new Translation2d(TunerConstants.kBotOffset, tagPose2d.getRotation());
+    var botSideOffset = new Translation2d(botYOffset, tagPose2d.getRotation());
+    var botPose = new Pose2d(tagPose2d.getTranslation().plus(botOffset), tagPose2d.getRotation().rotateBy(Rotation2d.k180deg));
+    return botPose;
+
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run

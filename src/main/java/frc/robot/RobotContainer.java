@@ -125,9 +125,13 @@ public class RobotContainer {
         registerNamedCommands();
         autonChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auton Chooser", autonChooser);
+        doMath();
     }
 
     
+    private void doMath(){
+
+    }
 
         //Command autoCoralHigh = Commands.sequence(new InstantCommand(() -> elevator.raiseLevel4()), new InstantCommand(() -> coral.forward(1)));
 
@@ -178,19 +182,20 @@ public class RobotContainer {
         //     .onFalse(new InstantCommand(() -> elevator.stopElevator()));
         // joystick2.x()
         //     .whileTrue(new InstantCommand(() -> elevator.lower()))
-        //     .onFalse(new InstantCommand(() -> elevator.stopElevator()));
-        joystick2.a()
+        //     .onFalse(n
+        new InstantCommand(() -> elevator.stopElevator());
+        joystick2.x()
             .whileTrue(new InstantCommand(() -> elevator.raiseLevel1()))
             .onFalse(new InstantCommand(() -> elevator.stopElevator()));
-        joystick2.x()
+        joystick2.a()
             .whileTrue(new InstantCommand(() -> elevator.raiseLevel2()))
-            .onFalse(new InstantCommand(() -> elevator.stopElevator()));
-        joystick2.y()
-            .whileTrue(new InstantCommand(() -> elevator.raiseLevel3()))
-            .onFalse(new InstantCommand(() -> elevator.stopElevator()));
+            .onFalse(new InstantCommand(() -> elevator.raiseLevel1()));
         joystick2.b()
+            .whileTrue(new InstantCommand(() -> elevator.raiseLevel3()))
+            .onFalse(new InstantCommand(() -> elevator.raiseLevel1()));
+        joystick2.y()
             .whileTrue(new InstantCommand(() -> elevator.raiseLevel4()))
-            .onFalse(new InstantCommand(() -> elevator.stopElevator()));
+            .onFalse(new InstantCommand(() -> elevator.raiseLevel3()));
        
 
         joystick2.povUp().and(joystick2.rightBumper())
