@@ -44,6 +44,9 @@ public class PoseUpdater extends SubsystemBase {
   public double totalAdjustment = 0;
   public int numAdjustments = 0;
   public int poseCount;
+  public int ambiguityCount;
+  public int distanceCount;
+  public boolean isMT2 = false;
 
   public PoseUpdater(LimeLight limeLightFront, LimeLight limeLightFrontRight, CommandSwerveDrivetrain swerveSubsystem) {
     this.limeLight = limeLightFront;
@@ -124,19 +127,30 @@ public class PoseUpdater extends SubsystemBase {
     poseCount = 0;
   }
 
+  public void setMT1(){
+    isMT2 = false;
+  }
+
+  public void setMT2(){
+    isMT2 = true;
+  }
+
   @Override
   public void periodic() {
     if (!isEnabled || commandSwerveDrivetrain.getState().Pose == null) return;
 
-    // ~~~~~~~~~~~~~~~~~   Only use MT2    ~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~   Pick MT1 or MT2    ~~~~~~~~~~~~~~~~~
     double robotYaw = commandSwerveDrivetrain.getState().Pose.getRotation().getDegrees();
     for(LimeLight ll: limeLights){
-      updatePoseEstimator(ll, robotYaw);
+      if (isMT2){
+        updatePoseEstimatorMT2(ll, robotYaw);
+      }else{
+        updatePoseEstimatorMT1(ll);
+      }
     }
-    
   }
 
-  private void updatePoseEstimator(LimeLight limeLight, double robotYaw){
+  private void updatePoseEstimatorMT2(LimeLight limeLight, double robotYaw){
     
     isTargetVisible = limeLight.getVisionTargetStatus();
     if (LimelightHelpers.getTargetCount(limeLight.limelightName) > 0) {
@@ -159,6 +173,29 @@ public class PoseUpdater extends SubsystemBase {
         doRejectUpdate = true;
       }
 
+
+      // TODO: Update stddev based on number of tags observed (not used yet)
+      double positionStdDev = 0.7;
+      // if (limelightMeasurementMT2.tagCount > 1){
+      //   positionStdDev = 0.5;
+      // }
+
+      var myTags = limelightMeasurementMT2.rawFiducials;
+      // TODO: Reject if ambiguity too high (not implemented yet)
+      // TODO: Adjust stdev based on max tag distance (not implemented yet)
+      for(int i = 0; i < myTags.length; i++){
+        if (myTags[i].ambiguity > 0.7){
+          ambiguityCount++;
+          // doRejectUpdate = true;
+        } else if(myTags[i].distToCamera > 4.5){
+          distanceCount++;
+          // doRejectUpdate = true;
+        } else if(myTags[i].distToCamera > 3.0){
+          distanceCount++;
+          // positionStdDev *= 2.0;
+        }
+      }
+
       if(!doRejectUpdate){
         // TODO: Update stddev numbers as a function of distance from target (distVisionToCurrent)
         commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 99999999));
@@ -171,65 +208,46 @@ public class PoseUpdater extends SubsystemBase {
     }
   }
 
+  private void updatePoseEstimatorMT1(LimeLight limeLight){
+    // ~~~~~~~~~~~~~~~~~ updates pose with vision using MegaTag1 ~~~~~~~~~~~~~~~~~
+    LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue(limeLight.limelightName);
+    if (limelightMeasurement == null) return;
 
-    // ~~~~~~~~~~~~~~~~~   The code below splits between MT1 and MT2    ~~~~~~~~~~~~~~~~~
-    // SmartDashboard.putNumber("Yaw from Pose", robotYaw);
-    // if(DriverStation.isDisabled()){
-    //   LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue(limeLightFront.limelightName);
+    boolean doRejectUpdate = false;
 
-    //   Boolean doRejectUpdate = false;
+    //SmartDashboard.putNumber("Limelight Measured Heading", limelightMeasurement.pose.getRotation().getDegrees());
+    if(limelightMeasurement.tagCount == 1 && limelightMeasurement.rawFiducials.length == 1) {
+      if(limelightMeasurement.rawFiducials[0].ambiguity > .7)
+      {
+        ambiguityCount++;
+        doRejectUpdate = true;
+      }
+      if(limelightMeasurement.rawFiducials[0].distToCamera > 3)
+      {
+        doRejectUpdate = true;
+      }
+    }
+    if(limelightMeasurement.tagCount == 0)
+    {
+      doRejectUpdate = true;
+    }
 
-    //   if (limelightMeasurement == null) return;
+    // only accept vision measurements that are within 1m of current pose
+    if(commandSwerveDrivetrain.getState().Pose.getTranslation().getDistance(limelightMeasurement.pose.getTranslation()) > 1.0){
+      doRejectUpdate = true;
+    }
 
-    //   //SmartDashboard.putNumber("Limelight Measured Heading", limelightMeasurement.pose.getRotation().getDegrees());
-    //   if(limelightMeasurement.tagCount == 1 && limelightMeasurement.rawFiducials.length == 1) {
-    //     if(limelightMeasurement.rawFiducials[0].ambiguity > .7)
-    //     {
-    //       doRejectUpdate = true;
-    //     }
-    //     if(limelightMeasurement.rawFiducials[0].distToCamera > 3)
-    //     {
-    //       doRejectUpdate = true;
-    //     }
-    //   }
-    //   if(limelightMeasurement.tagCount == 0)
-    //   {
-    //     doRejectUpdate = true;
-    //   }
-
-    //   // only accept vision measurements that are within 1m of current pose
-    //   if(commandSwerveDrivetrain.getState().Pose.getTranslation().getDistance(limelightMeasurement.pose.getTranslation()) > 1.0){
-    //     doRejectUpdate = true;
-    //   }
-
-    //   if(!doRejectUpdate)
-    //   {
-    //     // commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,.25));
-    //     // commandSwerveDrivetrain.resetPose(limelightMeasurement.pose);
-    //     commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,9999999));
-    //     poseCount ++;
-    //     commandSwerveDrivetrain.addVisionMeasurement(
-    //       limelightMeasurement.pose,
-    //       limelightMeasurement.timestampSeconds
-    //   );
-    //   }
-
-    // } else {
-    //   isTargetVisible = limeLightFront.getVisionTargetStatus();
-    //   if (LimelightHelpers.getTargetCount(limeLightFront.limelightName) > 0) {
-    //       LimelightHelpers.SetRobotOrientation(limeLightFront.limelightName, robotYaw, 0.0, 0.0, 0.0, 0.0, 0.0);          LimelightHelpers.PoseEstimate limelightMeasurement2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limeLightFront.limelightName);
-
-    //       commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 99999999));
-    //       poseCount ++;
-    //       commandSwerveDrivetrain.addVisionMeasurement(
-    //           limelightMeasurement2.pose,
-    //           limelightMeasurement2.timestampSeconds
-    //       );
-    //     SmartDashboard.putNumber("Limelight Measured X", limelightMeasurement2.pose.getX());
-    //     SmartDashboard.putNumber("Limelight Measured Y", limelightMeasurement2.pose.getY());
-    //   }
-    // }
-
+    if(!doRejectUpdate){
+      // commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,.25));
+      // commandSwerveDrivetrain.resetPose(limelightMeasurement.pose);
+      commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,9999999));
+      poseCount ++;
+      commandSwerveDrivetrain.addVisionMeasurement(
+        limelightMeasurement.pose,
+        limelightMeasurement.timestampSeconds
+      );
+    }
+  }
   
 
   @Override
@@ -287,6 +305,8 @@ public class PoseUpdater extends SubsystemBase {
     super.initSendable(builder);
     // builder.addDoubleArrayProperty("tx-ta", () -> new double[] {tx, ta}, null);
     builder.addDoubleProperty("pose Count",() -> poseCount, null);
+    builder.addDoubleProperty("ambiguity Count",() -> ambiguityCount, null);
+    builder.addDoubleProperty("distance Count",() -> distanceCount, null);
   }
 
 }
