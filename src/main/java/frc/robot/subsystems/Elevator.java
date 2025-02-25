@@ -76,7 +76,7 @@ public class Elevator extends SubsystemBase {
   public void raiseLevel4() {
     m_motmag.Slot = 0;
     elevator.setControl(m_motmag.withPosition(L4));
-    System.out.println("raised$$$$$$$$");
+    System.out.println("$$$$$$$$$$$$$$raised level 4$$$$%$$$$$$$");
   } 
   public void stopElevator() {
     elevator.setControl(m_request.withOutput(0));
