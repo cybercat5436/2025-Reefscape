@@ -304,9 +304,10 @@ public class PoseUpdater extends SubsystemBase {
     // TODO Auto-generated method stub
     super.initSendable(builder);
     // builder.addDoubleArrayProperty("tx-ta", () -> new double[] {tx, ta}, null);
-    builder.addDoubleProperty("pose Count",() -> poseCount, null);
-    builder.addDoubleProperty("ambiguity Count",() -> ambiguityCount, null);
-    builder.addDoubleProperty("distance Count",() -> distanceCount, null);
+    builder.addIntegerProperty("pose Count",() -> poseCount, null);
+    builder.addIntegerProperty("ambiguity Count",() -> ambiguityCount, null);
+    builder.addIntegerProperty("distance Count",() -> distanceCount, null);
+    builder.addBooleanProperty("isMT2",() -> isMT2, (value) -> isMT2 = value);
   }
 
 }
