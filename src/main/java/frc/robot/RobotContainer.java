@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.*;
 import java.io.IOException;
 import org.json.simple.parser.ParseException;
 import java.lang.annotation.Repeatable;
+import java.time.Instant;
 import java.time.temporal.TemporalAccessor;
 import java.util.List;
 import java.util.Optional;
@@ -200,17 +201,16 @@ public class RobotContainer {
         //     .whileTrue(new InstantCommand(() -> elevator.lower()))
         //     .onFalse(new InstantCommand(() -> elevator.stopElevator()));
         joystick2.x()
-            .whileTrue(new InstantCommand(() -> elevator.raiseLevel1()))
-            .onFalse(new InstantCommand(() -> elevator.stopElevator()));
+            .onTrue(new InstantCommand(() -> elevator.raiseLevel1())
+            .andThen(Commands.waitSeconds(1.5))
+            .andThen(new InstantCommand(() -> elevator.stopElevator())));
         joystick2.a()
-            .whileTrue(new InstantCommand(() -> elevator.raiseLevel2()))
-            .onFalse(new InstantCommand(() -> elevator.stopElevator()));
+            .onTrue(new InstantCommand(() -> elevator.raiseLevel2()));
         joystick2.b()
-            .whileTrue(new InstantCommand(() -> elevator.raiseLevel3()))
-            .onFalse(new InstantCommand(() -> elevator.stopElevator()));
+            .onTrue(new InstantCommand(() -> elevator.raiseLevel3()));
         joystick2.y()
-            .whileTrue(new InstantCommand(() -> elevator.raiseLevel4()))
-            .onFalse(new InstantCommand(() -> elevator.stopElevator()));
+            .onTrue(new InstantCommand(() -> elevator.raiseLevel4()));
+           
        
 
         joystick2.povUp().and(joystick2.rightBumper())
