@@ -20,7 +20,14 @@ public class Climber2 extends SubsystemBase {
     private final TalonFX leftClimber = new TalonFX(16);
     private final DutyCycleOut leftOut = new DutyCycleOut(0);
     private final DutyCycleOut rightOut = new DutyCycleOut(0);
-  /** Creates a new Climber. */
+    private double rightEncoderValue;
+    private double leftEncoderValue;
+    private RelativeEncoder leftClimberEncoder;
+    private RelativeEncoder rightClimberEncoder;
+    private double ClimberEncoderLimitUp = 0;
+    private double ClimberEncoderLimitDown = -10;
+
+    /** Creates a new Climber. */
   public Climber2() {
     var leftConfiguration = new TalonFXConfiguration();
     var rightConfiguration = new TalonFXConfiguration();
@@ -40,15 +47,40 @@ public class Climber2 extends SubsystemBase {
   * 
   */
  public void leftClimb(double speed) {
+<<<<<<< HEAD
+  leftEncoderValue = leftClimber.getPosition().getValueAsDouble();
+  System.out.println("Left Encoder Value" + leftEncoderValue);
   leftOut.Output = speed;
   leftClimber.setControl(leftOut);
+  if((leftEncoderValue < leftClimberEncoderLimit) && (speed < 0)){
+=======
+  if((leftEncoderValue >= ClimberEncoderLimitUp) && (speed > 0)){
+    speed = 0.0;
+  }
+  if((leftEncoderValue <= ClimberEncoderLimitDown) && (speed < 0)){
+>>>>>>> 379927928b78ae4854a6eb44f09d2a89831b5cab
+    speed = 0.0;
+  }
+  leftClimber.setControl(leftOut.withOutput(speed));
   SmartDashboard.putNumber("ClimberLeft2", leftClimber.get());
   System.out.println("left climbing with speed " + speed);
  }
-
  public void rightClimb(double speed) {
+<<<<<<< HEAD
+  rightEncoderValue = rightClimber.getPosition().getValueAsDouble();
+  System.out.println("Right Encoder Value" + rightEncoderValue);
   rightOut.Output = speed;
   rightClimber.setControl(rightOut);
+  if((rightEncoderValue > rightClimberEncoderLimit) && (speed > 0)){
+=======
+  if((rightEncoderValue >= ClimberEncoderLimitUp) && (speed > 0)){
+    speed = 0.0;
+  }
+  if((rightEncoderValue <= ClimberEncoderLimitDown) && (speed < 0)){
+>>>>>>> 379927928b78ae4854a6eb44f09d2a89831b5cab
+    speed = 0.0;
+  }
+  rightClimber.setControl(rightOut.withOutput(speed));
   SmartDashboard.putNumber("ClimberRight2", rightClimber.get());
   System.out.println("right climbing with speed " + speed);
  }
