@@ -10,6 +10,7 @@ import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.RelativeEncoder;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -25,7 +26,7 @@ public class Climber2 extends SubsystemBase {
     private RelativeEncoder leftClimberEncoder;
     private RelativeEncoder rightClimberEncoder;
     private double ClimberEncoderLimitUp = 0;
-    private double ClimberEncoderLimitDown = -10;
+    private double ClimberEncoderLimitDown = 10;
 
     /** Creates a new Climber. */
   public Climber2() {
@@ -47,18 +48,13 @@ public class Climber2 extends SubsystemBase {
   * 
   */
  public void leftClimb(double speed) {
-<<<<<<< HEAD
   leftEncoderValue = leftClimber.getPosition().getValueAsDouble();
   System.out.println("Left Encoder Value" + leftEncoderValue);
-  leftOut.Output = speed;
-  leftClimber.setControl(leftOut);
-  if((leftEncoderValue < leftClimberEncoderLimit) && (speed < 0)){
-=======
-  if((leftEncoderValue >= ClimberEncoderLimitUp) && (speed > 0)){
+
+  if((leftEncoderValue <= ClimberEncoderLimitUp) && (speed > 0)){
     speed = 0.0;
   }
-  if((leftEncoderValue <= ClimberEncoderLimitDown) && (speed < 0)){
->>>>>>> 379927928b78ae4854a6eb44f09d2a89831b5cab
+  if((leftEncoderValue >= ClimberEncoderLimitDown) && (speed < 0)){
     speed = 0.0;
   }
   leftClimber.setControl(leftOut.withOutput(speed));
@@ -66,18 +62,13 @@ public class Climber2 extends SubsystemBase {
   System.out.println("left climbing with speed " + speed);
  }
  public void rightClimb(double speed) {
-<<<<<<< HEAD
   rightEncoderValue = rightClimber.getPosition().getValueAsDouble();
   System.out.println("Right Encoder Value" + rightEncoderValue);
-  rightOut.Output = speed;
-  rightClimber.setControl(rightOut);
-  if((rightEncoderValue > rightClimberEncoderLimit) && (speed > 0)){
-=======
-  if((rightEncoderValue >= ClimberEncoderLimitUp) && (speed > 0)){
+
+  if((rightEncoderValue <= ClimberEncoderLimitUp) && (speed > 0)){
     speed = 0.0;
   }
-  if((rightEncoderValue <= ClimberEncoderLimitDown) && (speed < 0)){
->>>>>>> 379927928b78ae4854a6eb44f09d2a89831b5cab
+  if((rightEncoderValue >= ClimberEncoderLimitDown) && (speed > 0)){
     speed = 0.0;
   }
   rightClimber.setControl(rightOut.withOutput(speed));
