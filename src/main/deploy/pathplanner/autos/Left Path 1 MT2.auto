@@ -90,6 +90,12 @@
           "data": {
             "name": "shootCoral"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "lowerElevator"
+          }
         }
       ]
     }

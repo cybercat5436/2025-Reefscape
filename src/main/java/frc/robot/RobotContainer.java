@@ -199,16 +199,16 @@ public class RobotContainer {
         // joystick2.x()
         //     .whileTrue(new InstantCommand(() -> elevator.lower()))
         //     .onFalse(new InstantCommand(() -> elevator.stopElevator()));
-        joystick2.a()
+        joystick2.x()
             .whileTrue(new InstantCommand(() -> elevator.raiseLevel1()))
             .onFalse(new InstantCommand(() -> elevator.stopElevator()));
-        joystick2.x()
+        joystick2.a()
             .whileTrue(new InstantCommand(() -> elevator.raiseLevel2()))
             .onFalse(new InstantCommand(() -> elevator.stopElevator()));
-        joystick2.y()
+        joystick2.b()
             .whileTrue(new InstantCommand(() -> elevator.raiseLevel3()))
             .onFalse(new InstantCommand(() -> elevator.stopElevator()));
-        joystick2.b()
+        joystick2.y()
             .whileTrue(new InstantCommand(() -> elevator.raiseLevel4()))
             .onFalse(new InstantCommand(() -> elevator.stopElevator()));
        
