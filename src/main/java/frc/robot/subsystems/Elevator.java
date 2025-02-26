@@ -23,9 +23,9 @@ public class Elevator extends SubsystemBase {
   MotionMagicVoltage m_motmag = new MotionMagicVoltage(0);
   final VoltageOut m_request = new VoltageOut(0);
   private double L1 = 0;
-  private double L2 = 26.5;
-  private double L3 = 65.64;
-  private double L4 = 128;
+  private double L2 = 14.8;
+  private double L3 = 34.4;
+  private double L4 = 77.14;
   private final TalonFXS elevator = new TalonFXS(12);
   public Elevator() {
     var talonFXSConfigs = new TalonFXSConfiguration();

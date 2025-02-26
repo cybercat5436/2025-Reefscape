@@ -1,14 +1,9 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.NetworkTableValue;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
@@ -37,6 +32,7 @@ public class LimeLight extends SubsystemBase {
   public double spinThreshold = 75;
 
   double[] positionStandardDeviations = new double[12];
+  
   public LimeLight(String networkTableName) {
     tableLimelight = NetworkTableInstance.getDefault().getTable(networkTableName);
     txLocal = tableLimelight.getEntry("tx"); // communicates horizontal degree offset from target
@@ -49,121 +45,40 @@ public class LimeLight extends SubsystemBase {
     limelightName = networkTableName;
     LimelightHelpers.setPipelineIndex(limelightName, 0);
 
-    // Change the camera pose relative to robot center (x forward, y left, z up, degrees)
-    LimelightHelpers.setCameraPose_RobotSpace(limelightName,
-    0.02,    // Forward offset (meters)
-    -0.3,    // Side offset (meters)
-    0.65,    // Height offset (meters)
-    -90,    // Roll (degrees)
-    0.0,   // Pitch (degrees)
-    0.0     // Yaw (degrees)
-    );
+    
   }
 
+  public LimeLight(String networkTableName, double forwardMeters, double sideMeters, double upMeters, 
+                    double rollDeg, double pitchDeg, double yawDeg){
 
-/*@Override
-  public void periodic() {
-    horizontalError = getVisionTargetHorizontalError();
-    verticalError = getVisionTargetVerticalError();
-    area = getVisionTargetAreaError();
-    targetInView = getVisionTargetStatus();
-    Pose2d p = getRobotPose();
-    if (isLoggingEnabled) {
-    SmartDashboard.putString("Camera Pose2d", p.toString());
-    LimelightResults limelightResults = LimelightHelpers.getLatestResults(limelightName);
-    positionStandardDeviations = limelightResults.standardDeviations;
-    if (positionStandardDeviations.length > 2) {
-      //System.out.println("Standard deviation of limelight measurement (MegaTag2) " + positionStandardDeviations[0]+" "+positionStandardDeviations[1]);
-    } else {
-      //System.out.println("No position measurement (MegaTag2)");
-    }
-    //System.out.println("Time of Limelight publishing measurement: (ms since Limelight boot) " + limelightResults.timestamp_LIMELIGHT_publish + " Rio receipt time: " + limelightResults.timestamp_RIOFPGA_capture);
-    //System.out.println("Number of tags visible:"+limelightResults.botpose_tagcount);
-    }
-    SmartDashboard.putNumber("tx", getVisionTargetHorizontalError());
-  }*/
-  
+    this(networkTableName);
+
+    // Change the camera pose relative to robot center (x forward, y left, z up, degrees)
+    LimelightHelpers.setCameraPose_RobotSpace(limelightName,
+      forwardMeters,    // Forward offset (meters)
+      sideMeters,    // Side offset (meters)
+      upMeters,    // Height offset (meters)
+      rollDeg,    // Roll (degrees)
+      pitchDeg,   // Pitch (degrees)
+      yawDeg     // Yaw (degrees)
+    );
+
+  }
+
+//   LimelightHelpers.setCameraPose_RobotSpace(limelightName,
+//   0.02,    // Forward offset (meters)
+//   -0.3,    // Side offset (meters)
+//   0.65,    // Height offset (meters)
+//   -90,    // Roll (degrees)
+//   0.0,   // Pitch (degrees)
+//   0.0     // Yaw (degrees)
+// );
+//
+
   public LimelightResults getLatestResults() {
     return LimelightHelpers.getLatestResults(limelightName);
   }
-  // This was refactored into SwerveJoystickCommand
-  public boolean alignToTarget(boolean targetFound, double xError, double yError, String zone){
-    double yOffset = 0;
-    boolean targetAligned = false;
-    boolean headingAligned = false;
-    boolean distanceAligned = false;
-    double vertical_error = 0;
-    double steering_adjust = 0;
-    double distance_adjust = 0;
-    
-    
-    double xSpeedAdjust = 0;
-    double ySpeedAdjust = 0;
-    double turningSpeedAdjust = 0;
-    
-    //Meadow calibrated the limelight cross-hair at ideal distance for first zone to target we shoot from.
-    //this meant ty = 0 at learned position at Blue zone.  Team did zones Target->Green->Blue->Yellow->Red
-    //Meadow then recorded the different ty "offset" values at each of the other shooter positions.
-    //Note - in Green zone we are too close to see target so not used
 
-    vertical_error = - (yError - yOffset);  //error goes to zero as we approach our offset positions and negative accounts for drivetrain
-    
-
-    //Calculating the speed at which to rotate based on tx
-    /*if (targetFound == true){ //Valid Target Found
-      //Clamp speeds to never go below minimum per constants file
-      steering_adjust = Math.signum(xError)* (Math.max(VisionConstants.kpAim*Math.abs(xError), VisionConstants.kMinRotateSpeed));
-      distance_adjust = Math.signum(verticalError) * (Math.max(VisionConstants.kpVertical*Math.abs(vertical_error), VisionConstants.kMinLinearSpeed));
-    } else {  //Target not within range
-      steering_adjust = 0;
-      distance_adjust = 0;
-    } */
-
-    /** 
-    //Drive the Robot with the adjusted speeds simultaneously
-    double leftSideSpeed = distance_adjust + steering_adjust;
-    double rightSideSpeed = distance_adjust - steering_adjust;
-    drive.tankDrivePWM(leftSideSpeed, rightSideSpeed);
-    **/
-
-    //Check to see if we are in range for heading and turn first
-      /*if (Math.abs(xError) <= VisionConstants.kAngleThreshold){// Target is within angle threshold
-        headingAligned = true;
-      } else {
-        headingAligned = false;
-        drive.tankDrivePWM(steering_adjust, -steering_adjust);
-      }
-
-      //Check to seeif we are in range for distance once we are aligned to heading (based on vertical)
-      if (headingAligned && (vertical_error == VisionConstants.kVerticalThreshold)){// Target is within vertical threshold
-        distanceAligned = true;
-      } else {
-        distanceAligned = false;
-        drive.tankDrivePWM(distance_adjust, distance_adjust);
-      }*/
-      
-    //Set Exit Flag only once both are aligned
-    if (headingAligned && distanceAligned){
-      targetAligned = true;
-    }else{
-      targetAligned = false;
-    }
-
-    return targetAligned;
-
-  }  
-
-
-  // Checks for cone orientation
-  public boolean isOriented(){
-    if (tLongLocal.getDouble(0) >= spinThreshold) {
-      return true;
-      //return false;
-    } else{
-      return false;
-    }
-  }
-  
   // responds true if target is identified in field of view
   public boolean getVisionTargetStatus(){
     boolean returnValue = false;

@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.507,
-        "y": 6.530749999999999
+        "x": 0.6240000000000001,
+        "y": 6.94025
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.0742646965801526,
-        "y": 6.114329245750675
+        "x": 1.1912646965801525,
+        "y": 6.523829245750675
       },
       "isLocked": false,
       "linkedName": "Left Path 2 MT2 end"
     },
     {
       "anchor": {
-        "x": 3.4807500000000005,
-        "y": 4.8245
+        "x": 3.471,
+        "y": 4.843999999999999
       },
       "prevControl": {
-        "x": 2.9161510028233035,
-        "y": 5.087776836170126
+        "x": 2.906401002823303,
+        "y": 5.107276836170126
       },
       "nextControl": null,
       "isLocked": false,
@@ -34,7 +34,21 @@
       "rotationDegrees": -45.0
     }
   ],
-  "constraintZones": [],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0.8730215827338131,
+      "maxWaypointRelativePos": 0.9636690647482004,
+      "constraints": {
+        "maxVelocity": 1.0,
+        "maxAcceleration": 1.0,
+        "maxAngularVelocity": 300.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
