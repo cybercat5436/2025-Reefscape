@@ -29,12 +29,15 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.revrobotics.spark.SparkBase;
 
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -102,6 +105,9 @@ public class RobotContainer {
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private final LimeLight limeLightFront = new LimeLight("limelight-front", 0.02, -0.3, 0.65, -90.0, 0.0, 0.0);
     private final LimeLight limeLightFrontRight = new LimeLight("limelight-right", 0.15, 0.13, 0.45, 0.0, 0.0, 0.0);
+    private final UsbCamera limeLightFrontRightAgian = CameraServer.startAutomaticCapture(0);
+    private final UsbCamera photonVisionAgain = CameraServer.startAutomaticCapture(1);
+    
     private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, limeLightFrontRight, drivetrain);
     private final AutoAlign autoAlign = new AutoAlign(drivetrain,limeLightFront,photonVision);
     private SendableChooser<Command> autonChooser;
@@ -109,7 +115,7 @@ public class RobotContainer {
     public final Climber2 climber2 = new Climber2();
     public final GamePieceDetector coralSensor = new GamePieceDetector(35000, GamePieceDetector.Sensors.coral);
     public final GamePieceDetector algaeSensor = new GamePieceDetector(25000, GamePieceDetector.Sensors.algae, 0.1);
-    
+    public final NetworkTableEntry cameraSelection = NetworkTableInstance.getDefault().getTable("").getEntry("CameraSelection");
     public final Coral coral = new Coral();
     public final Algae algae = new Algae();
     public final Elevator elevator = new Elevator();
@@ -193,7 +199,9 @@ public class RobotContainer {
            .whileTrue(new InstantCommand(() -> algae.intakeBall(-1)))
            .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
         
-        
+        joystick.y()
+            .whileTrue(new InstantCommand(() -> cameraSelection.setString(photonVisionAgain.getName())))
+            .onFalse(new InstantCommand(() -> cameraSelection.setString(limeLightFrontRightAgian.getName())));
 
         
         // joystick2.a()
