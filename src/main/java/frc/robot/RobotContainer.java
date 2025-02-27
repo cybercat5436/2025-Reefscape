@@ -105,8 +105,8 @@ public class RobotContainer {
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private final LimeLight limeLightFront = new LimeLight("limelight-front", 0.02, -0.3, 0.65, -90.0, 0.0, 0.0);
     private final LimeLight limeLightFrontRight = new LimeLight("limelight-right", 0.15, 0.13, 0.45, 0.0, 0.0, 0.0);
-    private final UsbCamera limeLightFrontRightAgian = CameraServer.startAutomaticCapture(0);
-    private final UsbCamera photonVisionAgain = CameraServer.startAutomaticCapture(1);
+    private final UsbCamera limeLightFrontRightSwitch = CameraServer.startAutomaticCapture(0);
+    private final UsbCamera photonVisionSwitch = CameraServer.startAutomaticCapture(1);
     
     private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, limeLightFrontRight, drivetrain);
     private final AutoAlign autoAlign = new AutoAlign(drivetrain,limeLightFront,photonVision);
@@ -200,8 +200,8 @@ public class RobotContainer {
            .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
         
         joystick.y()
-            .whileTrue(new InstantCommand(() -> cameraSelection.setString(photonVisionAgain.getName())))
-            .onFalse(new InstantCommand(() -> cameraSelection.setString(limeLightFrontRightAgian.getName())));
+            .whileTrue(new InstantCommand(() -> cameraSelection.setString(photonVisionSwitch.getName())))
+            .onFalse(new InstantCommand(() -> cameraSelection.setString(limeLightFrontRightSwitch.getName())));
 
         
         // joystick2.a()
