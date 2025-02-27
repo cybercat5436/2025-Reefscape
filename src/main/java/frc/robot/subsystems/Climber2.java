@@ -10,6 +10,7 @@ import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.RelativeEncoder;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -20,7 +21,14 @@ public class Climber2 extends SubsystemBase {
     private final TalonFX leftClimber = new TalonFX(16);
     private final DutyCycleOut leftOut = new DutyCycleOut(0);
     private final DutyCycleOut rightOut = new DutyCycleOut(0);
-  /** Creates a new Climber. */
+    private double rightEncoderValue;
+    private double leftEncoderValue;
+    private RelativeEncoder leftClimberEncoder;
+    private RelativeEncoder rightClimberEncoder;
+    private double ClimberEncoderLimitUp = 0;
+    private double ClimberEncoderLimitDown = 10;
+
+    /** Creates a new Climber. */
   public Climber2() {
     var leftConfiguration = new TalonFXConfiguration();
     var rightConfiguration = new TalonFXConfiguration();
@@ -40,15 +48,30 @@ public class Climber2 extends SubsystemBase {
   * 
   */
  public void leftClimb(double speed) {
-  leftOut.Output = speed;
-  leftClimber.setControl(leftOut);
+  leftEncoderValue = leftClimber.getPosition().getValueAsDouble();
+  System.out.println("Left Encoder Value" + leftEncoderValue);
+
+  if((leftEncoderValue <= ClimberEncoderLimitUp) && (speed > 0)){
+    speed = 0.0;
+  }
+  if((leftEncoderValue >= ClimberEncoderLimitDown) && (speed < 0)){
+    speed = 0.0;
+  }
+  leftClimber.setControl(leftOut.withOutput(speed));
   SmartDashboard.putNumber("ClimberLeft2", leftClimber.get());
   System.out.println("left climbing with speed " + speed);
  }
-
  public void rightClimb(double speed) {
-  rightOut.Output = speed;
-  rightClimber.setControl(rightOut);
+  rightEncoderValue = rightClimber.getPosition().getValueAsDouble();
+  System.out.println("Right Encoder Value" + rightEncoderValue);
+
+  if((rightEncoderValue <= ClimberEncoderLimitUp) && (speed > 0)){
+    speed = 0.0;
+  }
+  if((rightEncoderValue >= ClimberEncoderLimitDown) && (speed > 0)){
+    speed = 0.0;
+  }
+  rightClimber.setControl(rightOut.withOutput(speed));
   SmartDashboard.putNumber("ClimberRight2", rightClimber.get());
   System.out.println("right climbing with speed " + speed);
  }
