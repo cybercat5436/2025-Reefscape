@@ -149,7 +149,9 @@ public class RobotContainer {
     
 
         //Command autoCoralHigh = Commands.sequence(new InstantCommand(() -> elevator.raiseLevel4()), new InstantCommand(() -> coral.forward(1)));
-
+    public void resetGyroAfterAuton(){
+        drivetrain.setPigeonHeadingToOdometry();
+    }
 
 
 
