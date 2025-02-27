@@ -13,6 +13,17 @@ import com.ctre.phoenix6.hardware.TalonFXS;
 import com.ctre.phoenix6.signals.ExternalFeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorArrangementValue;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -26,29 +37,83 @@ public class Elevator extends SubsystemBase {
   private double L2 = 14.8;
   private double L3 = 34.4;
   private double L4 = 77.14;
-  private final TalonFXS elevator = new TalonFXS(12);
+ // private final TalonFXS elevator = new TalonFXS(12);
+ private final SparkMax elevator=new SparkMax(12,MotorType.kBrushless);
+ SparkMaxConfig motorConfig;
+  private SparkClosedLoopController elevatorClosedLoopController;
+  private RelativeEncoder encoder;
+
+
   public Elevator() {
-    var talonFXSConfigs = new TalonFXSConfiguration();
-    talonFXSConfigs.Commutation.MotorArrangement = MotorArrangementValue.Minion_JST;
-    talonFXSConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-    talonFXSConfigs.ExternalFeedback.ExternalFeedbackSensorSource = ExternalFeedbackSensorSourceValue.Commutation;
-    elevator.setPosition(0);
-    // set slot 0 gains
-    var slot0Configs = talonFXSConfigs.Slot0;
-    slot0Configs.kS = 0.24; // add 0.24 V to overcome friction
-    slot0Configs.kV = 0.12; // apply 12 V for a target velocity of 100 rps
-    // PID runs on position
-    slot0Configs.kP = 4.8;
-    slot0Configs.kI = 0;
-    slot0Configs.kD = 0.1;
+     motorConfig = new SparkMaxConfig();
+     encoder=elevator.getEncoder();
 
-    // set Motion Magic settings
-    var motionMagicConfigs = talonFXSConfigs.MotionMagic;
-    motionMagicConfigs.MotionMagicCruiseVelocity = 300; // 80 rps cruise velocity
-    motionMagicConfigs.MotionMagicAcceleration = 1000; // 160 rps/s acceleration (0.5 seconds)
-    motionMagicConfigs.MotionMagicJerk = 200; // 1600 rps/s^2 jerk (0.1 seconds)
 
-    elevator.getConfigurator().apply(talonFXSConfigs, 0.050);
+    motorConfig
+      .smartCurrentLimit(50)
+        .idleMode(IdleMode.kBrake);
+
+    encoder = elevator.getEncoder(); 
+    elevatorClosedLoopController = elevator.getClosedLoopController();
+    motorConfig.encoder
+        .positionConversionFactor(1)
+        .velocityConversionFactor(1);
+
+    /*
+     * Create a new SPARK MAX configuration object. This will store the
+     * configuration parameters for the SPARK MAX that we will set below.
+     */
+
+    /*
+     * Configure the encoder. For this specific example, we are using the
+     * integrated encoder of the NEO, and we don't need to configure it. If
+     * needed, we can adjust values like the position or velocity conversion
+     * factors.
+     */
+    
+
+    /*
+     * Configure the closed loop controller. We want to make sure we set the
+     * feedback sensor as the primary encoder.
+     */
+    motorConfig.closedLoop
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+        // Set PID values for position control. We don't need to pass a closed
+        // loop slot, as it will default to slot 0.
+        .p(0.4)
+        .i(0)
+        .d(0)
+        .outputRange(-1, 1)
+        // Set PID values for velocity control in slot 1
+        .p(0.0001, ClosedLoopSlot.kSlot1)
+        .i(0, ClosedLoopSlot.kSlot1)
+        .d(0, ClosedLoopSlot.kSlot1)
+        .velocityFF(1.0 / 5767, ClosedLoopSlot.kSlot1)
+        .outputRange(-1, 1, ClosedLoopSlot.kSlot1);
+
+    motorConfig.closedLoop.maxMotion
+        // Set MAXMotion parameters for position control. We don't need to pass
+        // a closed loop slot, as it will default to slot 0.
+        .maxVelocity(4000)
+        .maxAcceleration(4000)
+        .allowedClosedLoopError(1)
+        // Set MAXMotion parameters for velocity control in slot 1
+        .maxAcceleration(500, ClosedLoopSlot.kSlot1)
+        .maxVelocity(6000, ClosedLoopSlot.kSlot1)
+        .allowedClosedLoopError(1, ClosedLoopSlot.kSlot1);
+
+    /*
+     * Apply the configuration to the SPARK MAX.
+     *
+     * kResetSafeParameters is used to get the SPARK MAX to a known state. This
+     * is useful in case the SPARK MAX is replaced.
+     *
+     * kPersistParameters is used to ensure the configuration is not lost when
+     * the SPARK MAX loses power. This is useful for power cycles that may occur
+     * mid-operation.
+     */
+    elevator.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+
   }
   // public void raiseLevel1() {
   //   m_motmag.Slot = 0;
@@ -62,31 +127,32 @@ public class Elevator extends SubsystemBase {
     elevator.set(-0.1);
   }
   public void raiseLevel1() {
-    m_motmag.Slot = 0;
-    elevator.setControl(m_motmag.withPosition(L1));
+    elevatorClosedLoopController.setReference(L1, ControlType.kMAXMotionPositionControl,
+    ClosedLoopSlot.kSlot0);
   } 
   public void raiseLevel2() {
-  m_motmag.Slot = 0;
-   elevator.setControl(m_motmag.withPosition(L2));
+    elevatorClosedLoopController.setReference(L2, ControlType.kMAXMotionPositionControl,
+    ClosedLoopSlot.kSlot0);
   }
   public void raiseLevel3() {
-    m_motmag.Slot = 0;
-    elevator.setControl(m_motmag.withPosition(L3));
+    elevatorClosedLoopController.setReference(L3, ControlType.kMAXMotionPositionControl,
+    ClosedLoopSlot.kSlot0);
   } 
   public void raiseLevel4() {
-    m_motmag.Slot = 0;
-    elevator.setControl(m_motmag.withPosition(L4));
-    System.out.println("$$$$$$$$$$$$$$raised level 4$$$$%$$$$$$$");
+    elevatorClosedLoopController.setReference(L4, ControlType.kMAXMotionPositionControl,
+    ClosedLoopSlot.kSlot0);
   } 
   public void stopElevator() {
-    elevator.setControl(m_request.withOutput(0));
+    elevator.set(0);
   }
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
-    SmartDashboard.putNumber("Elevator Rotor Encoder", elevator.getRotorPosition().getValueAsDouble());
-    SmartDashboard.putNumber("Elevator Encoder", elevator.getPosition().getValueAsDouble());
-    //SmartDashboard.putNumber("Elevator Quadrature Position", elevator.getRawQuadraturePosition().getValueAsDouble());
+    // TODO Auto-generated method stub
+    super.periodic();
+    SmartDashboard.putNumber("elevatorencoder", encoder.getPosition());
   }
-}
+
+ 
+  }
+
