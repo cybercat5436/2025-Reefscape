@@ -149,9 +149,7 @@ public class RobotContainer {
     
 
         //Command autoCoralHigh = Commands.sequence(new InstantCommand(() -> elevator.raiseLevel4()), new InstantCommand(() -> coral.forward(1)));
-    public void resetGyroAfterAuton(){
-        drivetrain.setPigeonHeadingToOdometry();
-    }
+
 
 
 
@@ -253,6 +251,10 @@ public class RobotContainer {
         SlewRateLimiter slewRateLimiterX = new SlewRateLimiter(maxSpeed * 2);  //Note: setting slewratelimiter to 2x speed means it takes 0.5s to accelerate to full speed
         SlewRateLimiter slewRateLimiterY = new SlewRateLimiter(maxSpeed * 2);
         SlewRateLimiter slewRateLimiterTurnX = new SlewRateLimiter(maxAngularRate * 2);  //corrected from using MaxSpeed
+        
+        SlewRateLimiter slowModeSlewRateLimiterX = new SlewRateLimiter(maxSpeed * 5);  //Note: setting slewratelimiter to 2x speed means it takes 0.5s to accelerate to full speed
+        SlewRateLimiter slowModeSlewRateLimiterY = new SlewRateLimiter(maxSpeed * 5);
+        SlewRateLimiter slowModeSlewRateLimiterTurnX = new SlewRateLimiter(maxAngularRate * 3);  //corrected from using MaxSpeed
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->{
@@ -274,41 +276,43 @@ public class RobotContainer {
         );
     
 
-        joystick.x().whileTrue(drivetrain.applyRequest(() -> {
-        robotX = limeLightFront.getVisionArea();
-        robotY = -limeLightFront.getVisionTargetHorizontalError();
-        xSpeed = robotX * kP * maxSpeed;
-        ySpeed = robotY * kP * maxSpeed;
-            SmartDashboard.putNumber("robot y velocity", joystick.getLeftX() * maxSpeed);
-        return robotCentricDrive.withVelocityX(0) // Drive forward with negative Y (forward)
-            .withVelocityY(ySpeed) // Drive left with negative X (left)
-            .withRotationalRate(-joystick.getRightX() * maxAngularRate); // Drive counterclockwise with negative X (left)
+    //     joystick.x().whileTrue(drivetrain.applyRequest(() -> {
+    //     robotX = limeLightFront.getVisionArea();
+    //     robotY = -limeLightFront.getVisionTargetHorizontalError();
+    //     xSpeed = robotX * kP * maxSpeed;
+    //     ySpeed = robotY * kP * maxSpeed;
+    //         SmartDashboard.putNumber("robot y velocity", joystick.getLeftX() * maxSpeed);
+    //     return robotCentricDrive.withVelocityX(0) // Drive forward with negative Y (forward)
+    //         .withVelocityY(ySpeed) // Drive left with negative X (left)
+    //         .withRotationalRate(-joystick.getRightX() * maxAngularRate); // Drive counterclockwise with negative X (left)
         
-    })
-    );
-//     joystick.back().whileTrue(drivetrain.applyRequest(() -> {
-//         SmartDashboard.putNumber("robot y velocity", joystick.getLeftX() * MaxSpeed);
-//     return robotCentricDrive.withVelocityX(joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-//         .withVelocityY(joystick.getLefty) // Drive left with negative X (left)
-//         .withRotationalRate(-joystick.getRightX() * MaxAngularRate); // Drive counterclockwise with negative X (left)
-        
-// }));
+    // })
+    // );
+    joystick.b().whileTrue(drivetrain.applyRequest(() -> {
+            double xSpeed = slewRateLimiterX.calculate(-joystick.getLeftY()* maxSpeed);             
+            double ySpeed = slewRateLimiterY.calculate(-joystick.getLeftX()* maxSpeed);          
+            double yTurnSpeed = slewRateLimiterTurnX.calculate(joystick.getRightX()* maxAngularRate);
+
+        return robotCentricDrive.withVelocityX(xSpeed * Math.abs(xSpeed)) 
+        .withVelocityY(ySpeed * Math.abs(ySpeed)) 
+        .withRotationalRate(-(yTurnSpeed * Math.abs(yTurnSpeed)));
+        }
+    ));
         
         Trigger slowModeTrigger = new Trigger ((joystick.leftTrigger()));
 
         slowModeTrigger.whileTrue(drivetrain.applyRequest(() ->{
             
-                double xSpeed = slewRateLimiterX.calculate(joystick.getLeftY()* HalfSpeed);
+                double xSpeed = slowModeSlewRateLimiterX.calculate(joystick.getLeftY()* HalfSpeed);
                 
                 
-                double ySpeed = slewRateLimiterY.calculate(joystick.getLeftX()* HalfSpeed);
+                double ySpeed = slowModeSlewRateLimiterY.calculate(joystick.getLeftX()* HalfSpeed);
                 
                 
-                double yTurnSpeed = slewRateLimiterTurnX.calculate(joystick.getRightX()* HalfAngularRate);
+                double yTurnSpeed = slowModeSlewRateLimiterTurnX.calculate(joystick.getRightX()* HalfAngularRate);
                 SmartDashboard.putNumber("RBySpeed",ySpeed);
                 SmartDashboard.putNumber("RBxSpeed",xSpeed);
                 SmartDashboard.putNumber("RByTurnSpeed",yTurnSpeed);
-
 
         return drive.withVelocityX(xSpeed * Math.abs(xSpeed)) // Drive forward with negative Y (forward)
             .withVelocityY(ySpeed * Math.abs(ySpeed)) // Drive left with negative X (left)
@@ -317,7 +321,7 @@ public class RobotContainer {
     ));
     
         joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        joystick.b().whileTrue(drivetrain.applyRequest(() ->
+        joystick.x().whileTrue(drivetrain.applyRequest(() ->
             point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
         ));
 
@@ -346,11 +350,11 @@ public class RobotContainer {
         Trigger leftClimberStopTrigger = new Trigger(() -> joystick2.getLeftY() >= -0.2 && joystick2.getLeftY() <= 0.2);
 
         leftClimbUpTrigger
-            .whileTrue(new InstantCommand(() -> climber2.rightClimb(-0.2)));
+            .whileTrue(new InstantCommand(() -> climber2.rightClimb(0.2)));
         rightClimbUpTrigger
             .whileTrue(new InstantCommand(() -> climber2.leftClimb(0.2)));
         leftClimbDownTrigger
-            .whileTrue(new InstantCommand(() -> climber2.rightClimb(0.2)));
+            .whileTrue(new InstantCommand(() -> climber2.rightClimb(-0.2)));
         rightClimbDownTrigger
             .whileTrue(new InstantCommand(() -> climber2.leftClimb(-0.2)));
         rightClimberStopTrigger
@@ -503,6 +507,12 @@ public class RobotContainer {
         
         return autonChooser.getSelected();
         
+    }
+
+
+
+    public void resetGyroAfterAuton() {
+        drivetrain.setPigeonHeadingToOdometry();
     }
 
    
