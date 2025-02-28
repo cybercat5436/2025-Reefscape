@@ -34,11 +34,12 @@ public class Elevator extends SubsystemBase {
   MotionMagicVoltage m_motmag = new MotionMagicVoltage(0);
   final VoltageOut m_request = new VoltageOut(0);
   private double L1 = 0;
-  private double L2 = 14.8;
-  private double L3 = 34.4;
-  private double L4 = 77.14;
+  private double L2 = 8.5;
+  private double L3 = 17.6;
+  private double L4 = 24;
+  private int cycleCount;
  // private final TalonFXS elevator = new TalonFXS(12);
- private final SparkMax elevator=new SparkMax(12,MotorType.kBrushless);
+ private final SparkMax elevator=new SparkMax(57,MotorType.kBrushless);
  SparkMaxConfig motorConfig;
   private SparkClosedLoopController elevatorClosedLoopController;
   private RelativeEncoder encoder;
@@ -53,11 +54,11 @@ public class Elevator extends SubsystemBase {
       .smartCurrentLimit(50)
         .idleMode(IdleMode.kBrake);
 
-    encoder = elevator.getEncoder(); 
     elevatorClosedLoopController = elevator.getClosedLoopController();
     motorConfig.encoder
         .positionConversionFactor(1)
         .velocityConversionFactor(1);
+    motorConfig.inverted(true);  
 
     /*
      * Create a new SPARK MAX configuration object. This will store the
@@ -95,8 +96,8 @@ public class Elevator extends SubsystemBase {
         // Set MAXMotion parameters for position control. We don't need to pass
         // a closed loop slot, as it will default to slot 0.
         .maxVelocity(4000)
-        .maxAcceleration(4000)
-        .allowedClosedLoopError(1)
+        .maxAcceleration(6000)
+        .allowedClosedLoopError(0.5)
         // Set MAXMotion parameters for velocity control in slot 1
         .maxAcceleration(500, ClosedLoopSlot.kSlot1)
         .maxVelocity(6000, ClosedLoopSlot.kSlot1)
@@ -151,6 +152,7 @@ public class Elevator extends SubsystemBase {
     // TODO Auto-generated method stub
     super.periodic();
     SmartDashboard.putNumber("elevatorencoder", encoder.getPosition());
+    SmartDashboard.putNumber("cycleCount", cycleCount++);
   }
 
  
