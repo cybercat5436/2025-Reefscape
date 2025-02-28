@@ -32,7 +32,7 @@ public class Climber2 extends SubsystemBase {
   public Climber2() {
     var leftConfiguration = new TalonFXConfiguration();
     var rightConfiguration = new TalonFXConfiguration();
-  
+    
     leftConfiguration.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     rightConfiguration.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
@@ -41,6 +41,11 @@ public class Climber2 extends SubsystemBase {
 
     rightClimber.getConfigurator().apply(rightConfiguration);
     leftClimber.getConfigurator().apply(leftConfiguration);
+
+    leftClimberEncoder.setPosition(0.0);
+    rightClimberEncoder.setPosition(0.0);
+    
+
   }
 /**
  * This method makes the robot climb and score LOTS of points
@@ -58,7 +63,6 @@ public class Climber2 extends SubsystemBase {
     speed = 0.0;
   }
   leftClimber.setControl(leftOut.withOutput(speed));
-  SmartDashboard.putNumber("ClimberLeft2", leftClimber.get());
   System.out.println("left climbing with speed " + speed);
  }
  public void rightClimb(double speed) {
@@ -72,7 +76,6 @@ public class Climber2 extends SubsystemBase {
     speed = 0.0;
   }
   rightClimber.setControl(rightOut.withOutput(speed));
-  SmartDashboard.putNumber("ClimberRight2", rightClimber.get());
   System.out.println("right climbing with speed " + speed);
  }
  
@@ -84,13 +87,15 @@ leftOut.Output = 0;
 rightOut.Output = 0;
 leftClimber.setControl(leftOut);
 rightClimber.setControl(rightOut);
-SmartDashboard.putNumber("ClimberLeft", leftClimber.get());
-SmartDashboard.putNumber("ClimberRight", rightClimber.get());
+
   System.out.println("Stopped climbing ");
 }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    SmartDashboard.putNumber("ClimberLeft", leftClimber.getPosition().getValueAsDouble());
+    SmartDashboard.putNumber("ClimberRight", rightClimber.getPosition().getValueAsDouble());
+
   }
 }

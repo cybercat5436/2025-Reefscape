@@ -7,19 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Test path 3"
+            "pathName": "Center Test path 3"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Test path 4"
+            "pathName": "CenterTest path 4"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": " Test Autons",
   "choreoAuto": false
 }

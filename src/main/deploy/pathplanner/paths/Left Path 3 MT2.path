@@ -64,7 +64,7 @@
     "rotation": -57.2004687273808
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Left Auton",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 125.00000000000001

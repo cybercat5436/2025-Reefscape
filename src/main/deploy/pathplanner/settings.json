@@ -5,10 +5,13 @@
   "pathFolders": [
     "Center Auton",
     "Left Auton",
+    "Calibration",
     "Right Auton"
   ],
   "autoFolders": [
-    "Calibration"
+    " Comp Autons",
+    "Calibration",
+    " Test Autons"
   ],
   "defaultMaxVel": 2.0,
   "defaultMaxAccel": 2.0,
