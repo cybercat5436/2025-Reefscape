@@ -10,7 +10,6 @@ import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.revrobotics.RelativeEncoder;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -23,10 +22,8 @@ public class Climber2 extends SubsystemBase {
     private final DutyCycleOut rightOut = new DutyCycleOut(0);
     private double rightEncoderValue;
     private double leftEncoderValue;
-    private RelativeEncoder leftClimberEncoder;
-    private RelativeEncoder rightClimberEncoder;
     private double ClimberEncoderLimitUp = 0;
-    private double ClimberEncoderLimitDown = 10;
+    private double ClimberEncoderLimitDown = -5;
 
     /** Creates a new Climber. */
   public Climber2() {
@@ -41,6 +38,9 @@ public class Climber2 extends SubsystemBase {
 
     rightClimber.getConfigurator().apply(rightConfiguration);
     leftClimber.getConfigurator().apply(leftConfiguration);
+
+    leftClimber.setPosition(0);
+    rightClimber.setPosition(0);
   }
 /**
  * This method makes the robot climb and score LOTS of points
@@ -48,49 +48,44 @@ public class Climber2 extends SubsystemBase {
   * 
   */
  public void leftClimb(double speed) {
-  leftEncoderValue = leftClimber.getPosition().getValueAsDouble();
-  System.out.println("Left Encoder Value" + leftEncoderValue);
-
-  if((leftEncoderValue <= ClimberEncoderLimitUp) && (speed > 0)){
+  if((leftEncoderValue >= ClimberEncoderLimitUp) && (speed > 0)){
     speed = 0.0;
   }
-  if((leftEncoderValue >= ClimberEncoderLimitDown) && (speed < 0)){
+  if((leftEncoderValue <= ClimberEncoderLimitDown) && (speed < 0)){
     speed = 0.0;
   }
   leftClimber.setControl(leftOut.withOutput(speed));
-  SmartDashboard.putNumber("ClimberLeft2", leftClimber.get());
-  System.out.println("left climbing with speed " + speed);
+  SmartDashboard.putNumber("ClimberLeftSpeed", leftClimber.get());
  }
- public void rightClimb(double speed) {
-  rightEncoderValue = rightClimber.getPosition().getValueAsDouble();
-  System.out.println("Right Encoder Value" + rightEncoderValue);
 
-  if((rightEncoderValue <= ClimberEncoderLimitUp) && (speed > 0)){
+
+ public void rightClimb(double speed) {
+  if((rightEncoderValue >= ClimberEncoderLimitUp) && (speed > 0)){
     speed = 0.0;
   }
-  if((rightEncoderValue >= ClimberEncoderLimitDown) && (speed > 0)){
+  if((rightEncoderValue <= ClimberEncoderLimitDown) && (speed < 0)){
     speed = 0.0;
   }
   rightClimber.setControl(rightOut.withOutput(speed));
-  SmartDashboard.putNumber("ClimberRight2", rightClimber.get());
-  System.out.println("right climbing with speed " + speed);
+  SmartDashboard.putNumber("ClimberRightSpeed", rightClimber.get());
  }
  
-//  public void rightClimb(double speed){
-//   rightClimber.set(speed);
-//  }
+
 public void stopClimb(){
 leftOut.Output = 0;
 rightOut.Output = 0;
 leftClimber.setControl(leftOut);
 rightClimber.setControl(rightOut);
-SmartDashboard.putNumber("ClimberLeft", leftClimber.get());
-SmartDashboard.putNumber("ClimberRight", rightClimber.get());
-  System.out.println("Stopped climbing ");
+System.out.println("Stopped climbing ");
 }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    leftEncoderValue = -leftClimber.getPosition().getValueAsDouble();
+    rightEncoderValue = -rightClimber.getPosition().getValueAsDouble();
+
+    SmartDashboard.putNumber("ClimberLeftValue",leftEncoderValue);
+    SmartDashboard.putNumber("ClimberRightValue", rightEncoderValue);
   }
 }

@@ -344,11 +344,11 @@ public class RobotContainer {
         Trigger leftClimberStopTrigger = new Trigger(() -> joystick2.getLeftY() >= -0.2 && joystick2.getLeftY() <= 0.2);
 
         leftClimbUpTrigger
-            .whileTrue(new InstantCommand(() -> climber2.rightClimb(-0.2)));
+            .whileTrue(new InstantCommand(() -> climber2.rightClimb(0.2)));
         rightClimbUpTrigger
             .whileTrue(new InstantCommand(() -> climber2.leftClimb(0.2)));
         leftClimbDownTrigger
-            .whileTrue(new InstantCommand(() -> climber2.rightClimb(0.2)));
+            .whileTrue(new InstantCommand(() -> climber2.rightClimb(-0.2)));
         rightClimbDownTrigger
             .whileTrue(new InstantCommand(() -> climber2.leftClimb(-0.2)));
         rightClimberStopTrigger
