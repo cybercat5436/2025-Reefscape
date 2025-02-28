@@ -27,9 +27,9 @@ public class Elevator extends SubsystemBase {
   MotionMagicVoltage m_motmag = new MotionMagicVoltage(0);
   final VoltageOut m_request = new VoltageOut(0);
   private double L1 = 0;
-  private double L2 = 14.8;
-  private double L3 = 34.4;
-  private double L4 = 77.14;
+  private double L2 = 2;
+  private double L3 = 6;
+  private double L4 = 8;
   private final TalonFX elevator = new TalonFX(12);
   public Elevator() {
     // var talonFXConfigs = new TalonFXConfiguration();
@@ -54,6 +54,7 @@ public class Elevator extends SubsystemBase {
 
     // elevator.getConfigurator().apply(talonFXConfigs, 0.050);
      TalonFXConfiguration cfg = new TalonFXConfiguration();
+     cfg.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
     /* Configure gear ratio */
     FeedbackConfigs fdb = cfg.Feedback;
@@ -117,7 +118,6 @@ public class Elevator extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    SmartDashboard.putNumber("Elevator Rotor Encoder", elevator.getRotorPosition().getValueAsDouble());
     SmartDashboard.putNumber("Elevator Encoder", elevator.getPosition().getValueAsDouble());
     //SmartDashboard.putNumber("Elevator Quadrature Position", elevator.getRawQuadraturePosition().getValueAsDouble());
   }
