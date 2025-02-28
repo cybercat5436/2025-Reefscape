@@ -44,11 +44,7 @@ public class Climber2 extends SubsystemBase {
     leftConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     rightConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
-    rightClimber.getConfigurator().apply(rightConfiguration);
-    leftClimber.getConfigurator().apply(leftConfiguration);
-
-    leftClimber.setPosition(0);
-    rightClimber.setPosition(0);
+    
 
 
 
@@ -79,6 +75,12 @@ public class Climber2 extends SubsystemBase {
     rightSlot0.kP = 60; // A position error of 0.2 rotations results in 12 V output
     rightSlot0.kI = 0; // No output for integrated error
     rightSlot0.kD = 0.5; // A velocity error of 1 rps results in 0.5 V output
+
+    rightClimber.getConfigurator().apply(rightConfiguration);
+    leftClimber.getConfigurator().apply(leftConfiguration);
+
+    leftClimber.setPosition(0);
+    rightClimber.setPosition(0);
   }
 /**
  * This method makes the robot climb and score LOTS of points

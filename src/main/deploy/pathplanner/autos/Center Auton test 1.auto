@@ -5,7 +5,7 @@
     "data": {
       "commands": [
         {
-          "type": "sequential",
+          "type": "parallel",
           "data": {
             "commands": [
               {
@@ -17,10 +17,16 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "raiseArmHigh"
+                  "name": "setClimberArmsToAutonStartPosition"
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "raiseArmHigh"
           }
         },
         {
