@@ -205,6 +205,8 @@ public class RobotContainer {
         // joystick2.x()
         //     .whileTrue(new InstantCommand(() -> elevator.lower()))
         //     .onFalse(new InstantCommand(() -> elevator.stopElevator()));
+        
+        
         joystick2.x()
             .onTrue(new InstantCommand(() -> elevator.raiseLevel1())
             .andThen(Commands.waitSeconds(1.5))
@@ -216,7 +218,8 @@ public class RobotContainer {
         joystick2.y()
             .onTrue(new InstantCommand(() -> elevator.raiseLevel4()));
            
-       
+        joystick2.povRight().onTrue(new InstantCommand(() -> elevator.incrementHeightAdjustment()));
+        joystick2.povLeft().onTrue(new InstantCommand(() -> elevator.decrementHeightAdjustment()));
 
         // joystick2.povUp().and(joystick2.rightBumper())
         //     .whileTrue(new InstantCommand(() -> algae.releaseBall(-0.3))) 

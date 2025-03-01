@@ -30,6 +30,7 @@ public class Elevator extends SubsystemBase {
   private double L2 = 0.84;
   private double L3 = 2.88;
   private double L4 = 5.79;
+  private int heightAdjustment = 0;
   private final TalonFX elevator = new TalonFX(12);
   public Elevator() {
     // var talonFXConfigs = new TalonFXConfiguration();
@@ -87,7 +88,18 @@ public class Elevator extends SubsystemBase {
   //   m_motmag.Slot = 0;
   //   elevator.setControl(m_motmag.withPosition(L1));
   // } 
-  
+  public void incrementHeightAdjustment() {
+    heightAdjustment++;
+    elevator.setControl(m_motmag.withPosition(L4 + heightAdjustment * 0.2));
+    System.out.println("Increased Height" + heightAdjustment);
+  }
+  public void decrementHeightAdjustment() {
+    heightAdjustment--;
+    elevator.setControl(m_motmag.withPosition(L4 + heightAdjustment * 0.2));
+    System.out.println("Decreased Height" + heightAdjustment);
+  }
+
+
   public void raise() { 
     elevator.set(0.1);
   }
@@ -108,7 +120,7 @@ public class Elevator extends SubsystemBase {
   } 
   public void raiseLevel4() {
     m_motmag.Slot = 0;
-    elevator.setControl(m_motmag.withPosition(L4));
+    elevator.setControl(m_motmag.withPosition(L4 + heightAdjustment * 0.2));
     System.out.println("$$$$$$$$$$$$$$raised level 4$$$$%$$$$$$$");
   } 
   public void stopElevator() {
