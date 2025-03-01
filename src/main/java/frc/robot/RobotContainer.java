@@ -118,7 +118,7 @@ public class RobotContainer {
         new InstantCommand(() -> elevator.raiseLevel4())
         ,Commands.waitSeconds(2.5)
         ,Commands.print("Auto Coral High")
-        .andThen(new InstantCommand(() -> coral.backward(1)))
+        .andThen(new InstantCommand(() -> coral.backward(0.9)))
         , Commands.waitSeconds(.5)
          .andThen(new InstantCommand(() -> coral.stopMotor())))
          .andThen(new InstantCommand(() -> elevator.stopElevator()));
@@ -182,7 +182,7 @@ public class RobotContainer {
 
 
         coralIntakeTrigger
-            .whileTrue(new InstantCommand(() -> coral.backward(1)))
+            .whileTrue(new InstantCommand(() -> coral.backward(0.9)))
             .onFalse(new InstantCommand(() -> coral.stopMotor()));
         
         algaeIntakeTrigger
@@ -190,7 +190,7 @@ public class RobotContainer {
             .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
 
         joystick2.leftBumper()
-           .whileTrue(new InstantCommand(() -> coral.forward(1)))
+           .whileTrue(new InstantCommand(() -> coral.forward(0.9)))
            .onFalse(new InstantCommand(() -> coral.stopMotor())); 
         joystick2.rightBumper()
            .whileTrue(new InstantCommand(() -> algae.intakeBall(-1)))
