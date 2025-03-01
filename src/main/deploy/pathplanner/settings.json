@@ -5,6 +5,7 @@
   "pathFolders": [
     "Center Auton",
     "Left Auton",
+    "Calibration",
     "Right Auton"
   ],
   "autoFolders": [

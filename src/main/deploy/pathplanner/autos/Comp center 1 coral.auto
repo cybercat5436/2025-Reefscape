@@ -11,22 +11,22 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Copy of Left Path 1 MT2"
+                  "pathName": "Test path 1"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "raiseArmHigh"
+                  "name": "setClimberArmsToAutonStartPosition"
                 }
               }
             ]
           }
         },
         {
-          "type": "wait",
+          "type": "named",
           "data": {
-            "waitTime": 1.0
+            "name": "raiseArmHigh"
           }
         },
         {
@@ -44,7 +44,7 @@
       ]
     }
   },
-  "resetOdom": false,
+  "resetOdom": true,
   "folder": null,
   "choreoAuto": false
 }

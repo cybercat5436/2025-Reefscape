@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.0,
-        "y": 5.0
+        "x": 0.5154713114754099,
+        "y": 4.0549692622950815
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.0,
-        "y": 6.0
+        "x": 1.515471311475408,
+        "y": 4.0549692622950815
       },
       "isLocked": false,
-      "linkedName": "CalibrationPoint3"
+      "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.0,
-        "y": 7.0
+        "x": 8.487295081967211,
+        "y": 4.0549692622950815
       },
       "prevControl": {
-        "x": 2.0,
-        "y": 6.0
+        "x": 7.487295081967211,
+        "y": 4.0549692622950815
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "CalibrationPoint1"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -45,7 +45,7 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": "Calibration",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0
