@@ -190,7 +190,7 @@ public class RobotContainer {
             .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
 
         joystick2.leftBumper()
-           .whileTrue(new InstantCommand(() -> coral.forward(0.9)))
+           .whileTrue(new InstantCommand(() -> coral.forward(0.8)))
            .onFalse(new InstantCommand(() -> coral.stopMotor())); 
         joystick2.rightBumper()
            .whileTrue(new InstantCommand(() -> algae.intakeBall(-1)))
