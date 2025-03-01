@@ -13,12 +13,6 @@
                 "data": {
                   "pathName": "Test path 1"
                 }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "setClimberArmsToAutonStartPosition"
-                }
               }
             ]
           }
