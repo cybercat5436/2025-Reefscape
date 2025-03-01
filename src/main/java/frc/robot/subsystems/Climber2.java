@@ -28,8 +28,8 @@ public class Climber2 extends SubsystemBase {
     private double rightEncoderValue;
     private double leftEncoderValue;
     private double climberEncoderLimitUp = 0;
-    private double climberEncoderLimitDown = -5;
-    private double climberAutonStartPosition = -2;
+    private double climberEncoderLimitDown = -42.5;
+    private double climberAutonStartPosition = -7.0;
     private final MotionMagicVoltage m_mmReq = new MotionMagicVoltage(0);
 
 
@@ -127,8 +127,8 @@ System.out.println("Stopped climbing ");
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    leftEncoderValue = -leftClimber.getPosition().getValueAsDouble();
-    rightEncoderValue = -rightClimber.getPosition().getValueAsDouble();
+    leftEncoderValue = leftClimber.getPosition().getValueAsDouble();
+    rightEncoderValue = rightClimber.getPosition().getValueAsDouble();
 
     SmartDashboard.putNumber("ClimberLeftValue",leftEncoderValue);
     SmartDashboard.putNumber("ClimberRightValue", rightEncoderValue);
