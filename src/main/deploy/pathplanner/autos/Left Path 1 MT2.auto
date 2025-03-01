@@ -17,16 +17,16 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "raiseArmHigh"
+                  "name": "setClimberArmsToAutonStartPosition"
                 }
               }
             ]
           }
         },
         {
-          "type": "wait",
+          "type": "named",
           "data": {
-            "waitTime": 0.6
+            "name": "raiseArmHigh"
           }
         },
         {
@@ -40,15 +40,15 @@
           "data": {
             "commands": [
               {
-                "type": "named",
-                "data": {
-                  "name": "lowerElevator"
-                }
-              },
-              {
                 "type": "path",
                 "data": {
                   "pathName": "Left Path 2 MT2"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "lowerElevator"
                 }
               }
             ]
@@ -61,7 +61,7 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "sequential",
           "data": {
             "commands": [
               {
@@ -77,12 +77,6 @@
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.6
           }
         },
         {

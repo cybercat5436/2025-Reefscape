@@ -17,16 +17,16 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "raiseArmHigh"
+                  "name": "setClimberArmsToAutonStartPosition"
                 }
               }
             ]
           }
         },
         {
-          "type": "wait",
+          "type": "named",
           "data": {
-            "waitTime": 1.0
+            "name": "raiseArmHigh"
           }
         },
         {

@@ -165,6 +165,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("lowerElevator", new InstantCommand(() -> elevator.raiseLevel1()).andThen(Commands.waitSeconds(2).andThen(new InstantCommand(() -> elevator.stopElevator()))));
         NamedCommands.registerCommand("coralIntake", new CoralIntakeWithDetection(coral, coralSensor));
         NamedCommands.registerCommand("stopCoralIntake", new InstantCommand(() -> coral.forward(0)));
+        NamedCommands.registerCommand("setClimberArmsToAutonStartPosition", new InstantCommand(() -> climber2.climberAutonStartPosition()));
     }
 
 
@@ -350,13 +351,13 @@ public class RobotContainer {
         Trigger leftClimberStopTrigger = new Trigger(() -> joystick2.getLeftY() >= -0.2 && joystick2.getLeftY() <= 0.2);
 
         leftClimbUpTrigger
-            .whileTrue(new InstantCommand(() -> climber2.rightClimb(0.2)));
+            .whileTrue(new InstantCommand(() -> climber2.rightClimb(0.2)).repeatedly());
         rightClimbUpTrigger
-            .whileTrue(new InstantCommand(() -> climber2.leftClimb(0.2)));
+            .whileTrue(new InstantCommand(() -> climber2.leftClimb(0.2)).repeatedly());
         leftClimbDownTrigger
-            .whileTrue(new InstantCommand(() -> climber2.rightClimb(-0.2)));
+            .whileTrue(new InstantCommand(() -> climber2.rightClimb(-0.2)).repeatedly());
         rightClimbDownTrigger
-            .whileTrue(new InstantCommand(() -> climber2.leftClimb(-0.2)));
+            .whileTrue(new InstantCommand(() -> climber2.leftClimb(-0.2)).repeatedly());
         rightClimberStopTrigger
             .whileTrue(new InstantCommand(() -> climber2.leftClimb(0)));
         leftClimberStopTrigger
@@ -364,6 +365,9 @@ public class RobotContainer {
         joystick.povLeft().onTrue(new InstantCommand(() -> candleSystem.changeAnimation(AnimationTypes.Fire)));
         joystick.povDown().onTrue(new InstantCommand(() -> candleSystem.turnOffColors()));
         joystick.povUp().onTrue(new InstantCommand(() -> candleSystem.showTeamColors()));
+        
+        SmartDashboard.putData(" Climber arms to auton start position", new InstantCommand(() -> climber2.climberAutonStartPosition()));
+        
         /*joystick.povRight()
             .onTrue(new InstantCommand(() -> candleSystem.flashColor(AvailableColors.Red))
             .andThen(new WaitCommand(0.5))
