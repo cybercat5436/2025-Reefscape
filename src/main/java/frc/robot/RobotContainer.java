@@ -351,13 +351,13 @@ public class RobotContainer {
         Trigger leftClimberStopTrigger = new Trigger(() -> joystick2.getLeftY() >= -0.2 && joystick2.getLeftY() <= 0.2);
 
         leftClimbUpTrigger
-            .whileTrue(new InstantCommand(() -> climber2.rightClimb(0.2)));
+            .whileTrue(new InstantCommand(() -> climber2.rightClimb(0.2)).repeatedly());
         rightClimbUpTrigger
-            .whileTrue(new InstantCommand(() -> climber2.leftClimb(0.2)));
+            .whileTrue(new InstantCommand(() -> climber2.leftClimb(0.2)).repeatedly());
         leftClimbDownTrigger
-            .whileTrue(new InstantCommand(() -> climber2.rightClimb(-0.2)));
+            .whileTrue(new InstantCommand(() -> climber2.rightClimb(-0.2)).repeatedly());
         rightClimbDownTrigger
-            .whileTrue(new InstantCommand(() -> climber2.leftClimb(-0.2)));
+            .whileTrue(new InstantCommand(() -> climber2.leftClimb(-0.2)).repeatedly());
         rightClimberStopTrigger
             .whileTrue(new InstantCommand(() -> climber2.leftClimb(0)));
         leftClimberStopTrigger
@@ -366,6 +366,7 @@ public class RobotContainer {
         joystick.povDown().onTrue(new InstantCommand(() -> candleSystem.turnOffColors()));
         joystick.povUp().onTrue(new InstantCommand(() -> candleSystem.showTeamColors()));
         
+        SmartDashboard.putData(" Climber arms to auton start position", new InstantCommand(() -> climber2.climberAutonStartPosition()));
         
         /*joystick.povRight()
             .onTrue(new InstantCommand(() -> candleSystem.flashColor(AvailableColors.Red))

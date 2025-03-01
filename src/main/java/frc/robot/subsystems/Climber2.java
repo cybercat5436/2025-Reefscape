@@ -28,9 +28,9 @@ public class Climber2 extends SubsystemBase {
     private double rightEncoderValue;
     private double leftEncoderValue;
     private double climberEncoderLimitUp = 0;
-    private double climberEncoderLimitDown = -42.5;
+    private double climberEncoderLimitDown = -45;
     private double climberAutonStartPosition = -7.0;
-    private final MotionMagicVoltage m_mmReq = new MotionMagicVoltage(0);
+    private MotionMagicVoltage m_mmReq = new MotionMagicVoltage(0);
 
 
     /** Creates a new Climber. */
@@ -44,9 +44,7 @@ public class Climber2 extends SubsystemBase {
     leftConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     rightConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
-    
-
-
+  
 
     MotionMagicConfigs mml = leftConfiguration.MotionMagic;
     mml.withMotionMagicCruiseVelocity(20) // 5 (mechanism) rotations per second cruise
