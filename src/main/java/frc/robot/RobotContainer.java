@@ -165,7 +165,11 @@ public class RobotContainer {
         NamedCommands.registerCommand("lowerElevator", new InstantCommand(() -> elevator.raiseLevel1()).andThen(Commands.waitSeconds(2).andThen(new InstantCommand(() -> elevator.stopElevator()))));
         NamedCommands.registerCommand("coralIntake", new CoralIntakeWithDetection(coral, coralSensor));
         NamedCommands.registerCommand("stopCoralIntake", new InstantCommand(() -> coral.forward(0)));
-        NamedCommands.registerCommand("setClimberArmsToAutonStartPosition", new InstantCommand(() -> climber2.climberAutonStartPosition()));
+        NamedCommands.registerCommand("setClimberArmsToAutonStartPosition", 
+        new InstantCommand(() -> climber2.climberAutonStartPosition())
+        .andThen(Commands.waitSeconds(0.5))
+        .andThen(new InstantCommand(() -> climber2.stopClimb())
+        ));
     }
 
 
@@ -366,7 +370,11 @@ public class RobotContainer {
         joystick.povDown().onTrue(new InstantCommand(() -> candleSystem.turnOffColors()));
         joystick.povUp().onTrue(new InstantCommand(() -> candleSystem.showTeamColors()));
         
-        SmartDashboard.putData(" Climber arms to auton start position", new InstantCommand(() -> climber2.climberAutonStartPosition()));
+        SmartDashboard.putData(" Climber arms to auton start position",
+         new InstantCommand(() -> climber2.climberAutonStartPosition())
+         .andThen(Commands.waitSeconds(0.5))
+         .andThen(new InstantCommand(() -> climber2.stopClimb())
+         ));
         
         /*joystick.povRight()
             .onTrue(new InstantCommand(() -> candleSystem.flashColor(AvailableColors.Red))

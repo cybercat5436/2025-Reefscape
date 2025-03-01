@@ -109,8 +109,8 @@ public class Climber2 extends SubsystemBase {
  }
 
  public void climberAutonStartPosition(){
-  rightClimber.setControl(m_mmReq.withPosition(climberAutonStartPosition));
-  leftClimber.setControl(m_mmReq.withPosition(climberAutonStartPosition));
+  rightClimber.set(-0.2);
+  leftClimber.set(-0.2);
  }
  
 

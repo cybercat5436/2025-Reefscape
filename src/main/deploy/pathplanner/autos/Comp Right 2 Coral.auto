@@ -13,6 +13,12 @@
                 "data": {
                   "pathName": "Right Path 1 MT2"
                 }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "setClimberArmsToAutonStartPosition"
+                }
               }
             ]
           }
