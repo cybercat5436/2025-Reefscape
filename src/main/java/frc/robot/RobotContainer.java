@@ -218,12 +218,12 @@ public class RobotContainer {
            
        
 
-        joystick2.povUp().and(joystick2.rightBumper())
-            .whileTrue(new InstantCommand(() -> algae.releaseBall(-0.3))) 
-            .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
-        joystick2.povRight().and(joystick2.rightBumper())
-            .whileTrue(new InstantCommand(() -> algae.releaseBall(-0.3))) 
-            .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
+        // joystick2.povUp().and(joystick2.rightBumper())
+        //     .whileTrue(new InstantCommand(() -> algae.releaseBall(-0.3))) 
+        //     .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
+        // joystick2.povRight().and(joystick2.rightBumper())
+        //     .whileTrue(new InstantCommand(() -> algae.releaseBall(-0.3))) 
+        //     .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
         //joystick2.povLeft()
          // .whileTrue(new InstantCommand(() -> algae.releaseBall(-0.3))) 
          //  .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
