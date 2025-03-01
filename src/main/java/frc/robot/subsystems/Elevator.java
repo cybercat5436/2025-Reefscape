@@ -90,12 +90,12 @@ public class Elevator extends SubsystemBase {
   // } 
   public void incrementHeightAdjustment() {
     heightAdjustment++;
-    elevator.setControl(m_motmag.withPosition(L4 + heightAdjustment * 0.2));
+    elevator.setControl(m_motmag.withPosition(L4 + heightAdjustment * 0.1));
     System.out.println("Increased Height" + heightAdjustment);
   }
   public void decrementHeightAdjustment() {
     heightAdjustment--;
-    elevator.setControl(m_motmag.withPosition(L4 + heightAdjustment * 0.2));
+    elevator.setControl(m_motmag.withPosition(L4 + heightAdjustment * 0.1));
     System.out.println("Decreased Height" + heightAdjustment);
   }
 
@@ -120,7 +120,7 @@ public class Elevator extends SubsystemBase {
   } 
   public void raiseLevel4() {
     m_motmag.Slot = 0;
-    elevator.setControl(m_motmag.withPosition(L4 + heightAdjustment * 0.2));
+    elevator.setControl(m_motmag.withPosition(L4 + heightAdjustment * 0.1));
     System.out.println("$$$$$$$$$$$$$$raised level 4$$$$%$$$$$$$");
   } 
   public void stopElevator() {
