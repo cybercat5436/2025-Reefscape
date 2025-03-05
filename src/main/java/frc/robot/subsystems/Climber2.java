@@ -27,7 +27,8 @@ public class Climber2 extends SubsystemBase {
     private final DutyCycleOut rightOut = new DutyCycleOut(0);
     private double rightEncoderValue;
     private double leftEncoderValue;
-    private double climberEncoderLimitUp = 10;
+    private boolean climberEncoderOverride = false;
+    private double climberEncoderLimitUp = 0;
     private double climberEncoderLimitDown = -53;
     private double climberAutonStartPosition = -7.0;
     private MotionMagicVoltage m_mmReq = new MotionMagicVoltage(0);
@@ -85,11 +86,14 @@ public class Climber2 extends SubsystemBase {
   * 
   * 
   */
+  public void setClimberOverride(boolean override) {
+    climberEncoderOverride = override;
+  }
  public void leftClimb(double speed) {
-  if((leftEncoderValue >= climberEncoderLimitUp) && (speed > 0)){
+  if((leftEncoderValue >= climberEncoderLimitUp) && (speed > 0) && !climberEncoderOverride){
     speed = 0.0;
   }
-  if((leftEncoderValue <= climberEncoderLimitDown) && (speed < 0)){
+  if((leftEncoderValue <= climberEncoderLimitDown) && (speed < 0) && !climberEncoderOverride){
     speed = 0.0;
   }
   leftClimber.setControl(leftOut.withOutput(speed));
@@ -98,10 +102,10 @@ public class Climber2 extends SubsystemBase {
 
 
  public void rightClimb(double speed) {
-  if((rightEncoderValue >= climberEncoderLimitUp) && (speed > 0)){
+  if((rightEncoderValue >= climberEncoderLimitUp) && (speed > 0) && !climberEncoderOverride){
     speed = 0.0;
   }
-  if((rightEncoderValue <= climberEncoderLimitDown) && (speed < 0)){
+  if((rightEncoderValue <= climberEncoderLimitDown) && (speed < 0) && !climberEncoderOverride){
     speed = 0.0;
   }
   rightClimber.setControl(rightOut.withOutput(speed));

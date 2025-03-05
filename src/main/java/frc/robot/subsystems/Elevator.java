@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.StatusCode;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -20,6 +21,7 @@ import com.ctre.phoenix6.signals.MotorArrangementValue;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.units.measure.*;
 
 
 public class Elevator extends SubsystemBase {
@@ -27,8 +29,8 @@ public class Elevator extends SubsystemBase {
   MotionMagicVoltage m_motmag = new MotionMagicVoltage(0);
   final VoltageOut m_request = new VoltageOut(0);
   private double L1 = 0;
-  private double L2 = 1.3;
-  private double L3 = 3.18;
+  private double L2 = 1.2;
+  private double L3 = 3.23;
   private double L4 = 6.12;
   private int heightAdjustment = 0;
   private final TalonFX elevator = new TalonFX(12);
@@ -54,7 +56,14 @@ public class Elevator extends SubsystemBase {
     // motionMagicConfigs.MotionMagicJerk = 200; // 1600 rps/s^2 jerk (0.1 seconds)
 
     // elevator.getConfigurator().apply(talonFXConfigs, 0.050);
-     TalonFXConfiguration cfg = new TalonFXConfiguration();
+     TalonFXConfiguration cfg = new TalonFXConfiguration()
+     .withCurrentLimits(
+            new CurrentLimitsConfigs()
+                // Swerve azimuth does not require much torque output, so we can set a relatively low
+                // stator current limit to help avoid brownouts without impacting performance.
+                .withStatorCurrentLimit(60)
+                .withStatorCurrentLimitEnable(true)
+        );
      cfg.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
     /* Configure gear ratio */

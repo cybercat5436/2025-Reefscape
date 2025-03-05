@@ -61,6 +61,7 @@ import frc.robot.subsystems.Algae;
 import frc.robot.subsystems.CANdleSystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Coral;
+import frc.robot.subsystems.CoralPoleDetector;
 import frc.robot.subsystems.GamePieceDetector;
 import frc.robot.subsystems.CANdleSystem.AnimationTypes;
 import frc.robot.subsystems.CANdleSystem.AvailableColors;
@@ -109,11 +110,11 @@ public class RobotContainer {
     public final Climber2 climber2 = new Climber2();
     public final GamePieceDetector coralSensor = new GamePieceDetector(35000, GamePieceDetector.Sensors.coral);
     public final GamePieceDetector algaeSensor = new GamePieceDetector(25000, GamePieceDetector.Sensors.algae, 0.1);
-    
     public final Coral coral = new Coral();
     public final Algae algae = new Algae();
     public final Elevator elevator = new Elevator();
     public CANdleSystem candleSystem = new CANdleSystem(joystick.getHID());
+    public final CoralPoleDetector coralPoleDetector = new CoralPoleDetector();
     private SequentialCommandGroup autoCoralHigh = new SequentialCommandGroup(
         new InstantCommand(() -> elevator.raiseLevel4())
         ,Commands.waitSeconds(2.5)
@@ -161,7 +162,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("autoCoralHigh", autoCoralHigh);
         NamedCommands.registerCommand("autoAlign", autoAlign);
         NamedCommands.registerCommand("raiseArmHigh", new InstantCommand(() -> elevator.raiseLevel4()));
-        NamedCommands.registerCommand("shootCoral", new InstantCommand(() -> coral.backward(1)).andThen(Commands.waitSeconds(0.3)).andThen(new InstantCommand(() -> coral.stopMotor())));
+        NamedCommands.registerCommand("shootCoral", new InstantCommand(() -> coral.backward(0.80)).andThen(Commands.waitSeconds(0.3)).andThen(new InstantCommand(() -> coral.stopMotor())));
         NamedCommands.registerCommand("lowerElevator", new InstantCommand(() -> elevator.raiseLevel1()).andThen(Commands.waitSeconds(2).andThen(new InstantCommand(() -> elevator.stopElevator()))));
         NamedCommands.registerCommand("coralIntake", new CoralIntakeWithDetection(coral, coralSensor));
         NamedCommands.registerCommand("stopCoralIntake", new InstantCommand(() -> coral.forward(0)));
@@ -190,7 +191,7 @@ public class RobotContainer {
             .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
 
         joystick2.leftBumper()
-           .whileTrue(new InstantCommand(() -> coral.forward(0.8)))
+           .whileTrue(new InstantCommand(() -> coral.forward(0.65)))
            .onFalse(new InstantCommand(() -> coral.stopMotor())); 
         joystick2.rightBumper()
            .whileTrue(new InstantCommand(() -> algae.intakeBall(-1)))
@@ -209,7 +210,7 @@ public class RobotContainer {
         
         joystick2.x()
             .onTrue(new InstantCommand(() -> elevator.raiseLevel1())
-            .andThen(Commands.waitSeconds(1.5))
+            .andThen(Commands.waitSeconds(1.25))
             .andThen(new InstantCommand(() -> elevator.stopElevator())));
         joystick2.a()
             .onTrue(new InstantCommand(() -> elevator.raiseLevel2()));
@@ -217,7 +218,7 @@ public class RobotContainer {
             .onTrue(new InstantCommand(() -> elevator.raiseLevel3()));
         joystick2.y()
             .onTrue(new InstantCommand(() -> elevator.raiseLevel4()));
-           
+        
         joystick2.povRight().onTrue(new InstantCommand(() -> elevator.incrementHeightAdjustment()));
         joystick2.povLeft().onTrue(new InstantCommand(() -> elevator.decrementHeightAdjustment()));
 
@@ -271,7 +272,7 @@ public class RobotContainer {
                 double ySpeed = slewRateLimiterY.calculate(joystick.getLeftX()* maxSpeed);
                 
                 double yTurnSpeed = slewRateLimiterTurnX.calculate(joystick.getRightX()* maxAngularRate);
-
+        
                 SmartDashboard.putNumber("xSpeed",xSpeed);
                 SmartDashboard.putNumber("ySpeed",ySpeed);
                 SmartDashboard.putNumber("yTurnSpeed",yTurnSpeed);
@@ -356,7 +357,7 @@ public class RobotContainer {
         Trigger leftClimbDownTrigger = new Trigger(() -> (joystick2.getLeftY() > 0.2));
         Trigger rightClimberStopTrigger = new Trigger(() -> joystick2.getRightY() >= -0.2 && joystick2.getRightY() <= 0.2);
         Trigger leftClimberStopTrigger = new Trigger(() -> joystick2.getLeftY() >= -0.2 && joystick2.getLeftY() <= 0.2);
-
+        
         leftClimbUpTrigger
             .whileTrue(new InstantCommand(() -> climber2.rightClimb(0.2)).repeatedly());
         rightClimbUpTrigger
@@ -372,7 +373,10 @@ public class RobotContainer {
         joystick.povLeft().onTrue(new InstantCommand(() -> candleSystem.changeAnimation(AnimationTypes.Fire)));
         joystick.povDown().onTrue(new InstantCommand(() -> candleSystem.turnOffColors()));
         joystick.povUp().onTrue(new InstantCommand(() -> candleSystem.showTeamColors()));
-        
+
+        joystick2.back().onTrue(new InstantCommand(() -> climber2.setClimberOverride(true)))
+        .onFalse(new InstantCommand(() -> climber2.setClimberOverride(false)));
+
         SmartDashboard.putData(" Climber arms to auton start position",
          new InstantCommand(() -> climber2.climberAutonStartPosition())
          .andThen(Commands.waitSeconds(0.5))
