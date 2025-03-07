@@ -29,6 +29,7 @@ public class PhotonVision extends SubsystemBase {
      if (results.isEmpty() == false) {
          // Camera processed a new frame since last
          // Get the last one in the list.
+         System.out.println("-----------------------//////Entered Photonvision periodic/////////---------------------");
          var result = results.get(results.size() - 1);
          if (result.hasTargets()) {
              // At least one AprilTag was seen by the camera
@@ -45,6 +46,8 @@ public class PhotonVision extends SubsystemBase {
                     targetVisible = true;
                     observedArea = target.getArea();
                 }
+                observedYaw = target.getYaw();
+                SmartDashboard.putNumber(getName(), observedArea);
              }
          }
      }
