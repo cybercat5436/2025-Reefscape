@@ -25,12 +25,12 @@ public class AutoAlignWithLimelight extends Command {
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
   private LimeLight limelight;
   private PhotonVision photonVision;
-  private MovingAverage movingAverage;
+  // private MovingAverage movingAverage;
   private double tX;
   private double targettX = 0;
   private double tXError;
   private double tY;
-  private double targettY = 0;
+  private double targettY = -3.2;
   private double tYError;
   private double kPX = 0.2;
   private double kPY = 0.2;
@@ -46,14 +46,14 @@ public class AutoAlignWithLimelight extends Command {
     this.commandSwerveDrivetrain = commandSwerveDrivetrain;
     this.limelight = limeLight;
     this.photonVision = photonVision;
-    this.movingAverage = new MovingAverage(20);
+    // this.movingAverage = new MovingAverage(20);
 
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    LimelightHelpers.setPipelineIndex(limelight.limelightName, 1);
+    LimelightHelpers.setPipelineIndex(limelight.limelightName, 0);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -65,11 +65,11 @@ public class AutoAlignWithLimelight extends Command {
     robotXError = targettX - tX;
     ySpeed = kPY * Math.min(maxSpeed, Math.abs(robotYError)) * Math.signum(robotYError);
     xSpeed = kPX * Math.min(maxSpeed, Math.abs(robotXError)) * Math.signum(robotXError);
-    movingAverage.putData(xSpeed);
+    // movingAverage.putData(xSpeed);
     System.out.println("tX "+tX + "xSpeed " + xSpeed);
     commandSwerveDrivetrain.setControl(
       robotCentricDrive
-      .withVelocityX(xSpeed));
+      .withVelocityY(ySpeed));
   }
 
 
