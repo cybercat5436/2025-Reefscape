@@ -259,7 +259,7 @@ public class PoseUpdater extends SubsystemBase {
     if(DriverStation.isDisabled()){
       var visionPose = new Pose2d(7.5, 5.5, Rotation2d.k180deg);
       double distVisionToCurrent = commandSwerveDrivetrain.getState().Pose.getTranslation().getDistance(visionPose.getTranslation());
-      System.out.println(String.format("Distance Vision to Current %.2f", distVisionToCurrent));
+      // System.out.println(String.format("Distance Vision to Current %.2f", distVisionToCurrent));
       
       // without this distance filter you can get diverging pose corrections (swirls off map)
       if(distVisionToCurrent <= 1.0){

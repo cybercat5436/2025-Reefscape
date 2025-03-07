@@ -16,9 +16,11 @@ public class Robot extends TimedRobot {
   private boolean didAutoChange = false;
   private boolean didAllianceChange = false;
   private Alliance m_alliance = Alliance.Blue;
+  private Command generatePathCommand;
 
   public Robot() {
     m_robotContainer = new RobotContainer();
+    this.generatePathCommand = m_robotContainer.testReefController();
   }
 
   @Override
@@ -70,6 +72,7 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+    m_robotContainer.resetSimulationStartPose();
   }
 
   @Override
@@ -90,5 +93,8 @@ public class Robot extends TimedRobot {
   public void testExit() {}
 
   @Override
-  public void simulationPeriodic() {}
+  public void simulationPeriodic() {
+    //m_robotContainer.resetSimulationStartPose();
+    generatePathCommand.schedule();
+  }
 }

@@ -9,6 +9,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.PathConstraints;
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -17,6 +20,7 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.generated.TunerConstants;
 
@@ -105,6 +109,29 @@ public class ReefController extends SubsystemBase {
     
     
   }
+
+  public Pose2d displaceOneMeterBackward(Pose2d botPose){
+    Rotation2d currentRotation = botPose.getRotation();
+
+    //calculae the displacement to move 1meter backward in current direction
+    double deltaX = -1.0 * Math.cos(currentRotation.getDegrees());
+    double deltaY = -1.0 * Math.sin(currentRotation.getDegrees());
+
+    // Pose2d generatePathTargetPose = botPose.transformBy(new Transform2d(new Translation2d(deltaX,deltaY),currentRotation));
+    var generatePathTargetPose = new Pose2d(botPose.getTranslation().minus(new Translation2d(1,botPose.getRotation())),botPose.getRotation());
+    return generatePathTargetPose;
+  }
+
+  //Generate path dynamically from the current pose to apriltag(selected) pose
+  public Command generatePathToReef(){
+    Pose2d targetPose = displaceOneMeterBackward(getTargetRobotPose());
+    System.out.println(targetPose + "@@@@@@@@@@@@@@@");
+    PathConstraints constraints = new PathConstraints(2.0, 2.0, 300, 720);
+    Command pathfindingCommand = AutoBuilder.pathfindToPose(
+        targetPose,
+        constraints);
+    return pathfindingCommand;
+  }
   public int getTagId(){
     return tagId;
   }
@@ -177,5 +204,10 @@ public class ReefController extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+  }
+
+  @Override
+  public void simulationPeriodic(){
+    
   }
 }
