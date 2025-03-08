@@ -4,7 +4,10 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.hal.AllianceStationID;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.generated.TunerConstants;
 
@@ -77,14 +80,10 @@ public class CANdleSystem extends SubsystemBase {
     }
 
     public void showTeamColors(){
-        //blue
-        m_candle.setLEDs(0,0,225,0,0,128);
-        m_candle.setLEDs(0,0,225,0,256,128);
-        
-        //yellow
-        //m_candle.setLEDs(225,215,0,0,2,2);
-        //m_candle.setLEDs(225,215,0,0,4,2);
-    }
+       
+
+
+       }
     public void showRed() {
         m_candle.setLEDs(255, 0, 0);
     }
@@ -292,6 +291,7 @@ public class CANdleSystem extends SubsystemBase {
     @Override
     public void periodic() {
         // This method will be called once per scheduler run
+        
         /*if(m_toAnimate == null) {
             m_candle.setLEDs((int)(joystick.getLeftTriggerAxis() * 255), 
                               (int)(joystick.getRightTriggerAxis() * 255), 

@@ -244,7 +244,7 @@ public class RobotContainer {
         
         // joystick.povLeft().onTrue(new InstantCommand(() -> candleSystem.incrementAnimation()));
         // joystick.povDown().onTrue(new InstantCommand(() -> candleSystem.turnOffColors()));
-        // joystick.povUp().onTrue(new InstantCommand(() -> candleSystem.showTeamColors()));
+        joystick.povUp().onTrue(new InstantCommand(() -> candleSystem.showTeamColors()));
         /*joystick.povRight()
             .onTrue(new InstantCommand(() -> candleSystem.flashColor(AvailableColors.Red))
             .andThen(new WaitCommand(0.5))
