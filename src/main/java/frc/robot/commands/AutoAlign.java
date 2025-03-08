@@ -21,6 +21,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.LimelightHelpers;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LimeLight;
 import frc.robot.subsystems.PhotonVision;
@@ -90,6 +91,7 @@ public class AutoAlign extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    LimelightHelpers.setPipelineIndex(limelight.limelightName, 0);
     timer.reset();
     timer.start();
     System.out.println("starting auto align");
@@ -168,6 +170,7 @@ public class AutoAlign extends Command {
         .withVelocityY(0)
         .withRotationalRate(0)
     );
+    LimelightHelpers.setPipelineIndex(limelight.limelightName, 1);
     
     if(isYAligned) {
       System.out.println("Robot Y Aligned");
