@@ -4,13 +4,18 @@
 
 package frc.robot.subsystems;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.json.simple.parser.ParseException;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.util.FileVersionException;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
@@ -22,6 +27,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.generated.TunerConstants;
 
@@ -53,15 +59,18 @@ public class ReefController extends SubsystemBase {
   private HashMap<ReefPosition, Integer> blueAprilTagMap = new HashMap<>();
   private HashMap<ReefPosition, Integer> redAprilTagMap = new HashMap<>();
   private HashMap<PolePlacement, Set<ReefPosition>> polePlacementMap = new HashMap<>();
+  private HashMap<ReefPosition, String> reefPositionStitchPath = new HashMap<>();
   private static AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
   private double poleOffsetDistanceMeters = 0.165; // Offset distance between center of April tag and reef pole 33 / 2 cm
   private Pose2d aprilTagPose2d = new Pose2d();
+  PathConstraints constraints = new PathConstraints(2.0, 2.0, 300, 720);
 
   /** Creates a new ReefController. */
   public ReefController() {
     populateBlueAprilTagMap();
     populateRedAprilTagMap();
     populatePolePlacementMap();
+    populateStitchPath();
   }
 
   public static Pose2d getPoseForTagId(int tagId){
@@ -131,7 +140,6 @@ public class ReefController extends SubsystemBase {
   public Command generatePathToReef(){
     Pose2d targetPose = displaceOneMeterBackward(getTargetRobotPose());
     System.out.println(targetPose + "@@@@@@@@@@@@@@@");
-    PathConstraints constraints = new PathConstraints(2.0, 2.0, 300, 720);
     Command pathfindingCommand = AutoBuilder.pathfindToPose(
         targetPose,
         constraints);
@@ -139,6 +147,50 @@ public class ReefController extends SubsystemBase {
   }
   public int getTagId(){
     return tagId;
+  }
+
+  //Stitch Path to ReefPosition
+  public Command followPathToReefPosition(){
+    
+    // Load the path we want to pathfind to and follow
+    try {
+      System.out.println("$$$$$$$$$$$$$"+ reefPositionStitchPath.get(targetReefPosition));
+       PathPlannerPath path = PathPlannerPath.fromPathFile(reefPositionStitchPath.get(targetReefPosition));
+       System.out.println("#############" + path);
+        // Since AutoBuilder is configured, we can use it to build pathfinding commands
+       return AutoBuilder.followPath(path);
+
+       
+    } catch (Exception e) {
+            // Handle errors (e.g., file not found, invalid path)
+            System.err.println("Error loading path: " + e.getMessage());
+            e.printStackTrace();
+            
+            // Return a default "do nothing" command to avoid crashes
+            return Commands.none();
+        }
+  }
+
+  //Path find to path and thn follow the path
+  public Command pathFindAndFollowPathToReefPosition(){
+    
+    // Load the path we want to pathfind to and follow
+    try {
+      System.out.println("$$$$$$$$$$$$$"+ reefPositionStitchPath.get(targetReefPosition));
+       PathPlannerPath path = PathPlannerPath.fromPathFile(reefPositionStitchPath.get(targetReefPosition));
+       System.out.println("#############" + path);
+        // Since AutoBuilder is configured, we can use it to build pathfinding commands
+       return AutoBuilder.pathfindThenFollowPath(path,constraints);
+
+       
+    } catch (Exception e) {
+            // Handle errors (e.g., file not found, invalid path)
+            System.err.println("Error loading path: " + e.getMessage());
+            e.printStackTrace();
+            
+            // Return a default "do nothing" command to avoid crashes
+            return Commands.none();
+        }
   }
 
   public void populateBlueAprilTagMap(){
@@ -170,6 +222,11 @@ public class ReefController extends SubsystemBase {
     redAprilTagMap.put(ReefPosition.K, 6);
     redAprilTagMap.put(ReefPosition.L, 6);
     
+  }
+
+  public void populateStitchPath(){
+    reefPositionStitchPath.put(ReefPosition.E, "E-ReefConroller-Stitch-Path");
+
   }
 
   private void populatePolePlacementMap(){

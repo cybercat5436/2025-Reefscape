@@ -447,22 +447,13 @@ public class RobotContainer {
 
     public Command testReefController(){
         reefController.setTargetReefPosition(ReefPosition.E);
-        return reefController.generatePathToReef();
-        // SmartDashboard.putData("Test path on Fly",new InstantCommand(() ->reefController.generatePathToReef()));
-    //     reefController.setTargetReefPosition(ReefPosition.I);
-    //     System.out.println(reefController.toString());
+        // return reefController.generatePathToReef();
 
-    //     reefController.setTargetReefPosition(ReefPosition.K);
-    //     System.out.println(reefController.toString());
-
-    //     reefController.setTargetReefPosition(ReefPosition.L);
-    //     System.out.println(reefController.toString());
-
-    //     reefController.setTargetReefPosition(ReefPosition.G);
-    //     System.out.println(reefController.toString());
-        
-    //     reefController.setTargetReefPosition(ReefPosition.H);
-    //     System.out.println(reefController.toString());        
+        //Test generate path and stitch path to Reef Position
+        return reefController.generatePathToReef().andThen(reefController.followPathToReefPosition());
+     
+        //Test Path find and then follow path to Reef Position
+        // return reefController.pathFindAndFollowPathToReefPosition();
     }
     
 

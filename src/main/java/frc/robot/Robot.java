@@ -94,7 +94,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void simulationPeriodic() {
-    //m_robotContainer.resetSimulationStartPose();
+    // m_robotContainer.resetSimulationStartPose();
     generatePathCommand.schedule();
   }
 }
