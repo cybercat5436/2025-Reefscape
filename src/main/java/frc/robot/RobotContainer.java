@@ -468,7 +468,14 @@ public class RobotContainer {
 
     public void setOdometryPoseFromSelectedAuto(String autonName){
         System.out.println("~~~~Setting pose from Selected Auto: " + autonName);
-        Pose2d startPose = new Pose2d();
+        // Pose2d startPose = new Pose2d();
+        
+        Pose2d coralStationPose = ReefController.getPoseForTagId(13);
+        Translation2d sideShift = new Translation2d(0.5,coralStationPose.getRotation().rotateBy(Rotation2d.kCW_90deg));
+        Translation2d botShift = new Translation2d(TunerConstants.kBotOffset, coralStationPose.getRotation());
+        var startAngle = ReefController.getPoseForTagId(13).getRotation().rotateBy(Rotation2d.k180deg);
+        // Pose2d startPose = new Pose2d(.551, 6.896, startAngle);
+        Pose2d startPose = new Pose2d(coralStationPose.getTranslation().plus(sideShift).plus(botShift), startAngle);
         
         try {
     

@@ -15,6 +15,7 @@ import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -52,7 +53,7 @@ public class ReefController extends SubsystemBase {
   private HashMap<ReefPosition, Integer> blueAprilTagMap = new HashMap<>();
   private HashMap<ReefPosition, Integer> redAprilTagMap = new HashMap<>();
   private HashMap<PolePlacement, Set<ReefPosition>> polePlacementMap = new HashMap<>();
-  private AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+  private static AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
   private double poleOffsetDistanceMeters = 0.165; // Offset distance between center of April tag and reef pole 33 / 2 cm
   private Pose2d aprilTagPose2d = new Pose2d();
 
@@ -61,6 +62,10 @@ public class ReefController extends SubsystemBase {
     populateBlueAprilTagMap();
     populateRedAprilTagMap();
     populatePolePlacementMap();
+  }
+
+  public static Pose2d getPoseForTagId(int tagId){
+    return aprilTagFieldLayout.getTagPose(tagId).orElse(new Pose3d()).toPose2d();
   }
 
   public Pose2d getTargetRobotPose(){
