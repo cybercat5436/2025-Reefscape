@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -210,6 +211,24 @@ public class PoseUpdater extends SubsystemBase {
     }
   }
 
+  public Pose2d visionDataCollection() {
+    double robotYaw = commandSwerveDrivetrain.getState().Pose.getRotation().getDegrees();
+    LimelightHelpers.SetRobotOrientation(limeLight.limelightName, robotYaw, 0.0, 0.0, 0.0, 0.0, 0.0);
+    LimelightHelpers.PoseEstimate limelightMeasurementMT2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limeLight.limelightName);
+    
+    
+    
+    return limelightMeasurementMT2.pose;
+    
+  }
+
+  public double visionStandardDeviation() {
+
+
+    return 0;
+
+  }
+
   private void updatePoseEstimatorMT1(LimeLight limeLight){
     // ~~~~~~~~~~~~~~~~~ updates pose with vision using MegaTag1 ~~~~~~~~~~~~~~~~~
     LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue(limeLight.limelightName);
@@ -251,6 +270,7 @@ public class PoseUpdater extends SubsystemBase {
     }
   }
   
+ 
 
   @Override
   public void simulationPeriodic() {

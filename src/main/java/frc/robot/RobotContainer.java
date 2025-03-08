@@ -11,6 +11,7 @@ import org.json.simple.parser.ParseException;
 import java.lang.annotation.Repeatable;
 import java.time.Instant;
 import java.time.temporal.TemporalAccessor;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.jar.Attributes.Name;
@@ -54,6 +55,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.AutoAlign;
 import frc.robot.commands.CoralIntakeWithDetection;
+import frc.robot.commands.StandardDeviation;
 import frc.robot.generated.TunerConstants;
 // import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Climber2;
@@ -98,12 +100,14 @@ public class RobotContainer {
     private final CommandXboxController joystick2 = new CommandXboxController(1);
     private final Joystick reefPositionJoystick = new Joystick(2);
     private final Joystick reefLevelJoystick = new Joystick(3);
+    private final CommandXboxController callibrationJoystick = new CommandXboxController(4);
    // private final ReefController reefController = new ReefController();
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private final LimeLight limeLightFront = new LimeLight("limelight-front", 0.02, -0.3, 0.65, -90.0, 0.0, 0.0);
     private final LimeLight limeLightFrontRight = new LimeLight("limelight-right", 0.15, 0.13, 0.45, 0.0, 0.0, 0.0);
     private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, limeLightFrontRight, drivetrain);
     private final AutoAlign autoAlign = new AutoAlign(drivetrain,limeLightFront,photonVision);
+    private final StandardDeviation standardDeviation = new StandardDeviation(poseUpdater, drivetrain);
     private SendableChooser<Command> autonChooser;
     // public final Climber climber = new Climber();
     public final Climber2 climber2 = new Climber2();
@@ -400,6 +404,9 @@ public class RobotContainer {
             new WaitCommand(0.25)
         );
 
+
+        // standard deviation calculation commands
+        callibrationJoystick.a().whileTrue(standardDeviation);
 
         //joystick.povRight().onTrue(new ParallelRaceGroup(blinkLight, new WaitCommand(2.25)));
         //joystick.povRight().onTrue(new ColorBlinkCommand(AvailableColors.Red, candleSystem));
