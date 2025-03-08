@@ -211,8 +211,9 @@ public class PoseUpdater extends SubsystemBase {
     }
   }
 
-  public Pose2d visionDataCollection() {
+  public Pose2d visionDataCollection(LimeLight limeLight) {
     double robotYaw = commandSwerveDrivetrain.getState().Pose.getRotation().getDegrees();
+    System.out.println("robotYaw: " + robotYaw);
     LimelightHelpers.SetRobotOrientation(limeLight.limelightName, robotYaw, 0.0, 0.0, 0.0, 0.0, 0.0);
     LimelightHelpers.PoseEstimate limelightMeasurementMT2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limeLight.limelightName);
     
@@ -220,13 +221,6 @@ public class PoseUpdater extends SubsystemBase {
     
     return limelightMeasurementMT2.pose;
     
-  }
-
-  public double visionStandardDeviation() {
-
-
-    return 0;
-
   }
 
   private void updatePoseEstimatorMT1(LimeLight limeLight){

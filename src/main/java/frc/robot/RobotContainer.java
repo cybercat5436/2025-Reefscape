@@ -107,7 +107,7 @@ public class RobotContainer {
     private final LimeLight limeLightFrontRight = new LimeLight("limelight-right", 0.15, 0.13, 0.45, 0.0, 0.0, 0.0);
     private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, limeLightFrontRight, drivetrain);
     private final AutoAlign autoAlign = new AutoAlign(drivetrain,limeLightFront,photonVision);
-    private final StandardDeviation standardDeviation = new StandardDeviation(poseUpdater, drivetrain);
+    private final StandardDeviation standardDeviation = new StandardDeviation(poseUpdater, drivetrain, new Pose2d(7.82,4.026,Rotation2d.k180deg),limeLightFront, limeLightFrontRight);
     private SendableChooser<Command> autonChooser;
     // public final Climber climber = new Climber();
     public final Climber2 climber2 = new Climber2();
