@@ -50,6 +50,10 @@ public class AutoAlignWithLimelight extends Command {
 
   }
 
+  public double getTargettY(){
+    return this.targettY;
+  }
+
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {

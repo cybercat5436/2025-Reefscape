@@ -69,7 +69,8 @@ public class ReefController extends SubsystemBase {
     } else{
       tagId = redAprilTagMap.get(targetReefPosition);
     }
-    aprilTagPose2d = aprilTagFieldLayout.getTagPose(tagId).isPresent()?aprilTagFieldLayout.getTagPose(tagId).get().toPose2d():new Pose2d();
+
+    aprilTagPose2d = aprilTagFieldLayout.getTagPose(tagId).isPresent() ? aprilTagFieldLayout.getTagPose(tagId).get().toPose2d() : new Pose2d();
     // System.out.println(aprilTagPose2d + " $%^");
 
     // From the center of the tag, the following translations are required:
@@ -105,6 +106,14 @@ public class ReefController extends SubsystemBase {
     
     
   }
+
+  /** Returns a Pose2d with the pole (x, y) field position and associated april tags heading */
+  public Pose2d getTargetPolePose2d(){
+    // get pole translation2d
+    // Translation2d poleTranslation2d = 
+    return null;
+  }
+
   public int getTagId(){
     return tagId;
   }

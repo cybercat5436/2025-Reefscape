@@ -70,6 +70,7 @@ import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.LimeLight;
 import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.PoseUpdater;
+import frc.robot.subsystems.PoseUpdaterPoleEdition;
 import frc.robot.subsystems.ReefController;
 
 public class RobotContainer {
@@ -99,13 +100,14 @@ public class RobotContainer {
     private final CommandXboxController joystick2 = new CommandXboxController(1);
     private final Joystick reefPositionJoystick = new Joystick(2);
     private final Joystick reefLevelJoystick = new Joystick(3);
-   // private final ReefController reefController = new ReefController();
+    private final ReefController reefController = new ReefController();
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private final LimeLight limeLightFront = new LimeLight("limelight-front", 0.02, -0.3, 0.65, -90.0, 0.0, 0.0);
     private final LimeLight limeLightFrontRight = new LimeLight("limelight-right", 0.15, 0.13, 0.45, 0.0, 0.0, 0.0);
     private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, limeLightFrontRight, drivetrain);
     private final AutoAlign autoAlign = new AutoAlign(drivetrain,limeLightFront,photonVision);
     private final AutoAlignWithLimelight autoALignWithLimelights = new AutoAlignWithLimelight(drivetrain,limeLightFront,photonVision);
+    private final PoseUpdaterPoleEdition poseUpdaterPoleEdition = new PoseUpdaterPoleEdition(limeLightFront, reefController, drivetrain);
     private SendableChooser<Command> autonChooser;
     // public final Climber climber = new Climber();
     public final Climber2 climber2 = new Climber2();
