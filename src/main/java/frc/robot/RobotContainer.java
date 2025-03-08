@@ -91,6 +91,10 @@ public class RobotContainer {
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
+    private final SwerveRequest.FieldCentricFacingAngle fieldCentricFacingAngle = new SwerveRequest.FieldCentricFacingAngle()
+            .withDeadband(maxSpeed * 0.1).withRotationalDeadband(maxAngularRate * 0.1) // Add a 10% deadband
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage) // Use open-loop control for drive motors
+            .withHeadingPID(3, 0, 0);
    
     private final Telemetry logger = new Telemetry(maxSpeed);
     private final PhotonVision photonVision = new PhotonVision();
@@ -266,9 +270,9 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->{
-                double xSpeed = slewRateLimiterX.calculate(joystick.getLeftY()* maxSpeed);
+                double xSpeed = slewRateLimiterX.calculate(-joystick.getLeftY()* maxSpeed);
                 
-                double ySpeed = slewRateLimiterY.calculate(joystick.getLeftX()* maxSpeed);
+                double ySpeed = slewRateLimiterY.calculate(-joystick.getLeftX()* maxSpeed);
                 
                 double yTurnSpeed = slewRateLimiterTurnX.calculate(joystick.getRightX()* maxAngularRate);
 
@@ -296,17 +300,33 @@ public class RobotContainer {
         
     // })
     // );
+    joystick.povUp().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 0));
+    joystick.povDown().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 180));
+    joystick.povLeft().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 90));
+    joystick.povRight().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 240));
+    //joystick.povUp().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 0));
+    //joystick.povUp().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 0));
+    
+
+    joystick.a().whileTrue(drivetrain.applyRequest(() -> {
+            double xSpeed = slewRateLimiterX.calculate(-joystick.getLeftY()* maxSpeed);             
+            double ySpeed = slewRateLimiterY.calculate(-joystick.getLeftX()* maxSpeed);          
+
+        return fieldCentricFacingAngle.withVelocityX(xSpeed * Math.abs(xSpeed)) 
+        .withVelocityY(ySpeed * Math.abs(ySpeed)) 
+        .withTargetDirection(Rotation2d.fromDegrees(drivetrain.targetRotation));
+        }
+    ));
     joystick.b().whileTrue(drivetrain.applyRequest(() -> {
             double xSpeed = slewRateLimiterX.calculate(-joystick.getLeftY()* maxSpeed);             
             double ySpeed = slewRateLimiterY.calculate(-joystick.getLeftX()* maxSpeed);          
             double yTurnSpeed = slewRateLimiterTurnX.calculate(joystick.getRightX()* maxAngularRate);
 
         return robotCentricDrive.withVelocityX(xSpeed * Math.abs(xSpeed)) 
-        .withVelocityY(ySpeed * Math.abs(ySpeed)) 
+        .withVelocityY(ySpeed * Math.abs(ySpeed))
         .withRotationalRate(-(yTurnSpeed * Math.abs(yTurnSpeed)));
         }
-    ));
-        
+    ));    
         Trigger slowModeTrigger = new Trigger ((joystick.leftTrigger()));
 
         slowModeTrigger.whileTrue(drivetrain.applyRequest(() ->{
@@ -327,8 +347,7 @@ public class RobotContainer {
             .withRotationalRate(-(yTurnSpeed * Math.abs(yTurnSpeed) ));
         } // Drive counterclockwise with negative X (left)
     ));
-    
-        joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
+        //joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
         joystick.x().whileTrue(drivetrain.applyRequest(() ->
             point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
         ));
