@@ -172,6 +172,8 @@ public class RobotContainer {
         .andThen(Commands.waitSeconds(0.5))
         .andThen(new InstantCommand(() -> climber2.stopClimb())
         ));
+        NamedCommands.registerCommand("autoAlignWithLimelight", autoALignWithLimelights);
+
     }
 
 
