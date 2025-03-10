@@ -39,6 +39,8 @@ public class AutoAlignWithLimelight extends Command {
   private double xSpeed;
   private double robotXError;
   private double maxSpeed = 1;
+  private double yErrorCalculated;
+  private double xErrorCalculated;
   /** Creates a new AutoAlignWithLimelight. */
   public AutoAlignWithLimelight(CommandSwerveDrivetrain commandSwerveDrivetrain, LimeLight limeLight, PhotonVision photonVision) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -59,12 +61,14 @@ public class AutoAlignWithLimelight extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    tY = -limelight.getVisionTargetVerticalError();
-    tX = -limelight.getVisionTargetHorizontalError();
-    robotYError = targettY - tY;
-    robotXError = targettX - tX;
-    ySpeed = kPY * Math.min(maxSpeed, Math.abs(robotYError)) * Math.signum(robotYError);
-    xSpeed = kPX * Math.min(maxSpeed, Math.abs(robotXError)) * Math.signum(robotXError);
+    tY = limelight.getVisionTargetVerticalError();
+    // tX = -limelight.getVisionTargetHorizontalError();
+    robotYError =  tY - targettY;
+    // robotXError = targettX - tX;
+    yErrorCalculated = kPY * Math.abs(robotYError);
+    // xErrorCalculated = kPX * Math.abs(robotXError);
+    ySpeed =  Math.min(maxSpeed, Math.abs(yErrorCalculated)) * Math.signum(robotYError);
+    // xSpeed = kPX * Math.min(maxSpeed, Math.abs(robotXError)) * Math.signum(robotXError);
     // movingAverage.putData(xSpeed);
     System.out.println("tX "+tX + "xSpeed " + xSpeed);
     commandSwerveDrivetrain.setControl(
@@ -77,7 +81,7 @@ public class AutoAlignWithLimelight extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    LimelightHelpers.setPipelineIndex(limelight.limelightName, 0);
+    LimelightHelpers.setPipelineIndex(limelight.limelightName, 1);
   }
 
   // Returns true when the command should end.
