@@ -29,7 +29,7 @@ public class Elevator extends SubsystemBase {
   private double L1 = 0;
   private double L2 = 1.3;
   private double L3 = 3.18;
-  private double L4 = 6.12;
+  private double L4 = 6.02;
   private int heightAdjustment = 0;
   private final TalonFX elevator = new TalonFX(12);
   public Elevator() {

@@ -56,6 +56,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.AutoAlign;
 import frc.robot.commands.AutoAlignWithLimelight;
 import frc.robot.commands.CoralIntakeWithDetection;
+import frc.robot.commands.DriveForward;
 import frc.robot.commands.StandardDeviation;
 import frc.robot.generated.TunerConstants;
 // import frc.robot.subsystems.Climber;
@@ -112,6 +113,7 @@ public class RobotContainer {
     private final LimeLight limeLightFrontRight = new LimeLight("limelight-right", 0.15, 0.13, 0.45, 0.0, 0.0, 0.0);
     private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, limeLightFrontRight, drivetrain);
     private final AutoAlign autoAlign = new AutoAlign(drivetrain,limeLightFront,photonVision);
+    private final DriveForward driveForward = new DriveForward(drivetrain, HalfSpeed, robotCentricDrive);
     private final AutoAlignWithLimelight autoALignWithLimelights = new AutoAlignWithLimelight(drivetrain,limeLightFront,photonVision);
     private final StandardDeviation standardDeviation = new StandardDeviation(poseUpdater, drivetrain, new Pose2d(7.82,4.026,Rotation2d.k180deg),limeLightFront, limeLightFrontRight);
     private SendableChooser<Command> autonChooser;
@@ -181,6 +183,10 @@ public class RobotContainer {
         .andThen(Commands.waitSeconds(0.5))
         .andThen(new InstantCommand(() -> climber2.stopClimb())
         ));
+        NamedCommands.registerCommand("autoAlignWithLimelight", autoALignWithLimelights);
+        NamedCommands.registerCommand("driveForwardFor1Second" , new  DriveForward(drivetrain, HalfSpeed, robotCentricDrive));
+        
+
     }
 
 
