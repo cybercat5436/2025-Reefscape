@@ -26,7 +26,7 @@
         {
           "type": "named",
           "data": {
-            "name": "autoAlignWithLimelight"
+            "name": "autoAlignPositionI"
           }
         },
         {
@@ -75,7 +75,7 @@
       ]
     }
   },
-  "resetOdom": true,
+  "resetOdom": false,
   "folder": null,
   "choreoAuto": false
 }

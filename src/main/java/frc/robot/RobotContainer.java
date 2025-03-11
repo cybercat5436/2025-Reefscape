@@ -186,8 +186,17 @@ public class RobotContainer {
         .andThen(Commands.waitSeconds(0.5))
         .andThen(new InstantCommand(() -> climber2.stopClimb())
         ));
+        
         NamedCommands.registerCommand("autoAlignWithLimelight", autoALignWithLimelights);
-        NamedCommands.registerCommand("driveForwardFor1Second" , new  DriveForward(drivetrain, HalfSpeed*1.5, robotCentricDrive));
+        NamedCommands.registerCommand("autoAlignPositionI",
+            new PrintCommand("~~~~~   Starting Autoalign to Position I  ~~~~~~~~~~~")
+            .andThen(new InstantCommand(() -> reefController.setTargetReefPosition(ReefPosition.I)))
+            .andThen(new AutoAlignWithLimelight(drivetrain, limeLightFront, photonVision, true))
+            .andThen(new PrintCommand("~~~~~   Completed autoAlignPositionI  ~~~~~~~~~~~"))
+        );
+        
+        // NamedCommands.registerCommand("driveForwardFor1Second" , new  DriveForward(drivetrain, HalfSpeed*1.5, robotCentricDrive));
+        NamedCommands.registerCommand("driveForwardFor1Second" , new  DriveForward(drivetrain, HalfSpeed*1.5));
         
 
     }
