@@ -56,6 +56,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.AutoAlign;
 import frc.robot.commands.AutoAlignWithLimelight;
 import frc.robot.commands.CoralIntakeWithDetection;
+import frc.robot.commands.DriveForward;
 import frc.robot.commands.StandardDeviation;
 import frc.robot.generated.TunerConstants;
 // import frc.robot.subsystems.Climber;
@@ -94,6 +95,10 @@ public class RobotContainer {
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
+    private final SwerveRequest.FieldCentricFacingAngle fieldCentricFacingAngle = new SwerveRequest.FieldCentricFacingAngle()
+            .withDeadband(maxSpeed * 0.1).withRotationalDeadband(maxAngularRate * 0.1) // Add a 10% deadband
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage) // Use open-loop control for drive motors
+            .withHeadingPID(3, 0, 0);
    
     private final Telemetry logger = new Telemetry(maxSpeed);
     private final PhotonVision photonVision = new PhotonVision();
@@ -102,12 +107,13 @@ public class RobotContainer {
     private final Joystick reefPositionJoystick = new Joystick(2);
     private final Joystick reefLevelJoystick = new Joystick(3);
     private final CommandXboxController callibrationJoystick = new CommandXboxController(4);
-    // private final ReefController reefController = new ReefController();
+    private final ReefController reefController = ReefController.getInstance();
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private final LimeLight limeLightFront = new LimeLight("limelight-front", 0.02, -0.3, 0.65, -90.0, 0.0, 0.0);
     private final LimeLight limeLightFrontRight = new LimeLight("limelight-right", 0.15, 0.13, 0.45, 0.0, 0.0, 0.0);
     private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, limeLightFrontRight, drivetrain);
     private final AutoAlign autoAlign = new AutoAlign(drivetrain,limeLightFront,photonVision);
+    private final DriveForward driveForward = new DriveForward(drivetrain, HalfSpeed, robotCentricDrive);
     private final AutoAlignWithLimelight autoALignWithLimelights = new AutoAlignWithLimelight(drivetrain,limeLightFront,photonVision);
     private final StandardDeviation standardDeviation = new StandardDeviation(poseUpdater, drivetrain, new Pose2d(7.82,4.026,Rotation2d.k180deg),limeLightFront, limeLightFrontRight);
     private SendableChooser<Command> autonChooser;
@@ -151,6 +157,9 @@ public class RobotContainer {
         //testReefController();
         autonChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auton Chooser", autonChooser);
+        LimelightHelpers.setPipelineIndex(limeLightFront.limelightName, 1);
+        LimelightHelpers.setPipelineIndex(limeLightFrontRight.limelightName, 1);
+
     }
 
     
@@ -177,6 +186,10 @@ public class RobotContainer {
         .andThen(Commands.waitSeconds(0.5))
         .andThen(new InstantCommand(() -> climber2.stopClimb())
         ));
+        NamedCommands.registerCommand("autoAlignWithLimelight", autoALignWithLimelights);
+        NamedCommands.registerCommand("driveForwardFor1Second" , new  DriveForward(drivetrain, HalfSpeed*1.5, robotCentricDrive));
+        
+
     }
 
 
@@ -273,9 +286,9 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->{
-                double xSpeed = slewRateLimiterX.calculate(joystick.getLeftY()* maxSpeed);
+                double xSpeed = slewRateLimiterX.calculate(-joystick.getLeftY()* maxSpeed);
                 
-                double ySpeed = slewRateLimiterY.calculate(joystick.getLeftX()* maxSpeed);
+                double ySpeed = slewRateLimiterY.calculate(-joystick.getLeftX()* maxSpeed);
                 
                 double yTurnSpeed = slewRateLimiterTurnX.calculate(joystick.getRightX()* maxAngularRate);
 
@@ -303,17 +316,33 @@ public class RobotContainer {
         
     // })
     // );
+    joystick.povUp().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 0));
+    joystick.povDown().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 180));
+    joystick.povLeft().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 90));
+    joystick.povRight().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 240));
+    //joystick.povUp().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 0));
+    //joystick.povUp().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 0));
+    
+
+    joystick.a().whileTrue(drivetrain.applyRequest(() -> {
+            double xSpeed = slewRateLimiterX.calculate(-joystick.getLeftY()* maxSpeed);             
+            double ySpeed = slewRateLimiterY.calculate(-joystick.getLeftX()* maxSpeed);          
+
+        return fieldCentricFacingAngle.withVelocityX(xSpeed * Math.abs(xSpeed)) 
+        .withVelocityY(ySpeed * Math.abs(ySpeed)) 
+        .withTargetDirection(Rotation2d.fromDegrees(drivetrain.targetRotation));
+        }
+    ));
     joystick.b().whileTrue(drivetrain.applyRequest(() -> {
             double xSpeed = slewRateLimiterX.calculate(-joystick.getLeftY()* maxSpeed);             
             double ySpeed = slewRateLimiterY.calculate(-joystick.getLeftX()* maxSpeed);          
             double yTurnSpeed = slewRateLimiterTurnX.calculate(joystick.getRightX()* maxAngularRate);
 
         return robotCentricDrive.withVelocityX(xSpeed * Math.abs(xSpeed)) 
-        .withVelocityY(ySpeed * Math.abs(ySpeed)) 
+        .withVelocityY(ySpeed * Math.abs(ySpeed))
         .withRotationalRate(-(yTurnSpeed * Math.abs(yTurnSpeed)));
         }
-    ));
-        
+    ));    
         Trigger slowModeTrigger = new Trigger ((joystick.leftTrigger()));
 
         slowModeTrigger.whileTrue(drivetrain.applyRequest(() ->{
@@ -334,8 +363,7 @@ public class RobotContainer {
             .withRotationalRate(-(yTurnSpeed * Math.abs(yTurnSpeed) ));
         } // Drive counterclockwise with negative X (left)
     ));
-    
-        joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
+        //joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
         joystick.x().whileTrue(drivetrain.applyRequest(() ->
             point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
         ));

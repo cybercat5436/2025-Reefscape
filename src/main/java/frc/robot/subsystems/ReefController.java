@@ -51,14 +51,19 @@ public class ReefController extends SubsystemBase {
   private AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
   private double poleOffsetDistanceMeters = 0.165; // Offset distance between center of April tag and reef pole 33 / 2 cm
   private Pose2d aprilTagPose2d = new Pose2d();
-
+  private static ReefController reefControllerInstance;
   /** Creates a new ReefController. */
-  public ReefController() {
+  private ReefController() {
     populateBlueAprilTagMap();
     populateRedAprilTagMap();
     populatePolePlacementMap();
   }
-
+  public static ReefController getInstance(){
+    if (reefControllerInstance == null) {
+      reefControllerInstance = new ReefController();
+    }
+    return reefControllerInstance;
+  }
   public Pose2d getTargetRobotPose(){
     alliance = DriverStation.getAlliance().isPresent()?DriverStation.getAlliance().get():DriverStation.Alliance.Blue;
     tagId =0;
