@@ -382,11 +382,9 @@ public class RobotContainer {
             new PrintCommand("~~~~ Starting Auto Align with Limelight ~~~~~~~~~~")
             .andThen(new InstantCommand(() -> reefController.setTargetReefPosition(ReefPosition.I)))
             .andThen(new PrintCommand(reefController.toString()))
-            .andThen(new PrintCommand("Operator Forward Direction: " + drivetrain.getOperatorForwardDirection().getDegrees()))
-            .andThen(new InstantCommand(() -> drivetrain.resetPose(reefController.getTargetRobotPose())))
-            .andThen(new AutoAlignWithLimelight(drivetrain, limeLightFront, photonVision))
+            .andThen(new AutoAlignWithLimelight(drivetrain, limeLightFront, photonVision, true))
             
-            ).onFalse(new PrintCommand("~~~~~  Exiting Auto Align  ~~~~~~~~~"));
+            ).onFalse(new PrintCommand("~~~~~  Exiting Auto Align via Interrupt  ~~~~~~~~~"));
 
         // climber commands
         

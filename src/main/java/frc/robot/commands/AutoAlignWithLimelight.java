@@ -35,7 +35,7 @@ public class AutoAlignWithLimelight extends Command {
   // Use reefController to determine target heading
   private ReefController reefController = ReefController.getInstance();
   private final SwerveRequest.FieldCentricFacingAngle fieldCentricFacingAngle = new SwerveRequest.FieldCentricFacingAngle()
-            .withHeadingPID(2, 0, 0)
+            .withHeadingPID(5, 0, 0)
             .withTargetDirection(reefController.getTargetRobotPose().getRotation());
 
   private LimeLight limelight;
@@ -59,14 +59,16 @@ public class AutoAlignWithLimelight extends Command {
   private Timer timer = new Timer();
   private boolean isYAligned;
   private boolean isXAligned;
+  private boolean isHeadingAligned = false;
   private boolean isTimedOut;
   private double horizontalThreshold = 0.5;
   private double verticalThreshold = 0.5;
+  private double rotationDegreesThreshold = 0.5;
   private double timeThreshold = 1;
   private double yErrorCalculated;
   private double xErrorCalculated;
   private int isCorrect = 0;
-  private boolean useLockedHeading = true;
+  private boolean useLockedHeading = false;
 
   /** Creates a new AutoAlignWithLimelight. */
   public AutoAlignWithLimelight(CommandSwerveDrivetrain commandSwerveDrivetrain, LimeLight limeLight, PhotonVision photonVision) {
@@ -78,6 +80,14 @@ public class AutoAlignWithLimelight extends Command {
     // this.movingAverage = new MovingAverage(20);
 
   }
+
+    /** Creates a new AutoAlignWithLimelight. */
+    public AutoAlignWithLimelight(CommandSwerveDrivetrain commandSwerveDrivetrain, LimeLight limeLight, PhotonVision photonVision, boolean useLockedHeading) {
+      // Use addRequirements() here to declare subsystem dependencies.
+      this(commandSwerveDrivetrain, limeLight, photonVision);
+      this.useLockedHeading = useLockedHeading;
+  
+    }
 
   // Called when the command is initially scheduled.
   @Override
@@ -108,7 +118,6 @@ public class AutoAlignWithLimelight extends Command {
         robotCentricDrive
         .withVelocityY(ySpeed));
     } else{
-      ySpeed = 1.0;
       // determine the drive direction in field coordinates.  
       // This 90 degree rotation aligns positive speed to robot left but expresses the angle relative to field
       Rotation2d driveDirection = reefController.getTargetRobotPose().getRotation().rotateBy(Rotation2d.kCCW_90deg);
@@ -122,8 +131,6 @@ public class AutoAlignWithLimelight extends Command {
         .withVelocityY(driveTranslation2d.getY())
         .withVelocityX(driveTranslation2d.getX())
         );
-
-
     }
 
     // System.out.println("~~~~ tY: "+tY + "  -- ySpeed: " + ySpeed + "~~~~~~~~");
@@ -139,16 +146,19 @@ public class AutoAlignWithLimelight extends Command {
   public void end(boolean interrupted) {
     timer.stop();
     LimelightHelpers.setPipelineIndex(limelight.limelightName, 1);
-    if(isYAligned && isXAligned) {
-      System.out.println("************Robot is Aligned*********");
+    
+    if(isCorrect > 3) {
+      System.out.println("*&^%#$@#^*     Alignment is sustained        ***!@#$%^&**&^?/%$");
+    } else if(isYAligned && isXAligned) {
+      System.out.println("************   Robot is Aligned     *********");
     }else if(isTimedOut){
-      System.out.println("Robot time up");
+      System.out.println("~~~~~~~   Robot time up  ~~~~~~~~~~~~");
     }else if(isXAligned) {
       System.out.println("Robot X Aligned");
     }else if(isYAligned) {
-      System.out.println("**********Robot Y Aligned************"); 
-    }else if(isCorrect > 3) {
-      System.out.println("*&^%#$@#^*Alignment is correct***!@#$%^&**&^?/%$");
+      System.out.println("**********Robot Y Aligned************");
+    } else if(interrupted){
+      System.out.println("~~~~  Auto align exited because interrupted   ~~~~~");
     }
 
     commandSwerveDrivetrain.setControl(
@@ -160,22 +170,31 @@ public class AutoAlignWithLimelight extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
-    // double YDistanceError = Math.abs(robotYError);
-    // double XDistanceError = Math.abs(robotXError);
-    // isYAligned = YDistanceError < horizontalThreshold;
-    // isXAligned = XDistanceError < verticalThreshold;
-    // isTimedOut = timer.get() > timeThreshold;
-    // if(isYAligned) {
-    //   isCorrect++;
-    // }else {
-    //   isCorrect = 0;
-    // }
+    double YDistanceError = Math.abs(robotYError);
+    double XDistanceError = Math.abs(robotXError);
+    isYAligned = YDistanceError < horizontalThreshold;
+    isXAligned = XDistanceError < verticalThreshold;
+    isTimedOut = timer.get() > timeThreshold;
+    
+    boolean isAligned = isYAligned;
+    
+    if (useLockedHeading){
+      var rotationError = commandSwerveDrivetrain.getState().Pose.getRotation().minus(ReefController.getInstance().getTargetRobotPose().getRotation());
+      isHeadingAligned = Math.abs(rotationError.getDegrees()) < rotationDegreesThreshold;
+      isAligned = (isYAligned && isHeadingAligned);
+    }
     
     
-    // // return isTimedOut || isYAligned && isXAligned;
-    // // return isXAligned;
-    // return isCorrect > 3;
+    if(isAligned) {
+      isCorrect++;
+    }else {
+      isCorrect = 0;
+    }
+    
+    
+    // return isTimedOut || isYAligned && isXAligned;
+    // return isXAligned;
+    return isCorrect > 3;
 
   }
 }
