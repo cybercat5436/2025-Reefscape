@@ -18,6 +18,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LimeLight;
 import frc.robot.subsystems.PhotonVision;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
@@ -93,6 +94,8 @@ public class AutoAlignWithLimelight extends Command {
       // .withVelocityX(xSpeed)
       );
       System.out.println("******Robot x Error******" + robotXError);
+      SmartDashboard.putNumber("Successes for AutoAlign", isCorrect);
+      SmartDashboard.putNumber("yError", robotYError);
   }
 
 
@@ -110,7 +113,7 @@ public class AutoAlignWithLimelight extends Command {
       System.out.println("Robot X Aligned");
     }else if(isYAligned) {
       System.out.println("**********Robot Y Aligned************"); 
-    }else if(isCorrect >= 3) {
+    }else if(isCorrect > 3) {
       System.out.println("*&^%#$@#^*Alignment is correct***!@#$%^&**&^?/%$");
     }
 
@@ -137,7 +140,7 @@ public class AutoAlignWithLimelight extends Command {
     
     // return isTimedOut || isYAligned && isXAligned;
     // return isXAligned;
-    return isCorrect >= 3;
+    return isCorrect > 3;
 
   }
 }

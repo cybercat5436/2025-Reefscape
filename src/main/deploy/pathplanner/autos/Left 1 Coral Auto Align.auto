@@ -11,13 +11,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Center Path 1 MT2"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "setClimberArmsToAutonStartPosition"
+                  "pathName": "Left Path 1 MT2"
                 }
               }
             ]
@@ -33,6 +27,12 @@
           "type": "named",
           "data": {
             "name": "autoAlignWithLimelight"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "driveForwardFor1Second"
           }
         },
         {
@@ -60,9 +60,16 @@
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "lowerElevator"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "lowerElevator"
+                }
+              }
+            ]
           }
         }
       ]

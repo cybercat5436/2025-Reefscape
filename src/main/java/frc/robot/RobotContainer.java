@@ -157,6 +157,9 @@ public class RobotContainer {
         //testReefController();
         autonChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auton Chooser", autonChooser);
+        LimelightHelpers.setPipelineIndex(limeLightFront.limelightName, 1);
+        LimelightHelpers.setPipelineIndex(limeLightFrontRight.limelightName, 1);
+
     }
 
     
@@ -184,7 +187,7 @@ public class RobotContainer {
         .andThen(new InstantCommand(() -> climber2.stopClimb())
         ));
         NamedCommands.registerCommand("autoAlignWithLimelight", autoALignWithLimelights);
-        NamedCommands.registerCommand("driveForwardFor1Second" , new  DriveForward(drivetrain, HalfSpeed, robotCentricDrive));
+        NamedCommands.registerCommand("driveForwardFor1Second" , new  DriveForward(drivetrain, HalfSpeed*1.5, robotCentricDrive));
         
 
     }
