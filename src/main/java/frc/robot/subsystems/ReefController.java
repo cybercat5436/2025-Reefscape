@@ -40,7 +40,7 @@ public class ReefController extends SubsystemBase {
     Right
   }
 
-  private ReefPosition targetReefPosition = ReefPosition.A;
+  private ReefPosition targetReefPosition = ReefPosition.I;
   private int reefLevel = 4;
   private int tagId = 0;
   private Alliance alliance = DriverStation.getAlliance().isPresent()?DriverStation.getAlliance().get():DriverStation.Alliance.Blue;
@@ -65,7 +65,7 @@ public class ReefController extends SubsystemBase {
     return reefControllerInstance;
   }
   public Pose2d getTargetRobotPose(){
-    alliance = DriverStation.getAlliance().isPresent()?DriverStation.getAlliance().get():DriverStation.Alliance.Blue;
+    alliance = DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() : DriverStation.Alliance.Blue;
     tagId =0;
     if (alliance == Alliance.Blue){
       tagId = blueAprilTagMap.get(targetReefPosition);
@@ -106,6 +106,7 @@ public class ReefController extends SubsystemBase {
                             .plus(coralTranslation2d);
 
     var botPose = new Pose2d(botTranslation2d, botRotation2d);
+
     return botPose;
     
     

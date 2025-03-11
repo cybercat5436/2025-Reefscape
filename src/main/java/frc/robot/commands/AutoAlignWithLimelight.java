@@ -101,13 +101,14 @@ public class AutoAlignWithLimelight extends Command {
     ySpeed =  Math.min(maxSpeed, Math.abs(yErrorCalculated)) * Math.signum(robotYError);
     // xSpeed = kPX * Math.min(maxSpeed, Math.abs(robotXError)) * Math.signum(robotXError);
     // movingAverage.putData(xSpeed);
-    System.out.println("~~~~ tX "+tX + "xSpeed " + xSpeed + "~~~~~~~~");
+
     
     if (!useLockedHeading){
       commandSwerveDrivetrain.setControl(
         robotCentricDrive
         .withVelocityY(ySpeed));
     } else{
+      ySpeed = 1.0;
       // determine the drive direction in field coordinates.  
       // This 90 degree rotation aligns positive speed to robot left but expresses the angle relative to field
       Rotation2d driveDirection = reefController.getTargetRobotPose().getRotation().rotateBy(Rotation2d.kCCW_90deg);
@@ -124,6 +125,10 @@ public class AutoAlignWithLimelight extends Command {
 
 
     }
+
+    // System.out.println("~~~~ tY: "+tY + "  -- ySpeed: " + ySpeed + "~~~~~~~~");
+    System.out.println("~~~~~~~ Chassis Speeds: " + commandSwerveDrivetrain.getState().Speeds.toString());
+    System.out.println("~~~~~~~ Target Heading: " + fieldCentricFacingAngle.HeadingController.getSetpoint() + "   Actual Heading: " + commandSwerveDrivetrain.getState().Pose.getRotation().getDegrees());
 
   }
 
@@ -155,21 +160,22 @@ public class AutoAlignWithLimelight extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    double YDistanceError = Math.abs(robotYError);
-    double XDistanceError = Math.abs(robotXError);
-    isYAligned = YDistanceError < horizontalThreshold;
-    isXAligned = XDistanceError < verticalThreshold;
-    isTimedOut = timer.get() > timeThreshold;
-    if(isYAligned) {
-      isCorrect++;
-    }else {
-      isCorrect = 0;
-    }
+    return false;
+    // double YDistanceError = Math.abs(robotYError);
+    // double XDistanceError = Math.abs(robotXError);
+    // isYAligned = YDistanceError < horizontalThreshold;
+    // isXAligned = XDistanceError < verticalThreshold;
+    // isTimedOut = timer.get() > timeThreshold;
+    // if(isYAligned) {
+    //   isCorrect++;
+    // }else {
+    //   isCorrect = 0;
+    // }
     
     
-    // return isTimedOut || isYAligned && isXAligned;
-    // return isXAligned;
-    return isCorrect > 3;
+    // // return isTimedOut || isYAligned && isXAligned;
+    // // return isXAligned;
+    // return isCorrect > 3;
 
   }
 }

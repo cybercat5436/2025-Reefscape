@@ -154,7 +154,7 @@ public class RobotContainer {
         configureBindings();
         poseUpdater.enable();
         registerNamedCommands();
-        //testReefController();
+        testReefController();
         autonChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auton Chooser", autonChooser);
         LimelightHelpers.setPipelineIndex(limeLightFront.limelightName, 1);
@@ -378,7 +378,15 @@ public class RobotContainer {
         // reset the field-centric heading on left bumper press
         joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
     
-        joystick.y().whileTrue(new AutoAlignWithLimelight(drivetrain, limeLightFront, photonVision));
+        joystick.y().whileTrue(
+            new PrintCommand("~~~~ Starting Auto Align with Limelight ~~~~~~~~~~")
+            .andThen(new InstantCommand(() -> reefController.setTargetReefPosition(ReefPosition.I)))
+            .andThen(new PrintCommand(reefController.toString()))
+            .andThen(new PrintCommand("Operator Forward Direction: " + drivetrain.getOperatorForwardDirection().getDegrees()))
+            .andThen(new InstantCommand(() -> drivetrain.resetPose(reefController.getTargetRobotPose())))
+            .andThen(new AutoAlignWithLimelight(drivetrain, limeLightFront, photonVision))
+            
+            ).onFalse(new PrintCommand("~~~~~  Exiting Auto Align  ~~~~~~~~~"));
 
         // climber commands
         
@@ -480,22 +488,26 @@ public class RobotContainer {
 
     }
 
-    // private void testReefController(){
-    //     reefController.setTargetReefPosition(ReefPosition.I);
-    //     System.out.println(reefController.toString());
+    private void testReefController(){
+        ReefPosition startingReefPosition = reefController.getTargetReefPosition();
 
-    //     reefController.setTargetReefPosition(ReefPosition.K);
-    //     System.out.println(reefController.toString());
+        reefController.setTargetReefPosition(ReefPosition.I);
+        System.out.println(reefController.toString());
 
-    //     reefController.setTargetReefPosition(ReefPosition.L);
-    //     System.out.println(reefController.toString());
+        reefController.setTargetReefPosition(ReefPosition.K);
+        System.out.println(reefController.toString());
 
-    //     reefController.setTargetReefPosition(ReefPosition.G);
-    //     System.out.println(reefController.toString());
+        reefController.setTargetReefPosition(ReefPosition.L);
+        System.out.println(reefController.toString());
+
+        reefController.setTargetReefPosition(ReefPosition.G);
+        System.out.println(reefController.toString());
         
-    //     reefController.setTargetReefPosition(ReefPosition.H);
-    //     System.out.println(reefController.toString());        
-    // }
+        reefController.setTargetReefPosition(ReefPosition.H);
+        System.out.println(reefController.toString());   
+        
+        reefController.setTargetReefPosition(startingReefPosition);
+    }
     
 
     public void setOdometryPoseFromSelectedAuto(String autonName){
