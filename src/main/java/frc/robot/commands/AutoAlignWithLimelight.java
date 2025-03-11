@@ -33,10 +33,10 @@ public class AutoAlignWithLimelight extends Command {
   private double tXError;
   private double tY;
   private double tA;
-  private double targettY = -4;
+  private double targettY = 0;
   private double tYError;
   private double kPX = 0.2;
-  private double kPY = 0.2;
+  private double kPY = 0.075;
   private double kPA = 0.2;
   private double ySpeed;
   private double robotYError;
@@ -47,11 +47,12 @@ public class AutoAlignWithLimelight extends Command {
   private boolean isYAligned;
   private boolean isXAligned;
   private boolean isTimedOut;
-  private double horizontalThreshold = 0.2;
-  private double verticalThreshold = 0.2;
+  private double horizontalThreshold = 0.5;
+  private double verticalThreshold = 0.5;
   private double timeThreshold = 1;
   private double yErrorCalculated;
   private double xErrorCalculated;
+  private int isCorrect = 0;
   /** Creates a new AutoAlignWithLimelight. */
   public AutoAlignWithLimelight(CommandSwerveDrivetrain commandSwerveDrivetrain, LimeLight limeLight, PhotonVision photonVision) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -85,7 +86,7 @@ public class AutoAlignWithLimelight extends Command {
     ySpeed =  Math.min(maxSpeed, Math.abs(yErrorCalculated)) * Math.signum(robotYError);
     // xSpeed = kPX * Math.min(maxSpeed, Math.abs(robotXError)) * Math.signum(robotXError);
     // movingAverage.putData(xSpeed);
-    System.out.println("tX "+tX + "xSpeed " + xSpeed);
+    // System.out.println("tX "+tX + "xSpeed " + xSpeed);
     commandSwerveDrivetrain.setControl(
       robotCentricDrive
       .withVelocityY(ySpeed)
@@ -102,11 +103,15 @@ public class AutoAlignWithLimelight extends Command {
     timer.stop();
     LimelightHelpers.setPipelineIndex(limelight.limelightName, 1);
     if(isYAligned && isXAligned) {
-      System.out.println("Robot is Aligned");
+      System.out.println("************Robot is Aligned*********");
     }else if(isTimedOut){
       System.out.println("Robot time up");
     }else if(isXAligned) {
       System.out.println("Robot X Aligned");
+    }else if(isYAligned) {
+      System.out.println("**********Robot Y Aligned************"); 
+    }else if(isCorrect >= 3) {
+      System.out.println("*&^%#$@#^*Alignment is correct***!@#$%^&**&^?/%$");
     }
 
     commandSwerveDrivetrain.setControl(
@@ -123,9 +128,16 @@ public class AutoAlignWithLimelight extends Command {
     isYAligned = YDistanceError < horizontalThreshold;
     isXAligned = XDistanceError < verticalThreshold;
     isTimedOut = timer.get() > timeThreshold;
+    if(isYAligned) {
+      isCorrect++;
+    }else {
+      isCorrect = 0;
+    }
+    
+    
     // return isTimedOut || isYAligned && isXAligned;
     // return isXAligned;
-    return isYAligned;
+    return isCorrect >= 3;
 
   }
 }
