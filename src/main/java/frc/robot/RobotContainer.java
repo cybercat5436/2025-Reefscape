@@ -13,6 +13,7 @@ import java.time.Instant;
 import java.time.temporal.TemporalAccessor;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.jar.Attributes.Name;
 
 import javax.sound.sampled.SourceDataLine;
@@ -38,6 +39,7 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -300,13 +302,26 @@ public class RobotContainer {
         
     // })
     // );
-    joystick.povUp().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 0));
-    joystick.povDown().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 180));
-    joystick.povLeft().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 90));
-    joystick.povRight().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 240));
-    //joystick.povUp().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 0));
-    //joystick.povUp().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 0));
-    
+    joystick.povUp().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 180)
+            .andThen(getRumbleCommand()));
+    joystick.povDown().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 0)
+            .andThen(getRumbleCommand()));
+    joystick.povDownLeft().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 60)
+            .andThen(getRumbleCommand())
+            .andThen(Commands.waitSeconds(0.1))
+            .andThen(getRumbleCommand()));
+    joystick.povDownRight().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 280)
+            .andThen(getRumbleCommand())
+            .andThen(Commands.waitSeconds(0.1))
+            .andThen(getRumbleCommand()));
+    joystick.povUpLeft().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 120)
+            .andThen(getRumbleCommand())
+            .andThen(Commands.waitSeconds(0.1))
+            .andThen(getRumbleCommand()));
+    joystick.povUpRight().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 220)
+            .andThen(getRumbleCommand())
+            .andThen(Commands.waitSeconds(0.1))
+            .andThen(getRumbleCommand()));
 
     joystick.a().whileTrue(drivetrain.applyRequest(() -> {
             double xSpeed = slewRateLimiterX.calculate(-joystick.getLeftY()* maxSpeed);             
@@ -477,7 +492,15 @@ public class RobotContainer {
     //     reefController.setTargetReefPosition(ReefPosition.H);
     //     System.out.println(reefController.toString());        
     // }
-    
+    private Command getRumbleCommand(){
+        return new InstantCommand(()-> joystick.setRumble(RumbleType.kBothRumble, 1))
+        .andThen(Commands.waitSeconds(0.15))
+        .andThen(new InstantCommand(()-> joystick.setRumble(RumbleType.kBothRumble, 0)));
+        
+        }
+
+
+
 
     public void setOdometryPoseFromSelectedAuto(String autonName){
         System.out.println("~~~~Setting pose from Selected Auto: " + autonName);
