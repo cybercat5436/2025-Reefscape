@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
+import frc.robot.commands.AutoAlign;
 import frc.robot.generated.TunerConstants;
 
 import com.ctre.phoenix.led.*;
@@ -23,6 +24,7 @@ public class CANdleSystem extends SubsystemBase {
     private XboxController joystick;
     private GamePieceDetector coralSensor;
     private GamePieceDetector algaeSensor;
+    
     private Animation m_toAnimate = null;
     LimeLight limeLightFront;
     public boolean animationOff = false;    
@@ -63,7 +65,7 @@ public class CANdleSystem extends SubsystemBase {
         this.coralSensor = coralSensor;
         this.algaeSensor = algaeSensor;
         this.limeLightFront = front;
-        changeAnimation(AnimationTypes.Larson);
+        showGreen(0, 300);
     }
 
 
@@ -142,6 +144,13 @@ public class CANdleSystem extends SubsystemBase {
         changeAnimation(AnimationTypes.SetAll);
     }
 
+    public void autoAlignStatus(AutoAlign autoAlign){
+        if (autoAlign.isFinished()){
+            m_candle.setLEDs(0, 255, 0);
+        } else{
+            turnOffColors();
+        }
+    }
     public void coralColors(boolean isOn){
         int r = 0;
         int g = isOn ? 128 : 0;
@@ -315,7 +324,9 @@ public class CANdleSystem extends SubsystemBase {
             coralOff();
         }*/
         
-        limeLightStatusColors(LimelightHelpers.getTargetCount(limeLightFront.limelightName));
+        //limeLightStatusColors(LimelightHelpers.getTargetCount(limeLightFront.limelightName));
+        
+        
         
         
 
