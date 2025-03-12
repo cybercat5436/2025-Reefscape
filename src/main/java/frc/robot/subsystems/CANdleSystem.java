@@ -65,7 +65,7 @@ public class CANdleSystem extends SubsystemBase {
         this.coralSensor = coralSensor;
         this.algaeSensor = algaeSensor;
         this.limeLightFront = front;
-        showGreen();
+        showGreen(0, 300);
     }
 
 

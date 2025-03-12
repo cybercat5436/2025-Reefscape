@@ -219,7 +219,7 @@ public class RobotContainer {
            .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
         
         
-
+        //Trigger autoAlignTrigger = new Trigger(() -> autoAlign.);
         
         // joystick2.a()
         //     .whileTrue(new InstantCommand(() -> elevator.raise()))
