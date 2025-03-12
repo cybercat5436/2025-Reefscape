@@ -57,6 +57,7 @@ import frc.robot.commands.AutoAlign;
 import frc.robot.commands.AutoAlignWithLimelight;
 import frc.robot.commands.CoralIntakeWithDetection;
 import frc.robot.commands.DriveForward;
+import frc.robot.commands.DriveForwardAndAutoAlign;
 import frc.robot.commands.StandardDeviation;
 import frc.robot.generated.TunerConstants;
 // import frc.robot.subsystems.Climber;
@@ -387,12 +388,27 @@ public class RobotContainer {
         // reset the field-centric heading on left bumper press
         joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
     
+        // Run AutoAlign with Heading Locked
         joystick.y().whileTrue(
-            new PrintCommand("~~~~ Starting Auto Align with Limelight ~~~~~~~~~~")
+            new PrintCommand("~~~~ Starting Auto Align HEADING LOCKED with Limelight ~~~~~~~~~~")
             .andThen(new InstantCommand(() -> reefController.setTargetReefPosition(ReefPosition.I)))
             .andThen(new PrintCommand(reefController.toString()))
             .andThen(new AutoAlignWithLimelight(drivetrain, limeLightFront, photonVision, true))
-            
+            ).onFalse(new PrintCommand("~~~~~  Exiting Auto Align via Interrupt  ~~~~~~~~~"));
+
+        // // Run AutoAlign with Heading Locked and drive forward with heading locked
+        // joystick.y().whileTrue(
+        //     new PrintCommand("~~~~ Starting Auto Align plus Drive Forward HEADING LOCKED with Limelight ~~~~~~~~~~")
+        //     .andThen(new InstantCommand(() -> reefController.setTargetReefPosition(ReefPosition.I)))
+        //     .andThen(new AutoAlignWithLimelight(drivetrain, limeLightFront, photonVision, true))
+        //     .andThen(new DriveForward(drivetrain, HalfSpeed * 1.5))
+        //     ).onFalse(new PrintCommand("~~~~~  Exiting Auto Align via Interrupt  ~~~~~~~~~"));
+
+        // Run DriveForwardAndAutoAlign with heading locked
+        joystick.y().whileTrue(
+            new PrintCommand("~~~~ Starting Drive Forward and AutoAlign HEADING LOCKED ~~~~~~~~~~")
+            .andThen(new InstantCommand(() -> reefController.setTargetReefPosition(ReefPosition.I)))
+            .andThen(new DriveForwardAndAutoAlign(drivetrain, HalfSpeed * 1.5, limeLightFront))
             ).onFalse(new PrintCommand("~~~~~  Exiting Auto Align via Interrupt  ~~~~~~~~~"));
 
         // climber commands
