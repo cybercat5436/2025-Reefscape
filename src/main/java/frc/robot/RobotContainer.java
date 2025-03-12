@@ -123,7 +123,7 @@ public class RobotContainer {
     public final Coral coral = new Coral();
     public final Algae algae = new Algae();
     public final Elevator elevator = new Elevator();
-    public CANdleSystem candleSystem = new CANdleSystem(joystick.getHID(), coralSensor, algaeSensor, limeLightFront);
+    public CANdleSystem candleSystem = new CANdleSystem(joystick.getHID(), coralSensor, algaeSensor, limeLightFront, autoAlign);
 
     private SequentialCommandGroup autoCoralHigh = new SequentialCommandGroup(
         new InstantCommand(() -> elevator.raiseLevel4())

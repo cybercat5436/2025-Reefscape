@@ -24,6 +24,7 @@ public class CANdleSystem extends SubsystemBase {
     private XboxController joystick;
     private GamePieceDetector coralSensor;
     private GamePieceDetector algaeSensor;
+    private AutoAlign autoAlign;
     
     private Animation m_toAnimate = null;
     LimeLight limeLightFront;
@@ -51,7 +52,7 @@ public class CANdleSystem extends SubsystemBase {
     }
     private AnimationTypes m_currentAnimation;
 
-    public CANdleSystem(XboxController joy, GamePieceDetector coralSensor, GamePieceDetector algaeSensor, LimeLight front) {
+    public CANdleSystem(XboxController joy, GamePieceDetector coralSensor, GamePieceDetector algaeSensor, LimeLight front, AutoAlign autoAlign) {
         //308 LEDS Total
         this.joystick = joy;
         changeAnimation(AnimationTypes.SetAll);
@@ -65,6 +66,8 @@ public class CANdleSystem extends SubsystemBase {
         this.coralSensor = coralSensor;
         this.algaeSensor = algaeSensor;
         this.limeLightFront = front;
+        this.autoAlign = autoAlign;
+
         showGreen();
     }
 
@@ -144,13 +147,6 @@ public class CANdleSystem extends SubsystemBase {
         changeAnimation(AnimationTypes.SetAll);
     }
 
-    public void autoAlignStatus(AutoAlign autoAlign){
-        if (autoAlign.isFinished()){
-            m_candle.setLEDs(0, 255, 0);
-        } else{
-            turnOffColors();
-        }
-    }
     public void coralColors(boolean isOn){
         int r = 0;
         int g = isOn ? 128 : 0;
@@ -175,42 +171,49 @@ public class CANdleSystem extends SubsystemBase {
         // showBlue(207,308);
         // showBlue(5,1);
         // showBlue(2,1);
-
+        
     }
     public void algaeOff(){
         turnOffColors(207,102);
     }
-
+    
     public void limeLightStatusColors(int tagAmount){
         int start = 103;
         int count = 104;
         int candleStart1 = 0;
         int candleCount1 = 2;
-
+        
         int candleStart2 = 6;
         int candleCount2 = 2;
         if (animationOff){
-
-        if (tagAmount == 0){
-            showRed(start, count);
-            showRed(candleStart1, candleCount1);
-            showRed(candleStart2, candleCount2);
-        } else if (tagAmount == 1){
-            showYellow(start,count); //Yellow
-            showYellow(candleStart1, candleCount1);
-            showYellow(candleStart2, candleCount2);
-        } else if (tagAmount == 2){
-            showMagenta(start,count);
-            showMagenta(candleStart1, candleCount1);
-            showMagenta(candleStart2, candleCount2);
-        } else if (tagAmount == 3){
-            showLightBlue(start,count);
-            showLightBlue(candleStart1, candleCount1);
-            showLightBlue(candleStart2, candleCount2);
-        } 
+            
+            if (tagAmount == 0){
+                showRed(start, count);
+                showRed(candleStart1, candleCount1);
+                showRed(candleStart2, candleCount2);
+            } else if (tagAmount == 1){
+                showYellow(start,count); //Yellow
+                showYellow(candleStart1, candleCount1);
+                showYellow(candleStart2, candleCount2);
+            } else if (tagAmount == 2){
+                showMagenta(start,count);
+                showMagenta(candleStart1, candleCount1);
+                showMagenta(candleStart2, candleCount2);
+            } else if (tagAmount == 3){
+                showLightBlue(start,count);
+                showLightBlue(candleStart1, candleCount1);
+                showLightBlue(candleStart2, candleCount2);
+            } 
         }
     }
-
+    public void autoAlignStatus(AutoAlign autoAlign){
+        if (autoAlign.isFinished()){
+            showGreen();
+        } else{
+            turnOffColors();
+        }
+    }
+    
     
 
 
@@ -325,7 +328,7 @@ public class CANdleSystem extends SubsystemBase {
         }*/
         
         //limeLightStatusColors(LimelightHelpers.getTargetCount(limeLightFront.limelightName));
-        
+        autoAlignStatus(autoAlign);
         
         
         
