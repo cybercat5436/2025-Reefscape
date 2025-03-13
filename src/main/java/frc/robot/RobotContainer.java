@@ -190,7 +190,8 @@ public class RobotContainer {
         ));
         NamedCommands.registerCommand("autoAlignWithLimelight", autoALignWithLimelights);
         NamedCommands.registerCommand("driveForwardFor1Second" , new  DriveForward(drivetrain, HalfSpeed*1.5, robotCentricDrive));
-        
+        NamedCommands.registerCommand("faceWheels-120Degrees" , new InstantCommand(() -> drivetrain.applyRequest(() ->
+        point.withModuleDirection(new Rotation2d(-120)))));
 
     }
 
