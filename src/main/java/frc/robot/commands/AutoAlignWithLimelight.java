@@ -113,7 +113,9 @@ public class AutoAlignWithLimelight extends Command {
       System.out.println("Robot X Aligned");
     }else if(isYAligned) {
       System.out.println("**********Robot Y Aligned************"); 
-    }else if(isCorrect > 3) {
+    }
+    
+    if(isCorrect > 3) {
       System.out.println("*&^%#$@#^*Alignment is correct***!@#$%^&**&^?/%$");
     }
 
@@ -129,7 +131,7 @@ public class AutoAlignWithLimelight extends Command {
     double YDistanceError = Math.abs(robotYError);
     double XDistanceError = Math.abs(robotXError);
     isYAligned = YDistanceError < horizontalThreshold;
-    isXAligned = XDistanceError < verticalThreshold;
+    // isXAligned = XDistanceError < verticalThreshold;
     isTimedOut = timer.get() > timeThreshold;
     if(isYAligned) {
       isCorrect++;
