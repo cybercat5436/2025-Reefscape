@@ -14,6 +14,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.LimelightHelpers;
+import frc.robot.subsystems.CANdleSystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LimeLight;
 import frc.robot.subsystems.PhotonVision;
@@ -54,6 +55,7 @@ public class AutoAlignWithLimelight extends Command {
   private double yErrorCalculated;
   private double xErrorCalculated;
   private int isCorrect = 0;
+  private CANdleSystem candleSystem = CANdleSystem.getInstance();
   /** Creates a new AutoAlignWithLimelight. */
   public AutoAlignWithLimelight(CommandSwerveDrivetrain commandSwerveDrivetrain, LimeLight limeLight, PhotonVision photonVision) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -72,6 +74,8 @@ public class AutoAlignWithLimelight extends Command {
 
     timer.reset();
     timer.start();
+
+    candleSystem.showYellow();
     
   }
 
@@ -107,6 +111,7 @@ public class AutoAlignWithLimelight extends Command {
     LimelightHelpers.setPipelineIndex(limelight.limelightName, 1);
     if(isYAligned && isXAligned) {
       System.out.println("************Robot is Aligned*********");
+      candleSystem.setIsAutoAligned(true);
     }else if(isTimedOut){
       System.out.println("Robot time up");
     }else if(isXAligned) {
