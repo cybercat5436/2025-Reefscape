@@ -200,6 +200,7 @@ public class RobotContainer {
         
         // NamedCommands.registerCommand("driveForwardFor1Second" , new  DriveForward(drivetrain, HalfSpeed*1.5, robotCentricDrive));
         NamedCommands.registerCommand("driveForwardFor1Second" , new  DriveForward(drivetrain, HalfSpeed*1.5));
+        NamedCommands.registerCommand("driveForwardWithAutoAlign" , new  DriveForwardAndAutoAlign(drivetrain, 0.5, limeLightFront));
         
 
     }
@@ -404,14 +405,14 @@ public class RobotContainer {
         joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
     
         // Run AutoAlign with Heading Locked
-        joystick.y().whileTrue(
-            new PrintCommand("~~~~ Starting Auto Align HEADING LOCKED with Limelight ~~~~~~~~~~")
-            .andThen(new InstantCommand(() -> reefController.setTargetReefPosition(ReefPosition.I)))
-            .andThen(new PrintCommand(reefController.toString()))
-            .andThen(new AutoAlignWithLimelight(drivetrain, limeLightFront, photonVision, true))
-            ).onFalse(new PrintCommand("~~~~~  Exiting Auto Align via Interrupt  ~~~~~~~~~"));
+        // joystick.y().whileTrue(
+        //     new PrintCommand("~~~~ Starting Auto Align HEADING LOCKED with Limelight ~~~~~~~~~~")
+        //     .andThen(new InstantCommand(() -> reefController.setTargetReefPosition(ReefPosition.I)))
+        //     .andThen(new PrintCommand(reefController.toString()))
+        //     .andThen(new AutoAlignWithLimelight(drivetrain, limeLightFront, photonVision, true))
+        //     ).onFalse(new PrintCommand("~~~~~  Exiting Auto Align via Interrupt  ~~~~~~~~~"));
 
-        // // Run AutoAlign with Heading Locked and drive forward with heading locked
+        // Run AutoAlign with Heading Locked and drive forward with heading locked
         // joystick.y().whileTrue(
         //     new PrintCommand("~~~~ Starting Auto Align plus Drive Forward HEADING LOCKED with Limelight ~~~~~~~~~~")
         //     .andThen(new InstantCommand(() -> reefController.setTargetReefPosition(ReefPosition.I)))
@@ -423,7 +424,7 @@ public class RobotContainer {
         joystick.y().whileTrue(
             new PrintCommand("~~~~ Starting Drive Forward and AutoAlign HEADING LOCKED ~~~~~~~~~~")
             .andThen(new InstantCommand(() -> reefController.setTargetReefPosition(ReefPosition.I)))
-            .andThen(new DriveForwardAndAutoAlign(drivetrain, HalfSpeed * 1.5, limeLightFront))
+            .andThen(new DriveForwardAndAutoAlign(drivetrain,0.5, limeLightFront))
             ).onFalse(new PrintCommand("~~~~~  Exiting Auto Align via Interrupt  ~~~~~~~~~"));
 
         // climber commands

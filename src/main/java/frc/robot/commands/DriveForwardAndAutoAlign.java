@@ -20,7 +20,7 @@ import edu.wpi.first.wpilibj.Timer;
 public class DriveForwardAndAutoAlign extends Command {
   private Timer timer = new Timer();
   private boolean isTimedOut;
-  private double timerThreshold = 1;
+  private double timerThreshold = 0.5;
   private double speed;
   private LimeLight limeLight;
 
@@ -29,7 +29,7 @@ public class DriveForwardAndAutoAlign extends Command {
   private double robotYError;
   private double yErrorCalculated;
   private double ySpeed;
-  private double maxSpeed = 1.0;
+  private double maxSpeed = 1;
   private double kPY = 0.075;
   private double horizontalThreshold = 0.5;
   private boolean isYAligned;
