@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import java.lang.reflect.Array;
+
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
@@ -30,7 +32,10 @@ public class Elevator extends SubsystemBase {
   private double L2 = 1.3;
   private double L3 = 3.18;
   private double L4 = 6.02;
-  private int heightAdjustment = 0;
+  private int heightAdjustmentLevel4 = 0;
+  private int heightAdjustmentLevel3 = 0;
+  private int heightAdjustmentLevel2 = 0;
+  private int elevatorLevel;
   private final TalonFX elevator = new TalonFX(12);
   public Elevator() {
     // var talonFXConfigs = new TalonFXConfiguration();
@@ -89,15 +94,36 @@ public class Elevator extends SubsystemBase {
   //   elevator.setControl(m_motmag.withPosition(L1));
   // } 
   public void incrementHeightAdjustment() {
-    heightAdjustment++;
-    elevator.setControl(m_motmag.withPosition(L4 + heightAdjustment * 0.1));
-    System.out.println("Increased Height" + heightAdjustment);
+    if(elevatorLevel == 2){
+      heightAdjustmentLevel2++;
+      elevator.setControl(m_motmag.withPosition(L2 + heightAdjustmentLevel2 * 0.1));
+      System.out.println("Increased Height Level 2" + heightAdjustmentLevel2);
+    }else if (elevatorLevel == 3) { 
+      heightAdjustmentLevel3++;
+      elevator.setControl(m_motmag.withPosition(L3 + heightAdjustmentLevel3 * 0.1));
+      System.out.println("Decreased Height Level 3" + heightAdjustmentLevel3);
+    }else if(elevatorLevel == 4){
+      heightAdjustmentLevel4++;
+      elevator.setControl(m_motmag.withPosition(L4 + heightAdjustmentLevel4 * 0.1));
+      System.out.println("Increased Height Level 4" + heightAdjustmentLevel4);
+    }
   }
   public void decrementHeightAdjustment() {
-    heightAdjustment--;
-    elevator.setControl(m_motmag.withPosition(L4 + heightAdjustment * 0.1));
-    System.out.println("Decreased Height" + heightAdjustment);
+    if(elevatorLevel == 2) {
+    heightAdjustmentLevel2--;
+    elevator.setControl(m_motmag.withPosition(L2 + heightAdjustmentLevel2 * 0.1));
+    System.out.println("Decreased Height Level 2" + heightAdjustmentLevel2);
+    }else if(elevatorLevel == 3) {
+      heightAdjustmentLevel3--;
+      elevator.setControl(m_motmag.withPosition(L3 + heightAdjustmentLevel3 * 0.1));
+      System.out.println("Decreased Height Level 3" + heightAdjustmentLevel3);
+    }else if(elevatorLevel == 4) {
+      heightAdjustmentLevel4--;
+      elevator.setControl(m_motmag.withPosition(L4 + heightAdjustmentLevel4 * 0.1));
+      System.out.println("Decreased Height Level 4" + heightAdjustmentLevel4);
+    }
   }
+  
 
 
   public void raise() { 
@@ -106,21 +132,25 @@ public class Elevator extends SubsystemBase {
   public void lower() { 
     elevator.set(-0.1);
   }
-  public void raiseLevel1() {
+  public void raiseStartLevel() {
+    elevatorLevel = 0;
     m_motmag.Slot = 0;
     elevator.setControl(m_motmag.withPosition(L1));
   } 
   public void raiseLevel2() {
+    elevatorLevel = 2;
   m_motmag.Slot = 0;
-   elevator.setControl(m_motmag.withPosition(L2));
+   elevator.setControl(m_motmag.withPosition(L2 + heightAdjustmentLevel2 * 0.1));
   }
   public void raiseLevel3() {
+    elevatorLevel = 3;
     m_motmag.Slot = 0;
-    elevator.setControl(m_motmag.withPosition(L3));
+    elevator.setControl(m_motmag.withPosition(L3 + heightAdjustmentLevel3 * 0.1));
   } 
   public void raiseLevel4() {
+    elevatorLevel = 4;
     m_motmag.Slot = 0;
-    elevator.setControl(m_motmag.withPosition(L4 + heightAdjustment * 0.1));
+    elevator.setControl(m_motmag.withPosition(L4 + heightAdjustmentLevel4 * 0.1));
     System.out.println("$$$$$$$$$$$$$$raised level 4$$$$%$$$$$$$");
   } 
   public void stopElevator() {
