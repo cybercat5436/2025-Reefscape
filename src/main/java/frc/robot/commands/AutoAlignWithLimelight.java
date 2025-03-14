@@ -39,6 +39,7 @@ public class AutoAlignWithLimelight extends Command {
   private double kPX = 0.2;
   private double kPY = 0.075;
   private double kPA = 0.2;
+  private double kIY = 0.0075;
   private double ySpeed;
   private double robotYError;
   private double xSpeed;
@@ -53,6 +54,7 @@ public class AutoAlignWithLimelight extends Command {
   private double timeThreshold = 1;
   private double yErrorCalculated;
   private double xErrorCalculated;
+  private double intergratedError = 0;
   private int isCorrect = 0;
   /** Creates a new AutoAlignWithLimelight. */
   public AutoAlignWithLimelight(CommandSwerveDrivetrain commandSwerveDrivetrain, LimeLight limeLight, PhotonVision photonVision) {
@@ -82,9 +84,11 @@ public class AutoAlignWithLimelight extends Command {
     // tX = -limelight.getVisionTargetHorizontalError();
     robotYError =  tY - targettY;
     // robotXError = targettX - tX;
+    intergratedError += robotXError * .020;
     yErrorCalculated = kPY * Math.abs(robotYError);
     // xErrorCalculated = kPX * Math.abs(robotXError);
-    ySpeed =  Math.min(maxSpeed, Math.abs(yErrorCalculated)) * Math.signum(robotYError);
+    ySpeed =  Math.min(maxSpeed, Math.abs(yErrorCalculated))* Math.signum(robotYError);
+    ySpeed += intergratedError * kIY;
     // xSpeed = kPX * Math.min(maxSpeed, Math.abs(robotXError)) * Math.signum(robotXError);
     // movingAverage.putData(xSpeed);
     // System.out.println("tX "+tX + "xSpeed " + xSpeed);
@@ -96,6 +100,7 @@ public class AutoAlignWithLimelight extends Command {
       System.out.println("******Robot x Error******" + robotXError);
       SmartDashboard.putNumber("Successes for AutoAlign", isCorrect);
       SmartDashboard.putNumber("yError", robotYError);
+      SmartDashboard.putNumber("Intergrated Error", + intergratedError);
   }
 
 
@@ -130,7 +135,7 @@ public class AutoAlignWithLimelight extends Command {
   public boolean isFinished() {
     double YDistanceError = Math.abs(robotYError);
     double XDistanceError = Math.abs(robotXError);
-    isYAligned = YDistanceError < horizontalThreshold;
+    isYAligned = YDistanceError < horizontalThreshold && (intergratedError < 10);
     // isXAligned = XDistanceError < verticalThreshold;
     isTimedOut = timer.get() > timeThreshold;
     if(isYAligned) {
