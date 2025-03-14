@@ -20,8 +20,10 @@ import frc.robot.subsystems.PoseUpdater;
 public class StandardDeviation extends Command {
   private PoseUpdater poseUpdater;
   private CommandSwerveDrivetrain commandSwerveDrivetrain;
-  private ArrayList<Double> distances = new ArrayList();
-  private double distanceEstimate;
+  private ArrayList<Double> distancesX = new ArrayList();
+  private ArrayList<Double> distancesY = new ArrayList();
+  private double distanceEstimateX;
+  private double distanceEstimateY;
   private Pose2d robotPose;
   private LimeLight limeLightFront;
   private LimeLight limeLightRight;
@@ -49,9 +51,13 @@ public class StandardDeviation extends Command {
   @Override
   public void execute() {
     Pose2d visionPose = poseUpdater.visionDataCollection(limeLightFront);
-    distanceEstimate = commandSwerveDrivetrain.getState().Pose.getTranslation().getDistance(visionPose.getTranslation());
-    distances.add(distanceEstimate);
-    System.out.println("distanceEstimate: " + distanceEstimate);
+    distanceEstimateX = commandSwerveDrivetrain.getState().Pose.getX() - visionPose.getX();
+    distancesX.add(distanceEstimateX);
+    distanceEstimateY = commandSwerveDrivetrain.getState().Pose.getY() - visionPose.getY();
+    distancesY.add(distanceEstimateY);
+
+    System.out.println("distanceEstimateX: " + distanceEstimateX);
+    System.out.println("distanceEstimateY: " + distanceEstimateY);
     System.out.println(robotPose);
     System.out.println("Vision Pose: " + visionPose);
   }
@@ -59,20 +65,45 @@ public class StandardDeviation extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+
+    // Standard Deviation of X Values
+
     double sum = 0;
-    for (double x:distances) {
+    for (double x:distancesX) {
       sum += x;
     }
-    double meanCalculation = sum/distances.size();
+    double meanCalculationX = sum/distancesX.size();
 
     double sum2 = 0;
-    for (double x:distances) {
-      sum2 += Math.pow((meanCalculation - x),2);
+    for (double x:distancesX) {
+      sum2 += Math.pow((meanCalculationX - x),2);
 
     }
     
-    double result = Math.sqrt(sum2/(distances.size() - 1));
-    System.out.println("**********Result: " + result);
+    double result = Math.sqrt(sum2/(distancesX.size() - 1));
+    
+
+    // Standard Deviation of Y Values
+    
+    double sum3 = 0;
+    for (double y:distancesY) {
+      sum3 += y;
+    }
+    double meanCalculationY = sum3/distancesY.size();
+
+    double sum4 = 0;
+    for (double y:distancesY) {
+      sum4 += Math.pow((meanCalculationY - y),2);
+
+    }
+    double result2 = Math.sqrt(sum4/(distancesY.size() - 1));
+
+    System.out.println("**********XStandardDeviation: " + result);
+    System.out.println("**********XAverage: " + meanCalculationX);
+    System.out.println("**********YStandardDeviation: " + result2);
+    System.out.println("**********YAverage: " + meanCalculationY);
+    
+    
   }
 
   // Returns true when the command should end.
