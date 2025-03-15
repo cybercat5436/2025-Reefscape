@@ -11,7 +11,7 @@
   "autoFolders": [
     "Calibration"
   ],
-  "defaultMaxVel": 2.0,
+  "defaultMaxVel": 4.0,
   "defaultMaxAccel": 2.0,
   "defaultMaxAngVel": 300.0,
   "defaultMaxAngAccel": 720.0,
