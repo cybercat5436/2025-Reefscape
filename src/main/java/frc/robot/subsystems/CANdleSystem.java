@@ -80,7 +80,6 @@ public class CANdleSystem extends SubsystemBase {
 
     }
     
-
     public void setIsAutoAligned(boolean bool){
         isAligned = bool;
     }

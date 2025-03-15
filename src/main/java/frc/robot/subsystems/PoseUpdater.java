@@ -157,6 +157,7 @@ public class PoseUpdater extends SubsystemBase {
     
     isTargetVisible = limeLight.getVisionTargetStatus();
     if (LimelightHelpers.getTargetCount(limeLight.limelightName) > 0) {
+
       
       boolean doRejectUpdate = false;  // initialize rough filter
 
@@ -164,6 +165,9 @@ public class PoseUpdater extends SubsystemBase {
       LimelightHelpers.SetRobotOrientation(limeLight.limelightName, robotYaw, 0.0, 0.0, 0.0, 0.0, 0.0);
       LimelightHelpers.PoseEstimate limelightMeasurementMT2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limeLight.limelightName);
 
+      if(limelightMeasurementMT2 == null){
+        return;
+      }
       // only accept vision measurements that are within 1m of current pose
       double distVisionToCurrent = commandSwerveDrivetrain.getState().Pose.getTranslation().getDistance(limelightMeasurementMT2.pose.getTranslation());
       if(distVisionToCurrent > 1.0){

@@ -40,7 +40,7 @@ public class AutoAlignWithLimelight extends Command {
   private double kPX = 0.2;
   private double kPY = 0.075;
   private double kPA = 0.2;
-  private double kIY = 0.48;
+  private double kIY = 0.24;
   private double ySpeed;
   private double robotYError;
   private double xSpeed;
@@ -88,11 +88,13 @@ public class AutoAlignWithLimelight extends Command {
     // tX = -limelight.getVisionTargetHorizontalError();
     robotYError =  tY - targettY;
     // robotXError = targettX - tX;
-    intergratedError += robotXError * .020;
+    intergratedError += robotYError * .005;
     yErrorCalculated = kPY * Math.abs(robotYError);
     // xErrorCalculated = kPX * Math.abs(robotXError);
     ySpeed =  Math.min(maxSpeed, Math.abs(yErrorCalculated))* Math.signum(robotYError);
+    if(Math.abs(robotYError) < 1){
     ySpeed += intergratedError * kIY;
+  }
     // xSpeed = kPX * Math.min(maxSpeed, Math.abs(robotXError)) * Math.signum(robotXError);
     // movingAverage.putData(xSpeed);
     // System.out.println("tX "+tX + "xSpeed " + xSpeed);
@@ -104,7 +106,8 @@ public class AutoAlignWithLimelight extends Command {
       System.out.println("******Robot x Error******" + robotXError);
       SmartDashboard.putNumber("Successes for AutoAlign", isCorrect);
       SmartDashboard.putNumber("yError", robotYError);
-      SmartDashboard.putNumber("Intergrated Error", + intergratedError);
+      SmartDashboard.putNumber("intergrated Y Error", intergratedError);
+      SmartDashboard.putBoolean("is target visable", LimelightHelpers.getTV(limelight.limelightName));
   }
 
 
@@ -144,7 +147,7 @@ public class AutoAlignWithLimelight extends Command {
     double YDistanceError = Math.abs(robotYError);
     double XDistanceError = Math.abs(robotXError);
     if(LimelightHelpers.getTV(limelight.limelightName)) {
-      isYAligned = YDistanceError < horizontalThreshold && (intergratedError < 10);
+      isYAligned = YDistanceError < horizontalThreshold && (intergratedError < 3);
     }else{
       isYAligned = false;
     }
