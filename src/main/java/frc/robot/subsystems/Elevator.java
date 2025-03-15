@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import java.lang.reflect.Array;
+
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
@@ -18,6 +20,10 @@ import com.ctre.phoenix6.signals.ExternalFeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorArrangementValue;
 
+import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.util.sendable.SendableRegistry;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -30,8 +36,19 @@ public class Elevator extends SubsystemBase {
   private double L2 = 0.91;
   private double L3 = 2.89;
   private double L4 = 5.9;
-  private int heightAdjustment = 0;
+ 
+  private int blueHeightAdjustmentLevel4 = 2;
+  private int blueHeightAdjustmentLevel3 = 2;
+  private int blueHeightAdjustmentLevel2 = 2;
+ 
+  private int redHeightAdjustmentLevel4 = -8;
+  private int redHeightAdjustmentLevel3 = -8;
+  private int redHeightAdjustmentLevel2 = -8;
+
+
+  private int elevatorLevel;
   private final TalonFX elevator = new TalonFX(12);
+  private Alliance alliance;
   public Elevator() {
     // var talonFXConfigs = new TalonFXConfiguration();
     // talonFXConfigs.Commutation.MotorArrangement = MotorArrangementValue.Minion_JST;
@@ -63,8 +80,8 @@ public class Elevator extends SubsystemBase {
 
     /* Configure Motion Magic */
     MotionMagicConfigs mm = cfg.MotionMagic;
-    mm.withMotionMagicCruiseVelocity(60) // 5 (mechanism) rotations per second cruise
-      .withMotionMagicAcceleration(60) // Take approximately 0.5 seconds to reach max vel
+    mm.withMotionMagicCruiseVelocity(75) // 5 (mechanism) rotations per second cruise
+      .withMotionMagicAcceleration(30) // Take approximately 0.5 seconds to reach max vel
       // Take approximately 0.1 seconds to reach max accel 
       .withMotionMagicJerk(300);
 
@@ -83,21 +100,80 @@ public class Elevator extends SubsystemBase {
     if (!status.isOK()) {
       System.out.println("Could not configure device. Error: " + status.toString());
     }
+    alliance = DriverStation.getAlliance().isPresent()?DriverStation.getAlliance().get():DriverStation.Alliance.Blue;
+     //Register the sendables
+    SendableRegistry.addLW(this, this.getClass().getSimpleName(), this.getClass().getSimpleName());
+    SmartDashboard.putData(this);
   }
+
+
   // public void raiseLevel1() {
   //   m_motmag.Slot = 0;
   //   elevator.setControl(m_motmag.withPosition(L1));
   // } 
   public void incrementHeightAdjustment() {
-    heightAdjustment++;
-    elevator.setControl(m_motmag.withPosition(L4 + heightAdjustment * 0.1));
-    System.out.println("Increased Height" + heightAdjustment);
+    if(alliance == Alliance.Red){
+      if(elevatorLevel == 2){
+        redHeightAdjustmentLevel2++;
+        elevator.setControl(m_motmag.withPosition(L2 + redHeightAdjustmentLevel2 * 0.1));
+        System.out.println("Increased Height Level 2 " + redHeightAdjustmentLevel2);
+      }else if (elevatorLevel == 3) { 
+        redHeightAdjustmentLevel3++;
+        elevator.setControl(m_motmag.withPosition(L3 + redHeightAdjustmentLevel3 * 0.1));
+        System.out.println("Decreased Height Level 3 " + redHeightAdjustmentLevel3);
+      }else if(elevatorLevel == 4){
+        redHeightAdjustmentLevel4++;
+        elevator.setControl(m_motmag.withPosition(L4 + redHeightAdjustmentLevel4 * 0.1));
+        System.out.println("Increased Height Level 4 " + redHeightAdjustmentLevel4);
+      }
+    } else{
+    if(elevatorLevel == 2){
+      blueHeightAdjustmentLevel2++;
+      elevator.setControl(m_motmag.withPosition(L2 + blueHeightAdjustmentLevel2 * 0.1));
+      System.out.println("Increased Height Level 2 " + blueHeightAdjustmentLevel2);
+    }else if (elevatorLevel == 3) { 
+      blueHeightAdjustmentLevel3++;
+      elevator.setControl(m_motmag.withPosition(L3 + blueHeightAdjustmentLevel3 * 0.1));
+      System.out.println("Increased Height Level 3 " + blueHeightAdjustmentLevel3);
+    }else if(elevatorLevel == 4){
+      blueHeightAdjustmentLevel4++;
+      elevator.setControl(m_motmag.withPosition(L4 + blueHeightAdjustmentLevel4 * 0.1));
+      System.out.println("Increased Height Level 4 " + blueHeightAdjustmentLevel4);
+    }
+  }
   }
   public void decrementHeightAdjustment() {
-    heightAdjustment--;
-    elevator.setControl(m_motmag.withPosition(L4 + heightAdjustment * 0.1));
-    System.out.println("Decreased Height" + heightAdjustment);
+    if(alliance == Alliance.Red){
+          if(elevatorLevel == 2) {
+      redHeightAdjustmentLevel2--;
+    elevator.setControl(m_motmag.withPosition(L2 + redHeightAdjustmentLevel2 * 0.1));
+    System.out.println("Decreased Height Level 2 " + redHeightAdjustmentLevel2);
+    }else if(elevatorLevel == 3) {
+      redHeightAdjustmentLevel3--;
+      elevator.setControl(m_motmag.withPosition(L3 + redHeightAdjustmentLevel3 * 0.1));
+      System.out.println("Decreased Height Level 3 " + redHeightAdjustmentLevel3);
+    }else if(elevatorLevel == 4) {
+      redHeightAdjustmentLevel4--;
+      elevator.setControl(m_motmag.withPosition(L4 + redHeightAdjustmentLevel4 * 0.1));
+      System.out.println("Decreased Height Level 4 " + redHeightAdjustmentLevel4);
+    }
+    }else{
+    if(elevatorLevel == 2) {
+      blueHeightAdjustmentLevel2--;
+    elevator.setControl(m_motmag.withPosition(L2 + blueHeightAdjustmentLevel2 * 0.1));
+    System.out.println("Decreased Height Level 2 " + blueHeightAdjustmentLevel2);
+    }else if(elevatorLevel == 3) {
+      blueHeightAdjustmentLevel3--;
+      elevator.setControl(m_motmag.withPosition(L3 + blueHeightAdjustmentLevel3 * 0.1));
+      System.out.println("Decreased Height Level 3 " + blueHeightAdjustmentLevel3);
+    }else if(elevatorLevel == 4) {
+      blueHeightAdjustmentLevel4--;
+      elevator.setControl(m_motmag.withPosition(L4 + blueHeightAdjustmentLevel4 * 0.1));
+      System.out.println("Decreased Height Level 4 " + blueHeightAdjustmentLevel4);
+    }
   }
+  }
+  
 
 
   public void raise() { 
@@ -106,22 +182,45 @@ public class Elevator extends SubsystemBase {
   public void lower() { 
     elevator.set(-0.1);
   }
-  public void raiseLevel1() {
+  public void raiseStartLevel() {
+    elevatorLevel = 0;
     m_motmag.Slot = 0;
     elevator.setControl(m_motmag.withPosition(L1));
   } 
   public void raiseLevel2() {
-  m_motmag.Slot = 0;
-   elevator.setControl(m_motmag.withPosition(L2));
+    if(alliance == Alliance.Red){
+      elevatorLevel = 2;
+      m_motmag.Slot = 0;
+       elevator.setControl(m_motmag.withPosition(L2 + redHeightAdjustmentLevel2 * 0.1));
+    } else{
+    elevatorLevel = 2;
+    m_motmag.Slot = 0;
+    elevator.setControl(m_motmag.withPosition(L2 + blueHeightAdjustmentLevel2 * 0.1));
+    }
   }
   public void raiseLevel3() {
-    m_motmag.Slot = 0;
-    elevator.setControl(m_motmag.withPosition(L3));
+    if(alliance == Alliance.Red){
+      elevatorLevel = 3;
+      m_motmag.Slot = 0;
+      elevator.setControl(m_motmag.withPosition(L3 + redHeightAdjustmentLevel3 * 0.1));
+    } else {
+     elevatorLevel = 3;
+      m_motmag.Slot = 0;
+      elevator.setControl(m_motmag.withPosition(L3 + blueHeightAdjustmentLevel3 * 0.1));
+    }
   } 
   public void raiseLevel4() {
-    m_motmag.Slot = 0;
-    elevator.setControl(m_motmag.withPosition(L4 + heightAdjustment * 0.1));
-    System.out.println("$$$$$$$$$$$$$$raised level 4$$$$%$$$$$$$");
+    if (alliance == Alliance.Red){
+      elevatorLevel = 4;
+      m_motmag.Slot = 0;
+      elevator.setControl(m_motmag.withPosition(L4 + redHeightAdjustmentLevel4 * 0.1));
+      System.out.println("$$$$$$$$$$$$$$raised level 4$$$$%$$$$$$$");
+    } else {
+      elevatorLevel = 4;
+      m_motmag.Slot = 0;
+      elevator.setControl(m_motmag.withPosition(L4 + blueHeightAdjustmentLevel4 * 0.1));
+    }
+   
   } 
   public void stopElevator() {
     elevator.setControl(m_request.withOutput(0));
@@ -132,5 +231,13 @@ public class Elevator extends SubsystemBase {
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("Elevator Encoder", elevator.getPosition().getValueAsDouble());
     //SmartDashboard.putNumber("Elevator Quadrature Position", elevator.getRawQuadraturePosition().getValueAsDouble());
+  
+  }
+  @Override
+  public void initSendable(SendableBuilder builder) {
+    // TODO Auto-generated method stub
+    super.initSendable(builder);
+    // builder.addDoubleArrayProperty("tx-ta", () -> new double[] {tx, ta}, null);
+
   }
 }
