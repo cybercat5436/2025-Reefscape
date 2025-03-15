@@ -66,9 +66,7 @@ public class CANdleSystem extends SubsystemBase {
         this.coralSensor = coralSensor;
         this.algaeSensor = algaeSensor;
         this.limeLightFront = front;
-        this.autoAlign = autoAlign;
-
-        showGreen();
+        showGreen(0, 300);
     }
 
 

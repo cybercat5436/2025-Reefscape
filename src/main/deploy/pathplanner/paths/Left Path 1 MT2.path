@@ -16,19 +16,24 @@
     },
     {
       "anchor": {
-        "x": 4.845750000000001,
-        "y": 5.108
+        "x": 5.06025,
+        "y": 4.980499999999999
       },
       "prevControl": {
-        "x": 5.517061475409838,
-        "y": 5.251852459016393
+        "x": 5.396942784671724,
+        "y": 5.563669009593274
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": "Left Path 1 MT2 end"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.75,
+      "rotationDegrees": -119.99999999999999
+    }
+  ],
   "constraintZones": [
     {
       "name": "Constraints Zone",

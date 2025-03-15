@@ -14,6 +14,7 @@ import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.jar.Attributes.Name;
 
 import javax.sound.sampled.SourceDataLine;
@@ -39,6 +40,7 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -56,6 +58,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.AutoAlign;
 import frc.robot.commands.AutoAlignWithLimelight;
 import frc.robot.commands.CoralIntakeWithDetection;
+import frc.robot.commands.DriveForward;
 import frc.robot.commands.StandardDeviation;
 import frc.robot.generated.TunerConstants;
 // import frc.robot.subsystems.Climber;
@@ -106,12 +109,13 @@ public class RobotContainer {
     private final Joystick reefPositionJoystick = new Joystick(2);
     private final Joystick reefLevelJoystick = new Joystick(3);
     private final CommandXboxController callibrationJoystick = new CommandXboxController(4);
-    // private final ReefController reefController = new ReefController();
+    private final ReefController reefController = ReefController.getInstance();
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private final LimeLight limeLightFront = new LimeLight("limelight-front", 0.02, -0.3, 0.65, -90.0, 0.0, 0.0);
     private final LimeLight limeLightFrontRight = new LimeLight("limelight-right", 0.15, 0.13, 0.45, 0.0, 0.0, 0.0);
     private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, limeLightFrontRight, drivetrain);
     private final AutoAlign autoAlign = new AutoAlign(drivetrain,limeLightFront,photonVision);
+    private final DriveForward driveForward = new DriveForward(drivetrain, HalfSpeed, robotCentricDrive);
     private final AutoAlignWithLimelight autoALignWithLimelights = new AutoAlignWithLimelight(drivetrain,limeLightFront,photonVision);
     private final StandardDeviation standardDeviation = new StandardDeviation(poseUpdater, drivetrain, new Pose2d(7.82,4.026,Rotation2d.k180deg),limeLightFront, limeLightFrontRight);
     private SendableChooser<Command> autonChooser;
@@ -155,6 +159,9 @@ public class RobotContainer {
         //testReefController();
         autonChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auton Chooser", autonChooser);
+        LimelightHelpers.setPipelineIndex(limeLightFront.limelightName, 1);
+        LimelightHelpers.setPipelineIndex(limeLightFrontRight.limelightName, 1);
+
     }
 
     
@@ -181,6 +188,11 @@ public class RobotContainer {
         .andThen(Commands.waitSeconds(0.5))
         .andThen(new InstantCommand(() -> climber2.stopClimb())
         ));
+        NamedCommands.registerCommand("autoAlignWithLimelight", autoALignWithLimelights);
+        NamedCommands.registerCommand("driveForwardFor1Second" , new  DriveForward(drivetrain, HalfSpeed*1.5, robotCentricDrive));
+        NamedCommands.registerCommand("faceWheels-120Degrees" , new InstantCommand(() -> drivetrain.applyRequest(() ->
+        point.withModuleDirection(new Rotation2d(-120)))));
+
     }
 
 
@@ -208,7 +220,7 @@ public class RobotContainer {
            .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
         
         
-
+        //Trigger autoAlignTrigger = new Trigger(() -> autoAlign.);
         
         // joystick2.a()
         //     .whileTrue(new InstantCommand(() -> elevator.raise()))
@@ -307,13 +319,26 @@ public class RobotContainer {
         
     // })
     // );
-    joystick.povUp().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 0));
-    joystick.povDown().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 180));
-    joystick.povLeft().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 90));
-    joystick.povRight().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 240));
-    //joystick.povUp().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 0));
-    //joystick.povUp().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 0));
-    
+    joystick.povUp().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 180)
+            .andThen(getRumbleCommand()));
+    joystick.povDown().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 0)
+            .andThen(getRumbleCommand()));
+    joystick.povDownLeft().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 60)
+            .andThen(getRumbleCommand())
+            .andThen(Commands.waitSeconds(0.1))
+            .andThen(getRumbleCommand()));
+    joystick.povDownRight().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 280)
+            .andThen(getRumbleCommand())
+            .andThen(Commands.waitSeconds(0.1))
+            .andThen(getRumbleCommand()));
+    joystick.povUpLeft().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 120)
+            .andThen(getRumbleCommand())
+            .andThen(Commands.waitSeconds(0.1))
+            .andThen(getRumbleCommand()));
+    joystick.povUpRight().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 220)
+            .andThen(getRumbleCommand())
+            .andThen(Commands.waitSeconds(0.1))
+            .andThen(getRumbleCommand()));
 
     joystick.a().whileTrue(drivetrain.applyRequest(() -> {
             double xSpeed = slewRateLimiterX.calculate(-joystick.getLeftY()* maxSpeed);             
@@ -487,7 +512,15 @@ public class RobotContainer {
     //     reefController.setTargetReefPosition(ReefPosition.H);
     //     System.out.println(reefController.toString());        
     // }
-    
+    private Command getRumbleCommand(){
+        return new InstantCommand(()-> joystick.setRumble(RumbleType.kBothRumble, 1))
+        .andThen(Commands.waitSeconds(0.15))
+        .andThen(new InstantCommand(()-> joystick.setRumble(RumbleType.kBothRumble, 0)));
+        
+        }
+
+
+
 
     public void setOdometryPoseFromSelectedAuto(String autonName){
         System.out.println("~~~~Setting pose from Selected Auto: " + autonName);

@@ -17,6 +17,9 @@ import frc.robot.LimelightHelpers;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LimeLight;
 import frc.robot.subsystems.PhotonVision;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class AutoAlignWithLimelight extends Command {
@@ -27,20 +30,32 @@ public class AutoAlignWithLimelight extends Command {
   private PhotonVision photonVision;
   // private MovingAverage movingAverage;
   private double tX;
-  private double targettX = 0;
+  private double targettA = 1.4;
   private double tXError;
   private double tY;
-  private double targettY = -3.2;
+  private double tA;
+  private double targettY = 0;
   private double tYError;
   private double kPX = 0.2;
-  private double kPY = 0.2;
+  private double kPY = 0.075;
+  private double kPA = 0.2;
+  private double kIY = 0.0075;
   private double ySpeed;
   private double robotYError;
   private double xSpeed;
   private double robotXError;
   private double maxSpeed = 1;
+  private Timer timer = new Timer();
+  private boolean isYAligned;
+  private boolean isXAligned;
+  private boolean isTimedOut;
+  private double horizontalThreshold = 0.5;
+  private double verticalThreshold = 0.5;
+  private double timeThreshold = 1;
   private double yErrorCalculated;
   private double xErrorCalculated;
+  private double intergratedError = 0;
+  private int isCorrect = 0;
   /** Creates a new AutoAlignWithLimelight. */
   public AutoAlignWithLimelight(CommandSwerveDrivetrain commandSwerveDrivetrain, LimeLight limeLight, PhotonVision photonVision) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -56,6 +71,10 @@ public class AutoAlignWithLimelight extends Command {
   @Override
   public void initialize() {
     LimelightHelpers.setPipelineIndex(limelight.limelightName, 0);
+
+    timer.reset();
+    timer.start();
+    
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -65,15 +84,23 @@ public class AutoAlignWithLimelight extends Command {
     // tX = -limelight.getVisionTargetHorizontalError();
     robotYError =  tY - targettY;
     // robotXError = targettX - tX;
+    intergratedError += robotXError * .020;
     yErrorCalculated = kPY * Math.abs(robotYError);
     // xErrorCalculated = kPX * Math.abs(robotXError);
-    ySpeed =  Math.min(maxSpeed, Math.abs(yErrorCalculated)) * Math.signum(robotYError);
+    ySpeed =  Math.min(maxSpeed, Math.abs(yErrorCalculated))* Math.signum(robotYError);
+    ySpeed += intergratedError * kIY;
     // xSpeed = kPX * Math.min(maxSpeed, Math.abs(robotXError)) * Math.signum(robotXError);
     // movingAverage.putData(xSpeed);
-    System.out.println("tX "+tX + "xSpeed " + xSpeed);
+    // System.out.println("tX "+tX + "xSpeed " + xSpeed);
     commandSwerveDrivetrain.setControl(
       robotCentricDrive
-      .withVelocityY(ySpeed));
+      .withVelocityY(ySpeed)
+      // .withVelocityX(xSpeed)
+      );
+      System.out.println("******Robot x Error******" + robotXError);
+      SmartDashboard.putNumber("Successes for AutoAlign", isCorrect);
+      SmartDashboard.putNumber("yError", robotYError);
+      SmartDashboard.putNumber("Intergrated Error", + intergratedError);
   }
 
 
@@ -81,12 +108,46 @@ public class AutoAlignWithLimelight extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    timer.stop();
     LimelightHelpers.setPipelineIndex(limelight.limelightName, 1);
+    if(isYAligned && isXAligned) {
+      System.out.println("************Robot is Aligned*********");
+    }else if(isTimedOut){
+      System.out.println("Robot time up");
+    }else if(isXAligned) {
+      System.out.println("Robot X Aligned");
+    }else if(isYAligned) {
+      System.out.println("**********Robot Y Aligned************"); 
+    }
+    
+    if(isCorrect > 3) {
+      System.out.println("*&^%#$@#^*Alignment is correct***!@#$%^&**&^?/%$");
+    }
+
+    commandSwerveDrivetrain.setControl(
+      robotCentricDrive
+      .withVelocityY(0)
+      .withVelocityX(0));
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    double YDistanceError = Math.abs(robotYError);
+    double XDistanceError = Math.abs(robotXError);
+    isYAligned = YDistanceError < horizontalThreshold && (intergratedError < 10);
+    // isXAligned = XDistanceError < verticalThreshold;
+    isTimedOut = timer.get() > timeThreshold;
+    if(isYAligned) {
+      isCorrect++;
+    }else {
+      isCorrect = 0;
+    }
+    
+    
+    // return isTimedOut || isYAligned && isXAligned;
+    // return isXAligned;
+    return isCorrect > 3;
+
   }
 }
