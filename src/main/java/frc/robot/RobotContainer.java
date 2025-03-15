@@ -119,7 +119,7 @@ public class RobotContainer {
     private final DriveForward driveForward = new DriveForward(drivetrain, HalfSpeed, robotCentricDrive);
     private final AutoAlignWithLimelight autoALignWithLimelights = new AutoAlignWithLimelight(drivetrain,limeLightFront,photonVision);
     private final StandardDeviation standardDeviation = new StandardDeviation(poseUpdater, drivetrain, new Pose2d(7.82,4.026,Rotation2d.k180deg),limeLightFront, limeLightFrontRight);
-    private final FlashLEDsForAutoAlign flashLEDsForAutoAlign = new FlashLEDsForAutoAlign();
+    private final FlashLEDsForAutoAlign flashLEDsForAutoAlign = new FlashLEDsForAutoAlign(limeLightFront);
     private SendableChooser<Command> autonChooser;
     // public final Climber climber = new Climber();
     public final Climber2 climber2 = new Climber2();
@@ -398,6 +398,9 @@ public class RobotContainer {
     
         joystick.y().whileTrue(new AutoAlignWithLimelight(drivetrain, limeLightFront, photonVision));
         
+        Trigger limelightLEDTrigger = new Trigger(() -> CANdleSystem.getInstance().getIsAligned());
+
+        limelightLEDTrigger.whileTrue(flashLEDsForAutoAlign);
         // climber commands
         
         drivetrain.registerTelemetry(logger::telemeterize);

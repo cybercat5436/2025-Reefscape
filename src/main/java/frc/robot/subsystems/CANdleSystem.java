@@ -29,7 +29,6 @@ public class CANdleSystem extends SubsystemBase {
     private AutoAlign autoAlign;
     private static CANdleSystem caNdleSystem;
     private Animation m_toAnimate = null;
-    private final FlashLEDsForAutoAlign flashLEDsForAutoAlign = new FlashLEDsForAutoAlign();
     // private final FlashLEDsForAutoAlign flashLEDsForAutoAlign = new FlashLEDsForAutoAlign();
     LimeLight limeLightFront;
     public boolean animationOff = false;    
@@ -235,7 +234,10 @@ public class CANdleSystem extends SubsystemBase {
 
     }
     
+    public boolean getIsAligned() {
 
+        return isAligned;
+    }
 
     public void incrementAnimation() {
         switch(m_currentAnimation) {
@@ -325,10 +327,10 @@ public class CANdleSystem extends SubsystemBase {
     @Override
     public void periodic() {
         // This method will be called once per scheduler run
-        if (isAligned == true) {
-            flashLEDsForAutoAlign.schedule();
+        // if (isAligned == true) {
+        //     flashLEDsForAutoAlign.schedule();
 
-        }
+        // }
 
         /*if(m_toAnimate == null) {
             m_candle.setLEDs((int)(joystick.getLeftTriggerAxis() * 255), 

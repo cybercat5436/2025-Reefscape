@@ -15,8 +15,9 @@ public class FlashLEDsForAutoAlign extends Command {
   /** Creates a new FlashLEDsForAutoAlign. */
   private Timer timer = new Timer();
   private LimeLight limelight;
-  public FlashLEDsForAutoAlign() {
+  public FlashLEDsForAutoAlign(LimeLight limelight) {
     // Use addRequirements() here to declare subsystem dependencies.
+    this.limelight = limelight;
   }
 
   // Called when the command is initially scheduled.
