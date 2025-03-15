@@ -128,7 +128,7 @@ public class AutoAlignWithLimelight extends Command {
     if(isCorrect > 3) {
       System.out.println("*&^%#$@#^*Alignment is correct***!@#$%^&**&^?/%$");
     }
-
+    CANdleSystem.getInstance().setIsAligned(isCorrect > 3);
     commandSwerveDrivetrain.setControl(
       robotCentricDrive
       .withVelocityY(0)
