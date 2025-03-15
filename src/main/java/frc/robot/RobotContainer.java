@@ -365,10 +365,10 @@ public class RobotContainer {
 
         slowModeTrigger.whileTrue(drivetrain.applyRequest(() ->{
             
-                double xSpeed = slowModeSlewRateLimiterX.calculate(joystick.getLeftY()* HalfSpeed);
+                double xSpeed = slowModeSlewRateLimiterX.calculate(-joystick.getLeftY()* HalfSpeed);
                 
                 
-                double ySpeed = slowModeSlewRateLimiterY.calculate(joystick.getLeftX()* HalfSpeed);
+                double ySpeed = slowModeSlewRateLimiterY.calculate(-joystick.getLeftX()* HalfSpeed);
                 
                 
                 double yTurnSpeed = slowModeSlewRateLimiterTurnX.calculate(joystick.getRightX()* HalfAngularRate);

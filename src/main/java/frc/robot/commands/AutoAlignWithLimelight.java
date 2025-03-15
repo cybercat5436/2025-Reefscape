@@ -66,7 +66,7 @@ public class AutoAlignWithLimelight extends Command {
     this.limelight = limeLight;
     this.photonVision = photonVision;
     // this.movingAverage = new MovingAverage(20);
-
+    System.out.println("**********enter autoalign with limelight**********");
   }
 
   // Called when the command is initially scheduled.
