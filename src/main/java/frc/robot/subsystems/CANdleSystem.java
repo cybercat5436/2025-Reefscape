@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
 import frc.robot.commands.AutoAlign;
+import frc.robot.commands.CANdleTimer;
 import frc.robot.generated.TunerConstants;
 
 import com.ctre.phoenix.led.*;
@@ -24,10 +25,14 @@ public class CANdleSystem extends SubsystemBase {
     private XboxController joystick;
     private GamePieceDetector coralSensor;
     private GamePieceDetector algaeSensor;
-    
+    CANdleTimer candleTimer = new CANdleTimer();
+
     private Animation m_toAnimate = null;
     LimeLight limeLightFront;
-    public boolean animationOff = false;    
+    public boolean animationOff = false;  
+    public boolean isAligned;
+
+    private static CANdleSystem caNdleSystem;
 
     public enum AnimationTypes {
         ColorFlow,
@@ -55,6 +60,14 @@ public class CANdleSystem extends SubsystemBase {
         //308 LEDS Total
         this.joystick = joy;
         changeAnimation(AnimationTypes.SetAll);
+        this.coralSensor = coralSensor;
+        this.algaeSensor = algaeSensor;
+        this.limeLightFront = front;
+        showGreen(0, 300);
+        
+    }
+    
+    private CANdleSystem(){
         CANdleConfiguration configAll = new CANdleConfiguration();
         configAll.statusLedOffWhenActive = true;
         configAll.disableWhenLOS = false;
@@ -62,12 +75,20 @@ public class CANdleSystem extends SubsystemBase {
         configAll.brightnessScalar = 0.1;
         configAll.vBatOutputMode = VBatOutputMode.Modulated;
         m_candle.configAllSettings(configAll, 100);
-        this.coralSensor = coralSensor;
-        this.algaeSensor = algaeSensor;
-        this.limeLightFront = front;
-        showGreen(0, 300);
+        isAligned = false;
+
+    }
+    public static CANdleSystem getInstance(){
+        if (caNdleSystem == null){
+            caNdleSystem = new CANdleSystem();
+        }
+        return caNdleSystem;
     }
 
+    public void setIsAutoAligned(boolean bool){
+        isAligned = bool;
+    }
+    
 
     public void flashColor(AvailableColors color){
         switch (color){
@@ -210,6 +231,7 @@ public class CANdleSystem extends SubsystemBase {
         } 
         }
     }
+    
 
     
 
@@ -325,6 +347,12 @@ public class CANdleSystem extends SubsystemBase {
         }*/
         
         //limeLightStatusColors(LimelightHelpers.getTargetCount(limeLightFront.limelightName));
+        
+        if (isAligned){
+            showGreen();
+            //candleTimer.initialize();   //Schedule the command
+            
+        }
         
         
         
