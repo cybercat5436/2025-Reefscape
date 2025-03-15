@@ -39,7 +39,7 @@ public class AutoAlignWithLimelight extends Command {
   private double kPX = 0.2;
   private double kPY = 0.075;
   private double kPA = 0.2;
-  private double kIY = 0.0075;
+  private double kIY = 0.12;
   private double ySpeed;
   private double robotYError;
   private double xSpeed;
@@ -128,6 +128,9 @@ public class AutoAlignWithLimelight extends Command {
       robotCentricDrive
       .withVelocityY(0)
       .withVelocityX(0));
+    
+    
+
   }
 
   // Returns true when the command should end.
@@ -135,7 +138,11 @@ public class AutoAlignWithLimelight extends Command {
   public boolean isFinished() {
     double YDistanceError = Math.abs(robotYError);
     double XDistanceError = Math.abs(robotXError);
-    isYAligned = YDistanceError < horizontalThreshold && (intergratedError < 10);
+    if(LimelightHelpers.getTV(limelight.limelightName)) {
+      isYAligned = YDistanceError < horizontalThreshold && (intergratedError < 10);
+    }else{
+      isYAligned = false;
+    }
     // isXAligned = XDistanceError < verticalThreshold;
     isTimedOut = timer.get() > timeThreshold;
     if(isYAligned) {
