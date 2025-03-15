@@ -319,7 +319,7 @@ public class RobotContainer {
         
     // })
     // );
-    joystick.povUp().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 180)
+    joystick.povUp().onTrue(new InstantCommand(() -> reefController.setTargetReefPosition(ReefPosition.A))
             .andThen(getRumbleCommand()));
     joystick.povDown().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 0)
             .andThen(getRumbleCommand()));
@@ -346,7 +346,7 @@ public class RobotContainer {
 
         return fieldCentricFacingAngle.withVelocityX(xSpeed * Math.abs(xSpeed)) 
         .withVelocityY(ySpeed * Math.abs(ySpeed)) 
-        .withTargetDirection(Rotation2d.fromDegrees(drivetrain.targetRotation));
+        .withTargetDirection(Rotation2d.fromDegrees(reefController.botRotation2d()));
         }
     ));
     joystick.b().whileTrue(drivetrain.applyRequest(() -> {
