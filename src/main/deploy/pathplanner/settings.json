@@ -11,8 +11,8 @@
   "autoFolders": [
     "Calibration"
   ],
-  "defaultMaxVel": 4.0,
-  "defaultMaxAccel": 6.0,
+  "defaultMaxVel": 2.0,
+  "defaultMaxAccel": 4.0,
   "defaultMaxAngVel": 300.0,
   "defaultMaxAngAccel": 720.0,
   "defaultNominalVoltage": 12.0,

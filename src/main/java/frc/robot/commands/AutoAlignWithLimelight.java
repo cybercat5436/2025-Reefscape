@@ -66,7 +66,6 @@ public class AutoAlignWithLimelight extends Command {
     this.limelight = limeLight;
     this.photonVision = photonVision;
     // this.movingAverage = new MovingAverage(20);
-    System.out.println("**********enter autoalign with limelight**********");
   }
 
   // Called when the command is initially scheduled.
@@ -78,7 +77,8 @@ public class AutoAlignWithLimelight extends Command {
     timer.start();
 
     candleSystem.showYellow();
-    
+    System.out.println("**********enter autoalign with limelight**********");
+
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -92,7 +92,7 @@ public class AutoAlignWithLimelight extends Command {
     yErrorCalculated = kPY * Math.abs(robotYError);
     // xErrorCalculated = kPX * Math.abs(robotXError);
     ySpeed =  Math.min(maxSpeed, Math.abs(yErrorCalculated))* Math.signum(robotYError);
-    if(Math.abs(robotYError) < 1){
+    if(Math.abs(robotYError) < 2){
     ySpeed += intergratedError * kIY;
   }
     // xSpeed = kPX * Math.min(maxSpeed, Math.abs(robotXError)) * Math.signum(robotXError);
@@ -103,7 +103,7 @@ public class AutoAlignWithLimelight extends Command {
       .withVelocityY(ySpeed)
       // .withVelocityX(xSpeed)
       );
-      System.out.println("******Robot x Error******" + robotXError);
+      System.out.println("******Robot Y Error******" + robotYError);
       SmartDashboard.putNumber("Successes for AutoAlign", isCorrect);
       SmartDashboard.putNumber("yError", robotYError);
       SmartDashboard.putNumber("intergrated Y Error", intergratedError);
@@ -147,7 +147,7 @@ public class AutoAlignWithLimelight extends Command {
     double YDistanceError = Math.abs(robotYError);
     double XDistanceError = Math.abs(robotXError);
     if(LimelightHelpers.getTV(limelight.limelightName)) {
-      isYAligned = YDistanceError < horizontalThreshold && (intergratedError < 3);
+      isYAligned = YDistanceError < horizontalThreshold && (intergratedError < 6);
     }else{
       isYAligned = false;
     }

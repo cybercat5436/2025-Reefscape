@@ -5,16 +5,9 @@
     "data": {
       "commands": [
         {
-          "type": "parallel",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Left Path 1 MT2"
-                }
-              }
-            ]
+            "pathName": "Left Path 1 MT2"
           }
         },
         {
