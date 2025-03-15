@@ -6,12 +6,15 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.LimelightHelpers;
 import frc.robot.subsystems.CANdleSystem;
+import frc.robot.subsystems.LimeLight;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class FlashLEDsForAutoAlign extends Command {
   /** Creates a new FlashLEDsForAutoAlign. */
   private Timer timer = new Timer();
+  private LimeLight limelight;
   public FlashLEDsForAutoAlign() {
     // Use addRequirements() here to declare subsystem dependencies.
   }
@@ -22,6 +25,7 @@ public class FlashLEDsForAutoAlign extends Command {
     timer.reset();
     timer.start();
     CANdleSystem.getInstance().showGreen();
+    LimelightHelpers.setLEDMode_ForceBlink(limelight.getName());
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -36,7 +40,7 @@ public class FlashLEDsForAutoAlign extends Command {
 
     CANdleSystem.getInstance().setIsAligned(false);
     CANdleSystem.getInstance().turnOffColors();
-   
+    LimelightHelpers.setLEDMode_ForceOff(limelight.getName());
   }
 
   // Returns true when the command should end.
