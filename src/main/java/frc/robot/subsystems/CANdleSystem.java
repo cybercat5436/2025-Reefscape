@@ -5,9 +5,11 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
 import frc.robot.commands.AutoAlign;
+import frc.robot.commands.FlashLEDsForAutoAlign;
 import frc.robot.generated.TunerConstants;
 
 import com.ctre.phoenix.led.*;
@@ -25,10 +27,13 @@ public class CANdleSystem extends SubsystemBase {
     private GamePieceDetector coralSensor;
     private GamePieceDetector algaeSensor;
     private AutoAlign autoAlign;
-    
+    private static CANdleSystem caNdleSystem;
     private Animation m_toAnimate = null;
+    private final FlashLEDsForAutoAlign flashLEDsForAutoAlign = new FlashLEDsForAutoAlign();
+    // private final FlashLEDsForAutoAlign flashLEDsForAutoAlign = new FlashLEDsForAutoAlign();
     LimeLight limeLightFront;
     public boolean animationOff = false;    
+    private boolean isAligned = false;
 
     public enum AnimationTypes {
         ColorFlow,
@@ -69,6 +74,26 @@ public class CANdleSystem extends SubsystemBase {
         showGreen(0, 300);
     }
 
+    private CANdleSystem() {
+        changeAnimation(AnimationTypes.SetAll);
+        CANdleConfiguration configAll = new CANdleConfiguration();
+        configAll.statusLedOffWhenActive = true;
+        configAll.disableWhenLOS = false;
+        configAll.stripType = LEDStripType.GRB; 
+        configAll.brightnessScalar = 0.1;
+        configAll.vBatOutputMode = VBatOutputMode.Modulated;
+        m_candle.configAllSettings(configAll, 100);
+
+    }
+
+    public static CANdleSystem getInstance() {
+        if (caNdleSystem == null) {
+            caNdleSystem = new CANdleSystem();
+
+        }
+        return caNdleSystem;
+
+    }
 
     public void flashColor(AvailableColors color){
         switch (color){
@@ -204,14 +229,11 @@ public class CANdleSystem extends SubsystemBase {
             } 
         }
     }
-    public void autoAlignStatus(AutoAlign autoAlign){
-        if (autoAlign.isFinished()){
-            showGreen();
-        } else{
-            turnOffColors();
-        }
-    }
     
+    public void setIsAligned(boolean value) {
+        isAligned = value;
+
+    }
     
 
 
@@ -303,6 +325,11 @@ public class CANdleSystem extends SubsystemBase {
     @Override
     public void periodic() {
         // This method will be called once per scheduler run
+        if (isAligned == true) {
+            flashLEDsForAutoAlign.schedule();
+
+        }
+
         /*if(m_toAnimate == null) {
             m_candle.setLEDs((int)(joystick.getLeftTriggerAxis() * 255), 
                               (int)(joystick.getRightTriggerAxis() * 255), 
@@ -326,7 +353,7 @@ public class CANdleSystem extends SubsystemBase {
         }*/
         
         //limeLightStatusColors(LimelightHelpers.getTargetCount(limeLightFront.limelightName));
-        autoAlignStatus(autoAlign);
+
         
         
         

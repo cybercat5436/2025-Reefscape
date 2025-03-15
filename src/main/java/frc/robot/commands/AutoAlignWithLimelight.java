@@ -14,6 +14,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.LimelightHelpers;
+import frc.robot.subsystems.CANdleSystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LimeLight;
 import frc.robot.subsystems.PhotonVision;
@@ -123,7 +124,7 @@ public class AutoAlignWithLimelight extends Command {
     if(isCorrect > 3) {
       System.out.println("*&^%#$@#^*Alignment is correct***!@#$%^&**&^?/%$");
     }
-
+    CANdleSystem.getInstance().setIsAligned(isCorrect > 3);
     commandSwerveDrivetrain.setControl(
       robotCentricDrive
       .withVelocityY(0)
