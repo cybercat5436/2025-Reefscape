@@ -56,7 +56,7 @@ public class CANdleSystem extends SubsystemBase {
     }
     private AnimationTypes m_currentAnimation;
 
-    public CANdleSystem(XboxController joy, GamePieceDetector coralSensor, GamePieceDetector algaeSensor, LimeLight front, AutoAlign autoAlign) {
+    private CANdleSystem(XboxController joy, GamePieceDetector coralSensor, GamePieceDetector algaeSensor, LimeLight front, AutoAlign autoAlign) {
         //308 LEDS Total
         this.joystick = joy;
         changeAnimation(AnimationTypes.SetAll);

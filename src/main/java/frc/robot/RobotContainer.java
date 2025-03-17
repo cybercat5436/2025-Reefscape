@@ -129,7 +129,7 @@ public class RobotContainer {
     public final Coral coral = new Coral();
     public final Algae algae = new Algae();
     public final Elevator elevator = new Elevator();
-    public CANdleSystem candleSystem = new CANdleSystem(joystick.getHID(), coralSensor, algaeSensor, limeLightFront, autoAlign);
+    public CANdleSystem candleSystem = CANdleSystem.getInstance();
 
     private SequentialCommandGroup autoCoralHigh = new SequentialCommandGroup(
         new InstantCommand(() -> elevator.raiseLevel4())
@@ -279,8 +279,6 @@ public class RobotContainer {
         //     .onFalse(new InstantCommand(() -> algae.algaeStop()));
             
         
-        
-
         SlewRateLimiter slewRateLimiterX = new SlewRateLimiter(maxSpeed * 2);  //Note: setting slewratelimiter to 2x speed means it takes 0.5s to accelerate to full speed
         SlewRateLimiter slewRateLimiterY = new SlewRateLimiter(maxSpeed * 2);
         SlewRateLimiter slewRateLimiterTurnX = new SlewRateLimiter(maxAngularRate * 2);  //corrected from using MaxSpeed

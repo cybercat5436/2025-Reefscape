@@ -26,7 +26,7 @@ public class FlashLEDsForAutoAlign extends Command {
     timer.reset();
     timer.start();
     CANdleSystem.getInstance().showGreen();
-    LimelightHelpers.setLEDMode_ForceBlink(limelight.getName());
+    LimelightHelpers.setLEDMode_ForceBlink(limelight.limelightName);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -41,7 +41,7 @@ public class FlashLEDsForAutoAlign extends Command {
 
     CANdleSystem.getInstance().setIsAligned(false);
     CANdleSystem.getInstance().turnOffColors();
-    LimelightHelpers.setLEDMode_ForceOff(limelight.getName());
+    LimelightHelpers.setLEDMode_ForceOff(limelight.limelightName);
   }
 
   // Returns true when the command should end.
