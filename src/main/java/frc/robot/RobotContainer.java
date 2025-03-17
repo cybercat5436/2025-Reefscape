@@ -182,7 +182,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("autoAlign", autoAlign);
         NamedCommands.registerCommand("raiseArmHigh", new InstantCommand(() -> elevator.raiseLevel4()));
         NamedCommands.registerCommand("shootCoral", new InstantCommand(() -> coral.backward(1)).andThen(Commands.waitSeconds(0.3)).andThen(new InstantCommand(() -> coral.stopMotor())));
-        NamedCommands.registerCommand("lowerElevator", new InstantCommand(() -> elevator.raiseLevel1()).andThen(Commands.waitSeconds(2).andThen(new InstantCommand(() -> elevator.stopElevator()))));
+        NamedCommands.registerCommand("lowerElevator", new InstantCommand(() -> elevator.raiseStartLevel()).andThen(Commands.waitSeconds(2).andThen(new InstantCommand(() -> elevator.stopElevator()))));
         NamedCommands.registerCommand("coralIntake", new CoralIntakeWithDetection(coral, coralSensor));
         NamedCommands.registerCommand("stopCoralIntake", new InstantCommand(() -> coral.forward(0)));
         NamedCommands.registerCommand("setClimberArmsToAutonStartPosition", 
@@ -191,7 +191,7 @@ public class RobotContainer {
         .andThen(new InstantCommand(() -> climber2.stopClimb())
         ));
         NamedCommands.registerCommand("autoAlignWithLimelight", autoALignWithLimelights);
-        NamedCommands.registerCommand("driveForwardFor1Second" , new  DriveForward(drivetrain, HalfSpeed*1.5, robotCentricDrive));
+        NamedCommands.registerCommand("driveForwardFor1Second" , new  DriveForward(drivetrain, 2, robotCentricDrive));
         NamedCommands.registerCommand("faceWheels-120Degrees" , new InstantCommand(() -> drivetrain.applyRequest(() ->
         point.withModuleDirection(new Rotation2d(-120)))));
 
@@ -233,7 +233,7 @@ public class RobotContainer {
         
         
         joystick2.x()
-            .onTrue(new InstantCommand(() -> elevator.raiseLevel1())
+            .onTrue(new InstantCommand(() -> elevator.raiseStartLevel())
             .andThen(Commands.waitSeconds(1.5))
             .andThen(new InstantCommand(() -> elevator.stopElevator())));
         joystick2.a()
@@ -363,10 +363,10 @@ public class RobotContainer {
 
         slowModeTrigger.whileTrue(drivetrain.applyRequest(() ->{
             
-                double xSpeed = slowModeSlewRateLimiterX.calculate(joystick.getLeftY()* HalfSpeed);
+                double xSpeed = slowModeSlewRateLimiterX.calculate(-joystick.getLeftY()* HalfSpeed);
                 
                 
-                double ySpeed = slowModeSlewRateLimiterY.calculate(joystick.getLeftX()* HalfSpeed);
+                double ySpeed = slowModeSlewRateLimiterY.calculate(-joystick.getLeftX()* HalfSpeed);
                 
                 
                 double yTurnSpeed = slowModeSlewRateLimiterTurnX.calculate(joystick.getRightX()* HalfAngularRate);

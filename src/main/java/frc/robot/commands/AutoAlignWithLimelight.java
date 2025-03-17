@@ -40,7 +40,7 @@ public class AutoAlignWithLimelight extends Command {
   private double kPX = 0.2;
   private double kPY = 0.075;
   private double kPA = 0.2;
-  private double kIY = 0.0075;
+  private double kIY = 0.24;
   private double ySpeed;
   private double robotYError;
   private double xSpeed;
@@ -57,6 +57,7 @@ public class AutoAlignWithLimelight extends Command {
   private double xErrorCalculated;
   private double intergratedError = 0;
   private int isCorrect = 0;
+  private CANdleSystem candleSystem = CANdleSystem.getInstance();
   /** Creates a new AutoAlignWithLimelight. */
   public AutoAlignWithLimelight(CommandSwerveDrivetrain commandSwerveDrivetrain, LimeLight limeLight, PhotonVision photonVision) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -65,7 +66,6 @@ public class AutoAlignWithLimelight extends Command {
     this.limelight = limeLight;
     this.photonVision = photonVision;
     // this.movingAverage = new MovingAverage(20);
-
   }
 
   // Called when the command is initially scheduled.
@@ -75,7 +75,10 @@ public class AutoAlignWithLimelight extends Command {
 
     timer.reset();
     timer.start();
-    
+
+    candleSystem.showYellow();
+    System.out.println("**********enter autoalign with limelight**********");
+
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -85,11 +88,13 @@ public class AutoAlignWithLimelight extends Command {
     // tX = -limelight.getVisionTargetHorizontalError();
     robotYError =  tY - targettY;
     // robotXError = targettX - tX;
-    intergratedError += robotXError * .020;
+    intergratedError += robotYError * .005;
     yErrorCalculated = kPY * Math.abs(robotYError);
     // xErrorCalculated = kPX * Math.abs(robotXError);
     ySpeed =  Math.min(maxSpeed, Math.abs(yErrorCalculated))* Math.signum(robotYError);
+    if(Math.abs(robotYError) < 2){
     ySpeed += intergratedError * kIY;
+  }
     // xSpeed = kPX * Math.min(maxSpeed, Math.abs(robotXError)) * Math.signum(robotXError);
     // movingAverage.putData(xSpeed);
     // System.out.println("tX "+tX + "xSpeed " + xSpeed);
@@ -98,10 +103,11 @@ public class AutoAlignWithLimelight extends Command {
       .withVelocityY(ySpeed)
       // .withVelocityX(xSpeed)
       );
-      System.out.println("******Robot x Error******" + robotXError);
+      System.out.println("******Robot Y Error******" + robotYError);
       SmartDashboard.putNumber("Successes for AutoAlign", isCorrect);
       SmartDashboard.putNumber("yError", robotYError);
-      SmartDashboard.putNumber("Intergrated Error", + intergratedError);
+      SmartDashboard.putNumber("intergrated Y Error", intergratedError);
+      SmartDashboard.putBoolean("is target visable", LimelightHelpers.getTV(limelight.limelightName));
   }
 
 
@@ -113,6 +119,7 @@ public class AutoAlignWithLimelight extends Command {
     LimelightHelpers.setPipelineIndex(limelight.limelightName, 1);
     if(isYAligned && isXAligned) {
       System.out.println("************Robot is Aligned*********");
+      candleSystem.setIsAutoAligned(true);
     }else if(isTimedOut){
       System.out.println("Robot time up");
     }else if(isXAligned) {
@@ -129,6 +136,9 @@ public class AutoAlignWithLimelight extends Command {
       robotCentricDrive
       .withVelocityY(0)
       .withVelocityX(0));
+    
+    
+
   }
 
   // Returns true when the command should end.
@@ -136,7 +146,11 @@ public class AutoAlignWithLimelight extends Command {
   public boolean isFinished() {
     double YDistanceError = Math.abs(robotYError);
     double XDistanceError = Math.abs(robotXError);
-    isYAligned = YDistanceError < horizontalThreshold && (intergratedError < 10);
+    if(LimelightHelpers.getTV(limelight.limelightName)) {
+      isYAligned = YDistanceError < horizontalThreshold && (intergratedError < 6);
+    }else{
+      isYAligned = false;
+    }
     // isXAligned = XDistanceError < verticalThreshold;
     isTimedOut = timer.get() > timeThreshold;
     if(isYAligned) {

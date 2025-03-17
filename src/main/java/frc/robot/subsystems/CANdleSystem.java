@@ -60,21 +60,14 @@ public class CANdleSystem extends SubsystemBase {
         //308 LEDS Total
         this.joystick = joy;
         changeAnimation(AnimationTypes.SetAll);
-        CANdleConfiguration configAll = new CANdleConfiguration();
-        configAll.statusLedOffWhenActive = true;
-        configAll.disableWhenLOS = false;
-        configAll.stripType = LEDStripType.GRB; 
-        configAll.brightnessScalar = 0.1;
-        configAll.vBatOutputMode = VBatOutputMode.Modulated;
-        m_candle.configAllSettings(configAll, 100);
         this.coralSensor = coralSensor;
         this.algaeSensor = algaeSensor;
         this.limeLightFront = front;
         showGreen(0, 300);
+        
     }
-
-    private CANdleSystem() {
-        changeAnimation(AnimationTypes.SetAll);
+    
+    private CANdleSystem(){
         CANdleConfiguration configAll = new CANdleConfiguration();
         configAll.statusLedOffWhenActive = true;
         configAll.disableWhenLOS = false;
@@ -82,9 +75,15 @@ public class CANdleSystem extends SubsystemBase {
         configAll.brightnessScalar = 0.1;
         configAll.vBatOutputMode = VBatOutputMode.Modulated;
         m_candle.configAllSettings(configAll, 100);
+        isAligned = false;
 
     }
+    
+    public void setIsAutoAligned(boolean bool){
+        isAligned = bool;
+    }
 
+   
     public static CANdleSystem getInstance() {
         if (caNdleSystem == null) {
             caNdleSystem = new CANdleSystem();

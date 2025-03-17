@@ -5,46 +5,15 @@
     "data": {
       "commands": [
         {
-          "type": "parallel",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Left Path 1 MT2"
-                }
-              }
-            ]
+            "pathName": "Left Path 1 MT2"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.1
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "autoAlignWithLimelight"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.2
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "faceWheels-120Degrees"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.1
+            "waitTime": 0.05
           }
         },
         {
@@ -56,13 +25,25 @@
         {
           "type": "named",
           "data": {
+            "name": "autoAlignWithLimelight"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.1
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "raiseArmHigh"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 1.8
+            "waitTime": 1.5
           }
         },
         {
