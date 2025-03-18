@@ -319,23 +319,23 @@ public class RobotContainer {
         
     // })
     // );
-    joystick.povUp().onTrue(new InstantCommand(() -> reefController.setTargetReefPosition(ReefPosition.A))
+    joystick.povUp().onTrue(new InstantCommand(() -> reefController.setTargetReefPosition(ReefPosition.G))
             .andThen(getRumbleCommand()));
-    joystick.povDown().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 0)
+    joystick.povDown().onTrue(new InstantCommand(()-> reefController.setTargetReefPosition(ReefPosition.A))
             .andThen(getRumbleCommand()));
-    joystick.povDownLeft().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 60)
+    joystick.povDownLeft().onTrue(new InstantCommand(()-> reefController.setTargetReefPosition(ReefPosition.L))
             .andThen(getRumbleCommand())
             .andThen(Commands.waitSeconds(0.1))
             .andThen(getRumbleCommand()));
-    joystick.povDownRight().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 280)
+    joystick.povDownRight().onTrue(new InstantCommand(()-> reefController.setTargetReefPosition(ReefPosition.C))
             .andThen(getRumbleCommand())
             .andThen(Commands.waitSeconds(0.1))
             .andThen(getRumbleCommand()));
-    joystick.povUpLeft().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 120)
+    joystick.povUpLeft().onTrue(new InstantCommand(()-> reefController.setTargetReefPosition(ReefPosition.I))
             .andThen(getRumbleCommand())
             .andThen(Commands.waitSeconds(0.1))
             .andThen(getRumbleCommand()));
-    joystick.povUpRight().onTrue(new InstantCommand(()-> drivetrain.targetRotation = 220)
+    joystick.povUpRight().onTrue(new InstantCommand(()-> reefController.setTargetReefPosition(ReefPosition.E))
             .andThen(getRumbleCommand())
             .andThen(Commands.waitSeconds(0.1))
             .andThen(getRumbleCommand()));
@@ -346,7 +346,7 @@ public class RobotContainer {
 
         return fieldCentricFacingAngle.withVelocityX(xSpeed * Math.abs(xSpeed)) 
         .withVelocityY(ySpeed * Math.abs(ySpeed)) 
-        .withTargetDirection(Rotation2d.fromDegrees(reefController.botRotation2d()));
+        .withTargetDirection(reefController.getTargetRobotPose().getRotation());
         }
     ));
     joystick.b().whileTrue(drivetrain.applyRequest(() -> {
