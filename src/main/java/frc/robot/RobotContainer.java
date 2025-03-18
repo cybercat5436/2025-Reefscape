@@ -59,6 +59,7 @@ import frc.robot.commands.AutoAlign;
 import frc.robot.commands.AutoAlignWithLimelight;
 import frc.robot.commands.CoralIntakeWithDetection;
 import frc.robot.commands.DriveForward;
+import frc.robot.commands.FlashLEDsForAutoAlign;
 import frc.robot.commands.StandardDeviation;
 import frc.robot.generated.TunerConstants;
 // import frc.robot.subsystems.Climber;
@@ -118,6 +119,7 @@ public class RobotContainer {
     private final DriveForward driveForward = new DriveForward(drivetrain, HalfSpeed, robotCentricDrive);
     private final AutoAlignWithLimelight autoALignWithLimelights = new AutoAlignWithLimelight(drivetrain,limeLightFront,photonVision);
     private final StandardDeviation standardDeviation = new StandardDeviation(poseUpdater, drivetrain, new Pose2d(7.82,4.026,Rotation2d.k180deg),limeLightFront, limeLightFrontRight);
+    private final FlashLEDsForAutoAlign flashLEDsForAutoAlign = new FlashLEDsForAutoAlign();
     private SendableChooser<Command> autonChooser;
     // public final Climber climber = new Climber();
     public final Climber2 climber2 = new Climber2();
@@ -127,7 +129,7 @@ public class RobotContainer {
     public final Coral coral = new Coral();
     public final Algae algae = new Algae();
     public final Elevator elevator = new Elevator();
-    public CANdleSystem candleSystem = new CANdleSystem(joystick.getHID(), coralSensor, algaeSensor, limeLightFront);
+    public CANdleSystem candleSystem = CANdleSystem.getInstance();
 
     private SequentialCommandGroup autoCoralHigh = new SequentialCommandGroup(
         new InstantCommand(() -> elevator.raiseLevel4())
@@ -180,7 +182,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("autoAlign", autoAlign);
         NamedCommands.registerCommand("raiseArmHigh", new InstantCommand(() -> elevator.raiseLevel4()));
         NamedCommands.registerCommand("shootCoral", new InstantCommand(() -> coral.backward(1)).andThen(Commands.waitSeconds(0.3)).andThen(new InstantCommand(() -> coral.stopMotor())));
-        NamedCommands.registerCommand("lowerElevator", new InstantCommand(() -> elevator.raiseLevel1()).andThen(Commands.waitSeconds(2).andThen(new InstantCommand(() -> elevator.stopElevator()))));
+        NamedCommands.registerCommand("lowerElevator", new InstantCommand(() -> elevator.raiseStartLevel()).andThen(Commands.waitSeconds(2).andThen(new InstantCommand(() -> elevator.stopElevator()))));
         NamedCommands.registerCommand("coralIntake", new CoralIntakeWithDetection(coral, coralSensor));
         NamedCommands.registerCommand("stopCoralIntake", new InstantCommand(() -> coral.forward(0)));
         NamedCommands.registerCommand("setClimberArmsToAutonStartPosition", 
@@ -189,7 +191,7 @@ public class RobotContainer {
         .andThen(new InstantCommand(() -> climber2.stopClimb())
         ));
         NamedCommands.registerCommand("autoAlignWithLimelight", autoALignWithLimelights);
-        NamedCommands.registerCommand("driveForwardFor1Second" , new  DriveForward(drivetrain, HalfSpeed*1.5, robotCentricDrive));
+        NamedCommands.registerCommand("driveForwardFor1Second" , new  DriveForward(drivetrain, 2, robotCentricDrive));
         NamedCommands.registerCommand("faceWheels-120Degrees" , new InstantCommand(() -> drivetrain.applyRequest(() ->
         point.withModuleDirection(new Rotation2d(-120)))));
 
@@ -231,7 +233,7 @@ public class RobotContainer {
         
         
         joystick2.x()
-            .onTrue(new InstantCommand(() -> elevator.raiseLevel1())
+            .onTrue(new InstantCommand(() -> elevator.raiseStartLevel())
             .andThen(Commands.waitSeconds(1.5))
             .andThen(new InstantCommand(() -> elevator.stopElevator())));
         joystick2.a()
@@ -363,10 +365,10 @@ public class RobotContainer {
 
         slowModeTrigger.whileTrue(drivetrain.applyRequest(() ->{
             
-                double xSpeed = slowModeSlewRateLimiterX.calculate(joystick.getLeftY()* HalfSpeed);
+                double xSpeed = slowModeSlewRateLimiterX.calculate(-joystick.getLeftY()* HalfSpeed);
                 
                 
-                double ySpeed = slowModeSlewRateLimiterY.calculate(joystick.getLeftX()* HalfSpeed);
+                double ySpeed = slowModeSlewRateLimiterY.calculate(-joystick.getLeftX()* HalfSpeed);
                 
                 
                 double yTurnSpeed = slowModeSlewRateLimiterTurnX.calculate(joystick.getRightX()* HalfAngularRate);
@@ -395,7 +397,7 @@ public class RobotContainer {
         joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
     
         joystick.y().whileTrue(new AutoAlignWithLimelight(drivetrain, limeLightFront, photonVision));
-
+        
         // climber commands
         
         drivetrain.registerTelemetry(logger::telemeterize);

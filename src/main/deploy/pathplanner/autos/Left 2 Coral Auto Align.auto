@@ -26,7 +26,13 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.5
+            "waitTime": 0.1
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "driveForwardFor1Second"
           }
         },
         {
@@ -85,6 +91,12 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "driveForwardFor1Second"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "Left Path 3 MT2"
@@ -93,7 +105,13 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.5
+            "waitTime": 0.1
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "driveForwardFor1Second"
           }
         },
         {

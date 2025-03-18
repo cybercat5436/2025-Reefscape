@@ -22,6 +22,8 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.LimelightHelpers;
+import frc.robot.subsystems.AutoAlignCANdle;
+import frc.robot.subsystems.CANdleSystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LimeLight;
 import frc.robot.subsystems.PhotonVision;
@@ -72,7 +74,7 @@ public class AutoAlign extends Command {
   private double rotationError;
   private double currentRotation;
   private double rotationSpeed;
-  
+
 
   public AutoAlign(CommandSwerveDrivetrain commandSwerveDrivetrain, LimeLight limeLight, PhotonVision photonVision) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -82,6 +84,7 @@ public class AutoAlign extends Command {
     this.photonVision = photonVision;
     
     SendableRegistry.addLW(this, this.getClass().getSimpleName(), this.getClass().getSimpleName());
+  
     SmartDashboard.putData(this);
   }
   
@@ -95,7 +98,7 @@ public class AutoAlign extends Command {
     timer.reset();
     timer.start();
     System.out.println("starting auto align");
-
+    
     //ID 20
     targetYaw = -19.2;
     targetArea = 9.5;//Area target
@@ -164,6 +167,7 @@ public class AutoAlign extends Command {
     // To-Do May need to switch robot drive from robot centric to field centric, intial setting to fieldcentric 
     //happens in robotcontainer
     timer.stop();
+    
     commandSwerveDrivetrain.setControl(
         robotCentricDrive
         .withVelocityX(0) 
