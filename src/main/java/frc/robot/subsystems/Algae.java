@@ -59,6 +59,7 @@ public class Algae extends SubsystemBase {
         .positionConversionFactor(1)
         .velocityConversionFactor(1);
 
+        SmartDashboard.putNumber("Algae Encoder", encoder.getPosition());
     /*
      * Create a new SPARK MAX configuration object. This will store the
      * configuration parameters for the SPARK MAX that we will set below.
