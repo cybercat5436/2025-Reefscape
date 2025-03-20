@@ -40,7 +40,7 @@ public class AutoAlignWithLimelight extends Command {
   private double kPX = 0.2;
   private double kPY = 0.075;
   private double kPA = 0.2;
-  private double kIY = 0.24;
+  private double kIY = 0.18; //0.24
   private double ySpeed;
   private double robotYError;
   private double xSpeed;
@@ -52,7 +52,7 @@ public class AutoAlignWithLimelight extends Command {
   private boolean isTimedOut;
   private double horizontalThreshold = 0.5;
   private double verticalThreshold = 0.5;
-  private double timeThreshold = 1;
+  private double timeThreshold = 2;
   private double yErrorCalculated;
   private double xErrorCalculated;
   private double intergratedError = 0;
@@ -162,7 +162,7 @@ public class AutoAlignWithLimelight extends Command {
     
     // return isTimedOut || isYAligned && isXAligned;
     // return isXAligned;
-    return isCorrect > 3;
+    return isCorrect > 3 || isTimedOut;
 
   }
 }

@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.234733606557377,
-        "y": 0.6025102459016398
+        "x": 1.1628073770491802,
+        "y": 0.5665471311475403
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.7022540983606556,
-        "y": 1.1779200819672133
+        "x": 1.6303278688524587,
+        "y": 1.1419569672131138
       },
       "isLocked": false,
       "linkedName": "Right Path 2 MT2 end"
     },
     {
       "anchor": {
-        "x": 3.81225,
-        "y": 2.8354999999999997
+        "x": 4.219672131147541,
+        "y": 2.868186475409835
       },
       "prevControl": {
-        "x": 3.290225409836066,
-        "y": 2.353772540983606
+        "x": 3.6976475409836067,
+        "y": 2.3864590163934416
       },
       "nextControl": null,
       "isLocked": false,
@@ -30,7 +30,11 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.4658136745301866,
+      "waypointRelativePos": 0.3088685015290549,
+      "rotationDegrees": -125.00000000000001
+    },
+    {
+      "waypointRelativePos": 0.5366972477064215,
       "rotationDegrees": 47.28717391395684
     }
   ],

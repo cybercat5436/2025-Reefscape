@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.7019999999999998,
-        "y": 6.72575
+        "x": 0.4914959016393442,
+        "y": 6.944006147540984
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.2692646965801524,
-        "y": 6.309329245750675
+        "x": 1.058759510088953,
+        "y": 6.527583911001582
       },
       "isLocked": false,
       "linkedName": "Left Path 2 MT2 end"
     },
     {
       "anchor": {
-        "x": 3.81225,
-        "y": 5.18525
+        "x": 3.5483606557377048,
+        "y": 4.954047131147541
       },
       "prevControl": {
-        "x": 3.247651002823303,
-        "y": 5.448526836170126
+        "x": 2.983761658561008,
+        "y": 5.217323967317667
       },
       "nextControl": null,
       "isLocked": false,
@@ -30,8 +30,12 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.32472440944880354,
-      "rotationDegrees": -45.0
+      "waypointRelativePos": 0.22324159021406573,
+      "rotationDegrees": 125.00000000000001
+    },
+    {
+      "waypointRelativePos": 0.5183486238532105,
+      "rotationDegrees": -32.45896356225275
     }
   ],
   "constraintZones": [
