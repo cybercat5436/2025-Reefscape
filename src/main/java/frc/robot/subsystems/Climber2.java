@@ -108,10 +108,22 @@ public class Climber2 extends SubsystemBase {
   SmartDashboard.putNumber("ClimberRightSpeed", rightClimber.get());
  }
 
+ public void rightClimbOveride(double speed) {
+  rightClimber.setControl(rightOut.withOutput(speed));
+  SmartDashboard.putNumber("ClimberRightOverideSpeed", rightClimber.get());
+ }
+ public void leftClimbOveride(double speed) {
+  leftClimber.setControl(leftOut.withOutput(speed));
+  SmartDashboard.putNumber("ClimberLeftOverideSpeed", leftClimber.get());
+ }
+
  public void climberAutonStartPosition(){
   rightClimber.set(-0.2);
   leftClimber.set(-0.2);
  }
+
+ 
+
  
 
 public void stopClimb(){

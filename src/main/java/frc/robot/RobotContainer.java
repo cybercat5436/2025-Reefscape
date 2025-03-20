@@ -425,6 +425,14 @@ public class RobotContainer {
         joystick.povLeft().onTrue(new InstantCommand(() -> candleSystem.changeAnimation(AnimationTypes.Fire)));
         joystick.povDown().onTrue(new InstantCommand(() -> candleSystem.turnOffColors()));
         joystick.povUp().onTrue(new InstantCommand(() -> candleSystem.showTeamColors()));
+
+        joystick2.back().and(leftClimbUpTrigger).whileTrue(new InstantCommand(() -> climber2.rightClimbOveride(0.2)).repeatedly());
+        joystick2.back().and(rightClimbUpTrigger).whileTrue(new InstantCommand(() -> climber2.leftClimbOveride(0.2)).repeatedly());
+        joystick2.back().and(leftClimbDownTrigger).whileTrue(new InstantCommand(() -> climber2.rightClimbOveride(-0.2)).repeatedly());
+        joystick2.back().and(rightClimbDownTrigger).whileTrue(new InstantCommand(() -> climber2.leftClimbOveride(-0.2)).repeatedly());
+        joystick2.back().and(leftClimberStopTrigger).whileTrue(new InstantCommand(() -> climber2.rightClimbOveride(0)));
+        joystick2.back().and(rightClimberStopTrigger).whileTrue(new InstantCommand(() -> climber2.leftClimbOveride(0)));
+        
         
         SmartDashboard.putData(" Climber arms to auton start position",
          new InstantCommand(() -> climber2.climberAutonStartPosition())
