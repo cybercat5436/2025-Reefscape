@@ -262,21 +262,21 @@ public class RobotContainer {
         // joystick2.povLeft()
         // .onTrue(autoCoralHigh);
 
-        joystick2.povUp()
-            .whileTrue(new InstantCommand(() -> algae.algaeHigh(-0.3)).repeatedly())
-            .onFalse(new InstantCommand(() -> algae.algaeStop()));
-        joystick2.povDown()
-            .whileTrue(new InstantCommand(() -> algae.algaeHigh(0.3)))
-            .onFalse(new InstantCommand(() -> algae.algaeStop()));
         // joystick2.povUp()
-        //     .onTrue(new InstantCommand(() -> algae.algaeHigh()))
+        //     .whileTrue(new InstantCommand(() -> algae.algaeHigh(-0.3)).repeatedly())
         //     .onFalse(new InstantCommand(() -> algae.algaeStop()));
-        // joystick2.povRight()
-        //     .onTrue(new InstantCommand(() -> algae.algaeLow()))
+        // joystick2.povDown()
+        //     .whileTrue(new InstantCommand(() -> algae.algaeHigh(0.3)))
         //     .onFalse(new InstantCommand(() -> algae.algaeStop()));
-        // joystick2.povLeft()
-        //     .onTrue(new InstantCommand(() -> algae.algaeProcessor()))
-        //     .onFalse(new InstantCommand(() -> algae.algaeStop()));
+        joystick2.povUp()
+            .onTrue(new InstantCommand(() -> algae.algaeHigh()))
+            .onFalse(new InstantCommand(() -> algae.algaeStop()));
+        joystick2.povRight()
+            .onTrue(new InstantCommand(() -> algae.algaeLow()))
+            .onFalse(new InstantCommand(() -> algae.algaeStop()));
+        joystick2.povCenter()
+            .onTrue(new InstantCommand(() -> algae.algaeProcessor()))
+            .onFalse(new InstantCommand(() -> algae.algaeStop()));
             
         
         

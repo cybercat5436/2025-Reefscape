@@ -34,9 +34,9 @@ public class Algae extends SubsystemBase {
   SparkMaxConfig armConfig;
   private SparkClosedLoopController armClosedLoopController;
   private RelativeEncoder encoder;
-  private double targetPositionHigh = 56.81;
-  private double targetPositionLow = 74.33;
-  private double targetPositionProcessor = 1;
+  private double targetPositionHigh = -16.7;
+  private double targetPositionLow = -18.4;
+  private double targetPositionProcessor = -25.1;
   private double targetVelocity = 500;
   private double stopVelocity = 0;
 
@@ -58,6 +58,8 @@ public class Algae extends SubsystemBase {
     armConfig.encoder
         .positionConversionFactor(1)
         .velocityConversionFactor(1);
+
+    encoder.setPosition(0);
 
     /*
      * Create a new SPARK MAX configuration object. This will store the
@@ -115,6 +117,7 @@ public class Algae extends SubsystemBase {
     armMotor.configure(armConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
     // Initialize dashboard values
+    SmartDashboard.setDefaultNumber("Algae Encoder", encoder.getPosition());
     SmartDashboard.setDefaultNumber("Target PositionHigh", targetPositionHigh);
     SmartDashboard.setDefaultNumber("Target PositionLow", targetPositionLow);
     SmartDashboard.setDefaultNumber("Target PositionProcessor", targetPositionProcessor);
