@@ -34,9 +34,10 @@ public class Algae extends SubsystemBase {
   SparkMaxConfig armConfig;
   private SparkClosedLoopController armClosedLoopController;
   private RelativeEncoder encoder;
-  private double targetPositionHigh = -16.7;
+  private double targetPositionHigh = -21;
   private double targetPositionLow = -18.4;
   private double targetPositionProcessor = -25.1;
+  private double targetStartPosition = 0;
   private double targetVelocity = 500;
   private double stopVelocity = 0;
 
@@ -54,7 +55,6 @@ public class Algae extends SubsystemBase {
         .idleMode(IdleMode.kBrake);
     ballMotor.configure(ballConfig, ResetMode.kResetSafeParameters,PersistMode.kPersistParameters);
     encoder = armMotor.getEncoder(); 
-    armClosedLoopController = armMotor.getClosedLoopController();
     armConfig.encoder
         .positionConversionFactor(1)
         .velocityConversionFactor(1);
@@ -82,7 +82,7 @@ public class Algae extends SubsystemBase {
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         // Set PID values for position control. We don't need to pass a closed
         // loop slot, as it will default to slot 0.
-        .p(0.4)
+        .p(1.6)
         .i(0)
         .d(0)
         .outputRange(-1, 1)
@@ -96,8 +96,8 @@ public class Algae extends SubsystemBase {
     armConfig.closedLoop.maxMotion
         // Set MAXMotion parameters for position control. We don't need to pass
         // a closed loop slot, as it will default to slot 0.
-        .maxVelocity(4000)
-        .maxAcceleration(4000)
+        .maxVelocity(2000)
+        .maxAcceleration(2000)
         .allowedClosedLoopError(1)
         // Set MAXMotion parameters for velocity control in slot 1
         .maxAcceleration(500, ClosedLoopSlot.kSlot1)
@@ -115,6 +115,9 @@ public class Algae extends SubsystemBase {
      * mid-operation.
      */
     armMotor.configure(armConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+
+    armClosedLoopController = armMotor.getClosedLoopController();
+
 
     // Initialize dashboard values
     SmartDashboard.setDefaultNumber("Algae Encoder", encoder.getPosition());
@@ -145,6 +148,11 @@ public class Algae extends SubsystemBase {
     }
     public void algaeProcessor() {
       armClosedLoopController.setReference(targetPositionProcessor, ControlType.kMAXMotionPositionControl,
+      ClosedLoopSlot.kSlot0);
+      System.out.println("Algae Processor");
+    }
+    public void algaeStart() {
+      armClosedLoopController.setReference(targetStartPosition, ControlType.kMAXMotionPositionControl,
       ClosedLoopSlot.kSlot0);
       System.out.println("Algae Processor");
     }
