@@ -272,12 +272,13 @@ public class RobotContainer {
             .onTrue(new InstantCommand(() -> algae.algaeHigh()))
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
         joystick2.povDown()
+
             .onTrue(new InstantCommand(() -> algae.algaeLow()))
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
-        joystick2.povUpRight()
+        joystick2.povUpLeft()
             .onTrue(new InstantCommand(() -> algae.algaeProcessor()))
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
-        joystick2.povUpLeft()
+        joystick2.povUpRight()
             .onTrue(new InstantCommand(() -> algae.algaeStart()))
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
         

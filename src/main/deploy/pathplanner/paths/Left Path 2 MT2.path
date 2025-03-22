@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.06025,
-        "y": 4.980499999999999
+        "x": 4.8555,
+        "y": 5.048749999999999
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.6605,
-        "y": 6.4625
+        "x": 4.45575,
+        "y": 6.53075
       },
       "isLocked": false,
       "linkedName": "Left Path 1 MT2 end"
@@ -36,7 +36,7 @@
         "y": 6.944006147540984
       },
       "prevControl": {
-        "x": 1.176073770491804,
+        "x": 1.1760737704918043,
         "y": 6.1341967213114765
       },
       "nextControl": null,

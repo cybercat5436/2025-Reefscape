@@ -37,11 +37,11 @@ public class Elevator extends SubsystemBase {
   private double L3 = 2.89;
   private double L4 = 5.9;
  
-  private int blueHeightAdjustmentLevel4 = 0;
+  private int blueHeightAdjustmentLevel4 = 1;
   private int blueHeightAdjustmentLevel3 = 0;
   private int blueHeightAdjustmentLevel2 = 0;
  
-  private int redHeightAdjustmentLevel4 = 0;
+  private int redHeightAdjustmentLevel4 = 1;
   private int redHeightAdjustmentLevel3 = 0;
   private int redHeightAdjustmentLevel2 = 0;
 

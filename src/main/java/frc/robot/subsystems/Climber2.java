@@ -28,7 +28,7 @@ public class Climber2 extends SubsystemBase {
     private double rightEncoderValue;
     private double leftEncoderValue;
     private double climberEncoderLimitUp = 0;
-    private double climberEncoderLimitDown = -43.8;
+    private double climberEncoderLimitDown = -47;
     private double climberAutonStartPosition = -7.0;
     private MotionMagicVoltage m_mmReq = new MotionMagicVoltage(0);
 

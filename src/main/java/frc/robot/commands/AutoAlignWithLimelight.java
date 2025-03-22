@@ -12,6 +12,7 @@ import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.ApplyChassisSpeed
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.LimelightHelpers;
 import frc.robot.subsystems.CANdleSystem;
@@ -40,7 +41,7 @@ public class AutoAlignWithLimelight extends Command {
   private double kPX = 0.2;
   private double kPY = 0.075;
   private double kPA = 0.2;
-  private double kIY = 0.18; //0.24
+  private double kIY = 0.24; //0.24
   private double ySpeed;
   private double robotYError;
   private double xSpeed;
@@ -72,7 +73,6 @@ public class AutoAlignWithLimelight extends Command {
   @Override
   public void initialize() {
     LimelightHelpers.setPipelineIndex(limelight.limelightName, 0);
-
     timer.reset();
     timer.start();
 
@@ -108,7 +108,12 @@ public class AutoAlignWithLimelight extends Command {
       SmartDashboard.putNumber("yError", robotYError);
       SmartDashboard.putNumber("intergrated Y Error", intergratedError);
       SmartDashboard.putBoolean("is target visable", LimelightHelpers.getTV(limelight.limelightName));
+      SmartDashboard.putNumber("Auto Align Timer", timer.get());
+      SmartDashboard.putNumber("Limelight Pipeline", LimelightHelpers.getCurrentPipelineIndex(limelight.limelightName));
+   
+
   }
+  
 
 
 

@@ -96,8 +96,8 @@ public class Algae extends SubsystemBase {
     armConfig.closedLoop.maxMotion
         // Set MAXMotion parameters for position control. We don't need to pass
         // a closed loop slot, as it will default to slot 0.
-        .maxVelocity(2000)
-        .maxAcceleration(2000)
+        .maxVelocity(4000)
+        .maxAcceleration(4000)
         .allowedClosedLoopError(1)
         // Set MAXMotion parameters for velocity control in slot 1
         .maxAcceleration(500, ClosedLoopSlot.kSlot1)
