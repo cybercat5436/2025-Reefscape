@@ -4,6 +4,8 @@
 
 package frc.robot.commands;
 
+import java.util.function.DoubleSupplier;
+
 import org.opencv.photo.Photo;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
@@ -15,6 +17,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.LimelightHelpers;
+import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CANdleSystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LimeLight;
@@ -26,7 +29,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class AutoAlignWithLimelight extends Command {
+public class AutoAlignWithSlowMode extends Command {
   private CommandSwerveDrivetrain commandSwerveDrivetrain;
   private final SwerveRequest.RobotCentric robotCentricDrive = new SwerveRequest.RobotCentric()
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
@@ -47,6 +50,7 @@ public class AutoAlignWithLimelight extends Command {
   private double ySpeed;
   private double robotYError;
   private double xSpeed;
+  private double rotationSpeed;
   private double robotXError;
   private double maxSpeed = 1;
   private Timer timer = new Timer();
@@ -55,19 +59,29 @@ public class AutoAlignWithLimelight extends Command {
   private boolean isTimedOut;
   private double horizontalThreshold = 0.5;
   private double verticalThreshold = 0.5;
-  private double timeThreshold = 1.25;
+  private double timeThreshold = 30;
   private double yErrorCalculated;
   private double xErrorCalculated;
   private double intergratedError = 0;
   private int isCorrect = 0;
   private CANdleSystem candleSystem = CANdleSystem.getInstance();
+  private DoubleSupplier joystickRobotY;
+  private DoubleSupplier joystickRobotX;
+  private DoubleSupplier joystickRobotRotation;
+  private double slowModeSpeed = 0.78;
+  private double slowModeRoationSpeed = 1.18;
   /** Creates a new AutoAlignWithLimelight. */
-  public AutoAlignWithLimelight(CommandSwerveDrivetrain commandSwerveDrivetrain, LimeLight limeLight, PhotonVision photonVision) {
+  public AutoAlignWithSlowMode(CommandSwerveDrivetrain commandSwerveDrivetrain, LimeLight limeLight, PhotonVision photonVision, 
+  DoubleSupplier joystickRobotX, DoubleSupplier joystickRobotY, DoubleSupplier joystickRobotRotation) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.addRequirements(commandSwerveDrivetrain);
     this.commandSwerveDrivetrain = commandSwerveDrivetrain;
     this.limelight = limeLight;
     this.photonVision = photonVision;
+    this.joystickRobotX = joystickRobotX;
+    this.joystickRobotY = joystickRobotY;
+    this.joystickRobotRotation = joystickRobotRotation;
+    
     // this.movingAverage = new MovingAverage(20);
   }
 
@@ -78,7 +92,7 @@ public class AutoAlignWithLimelight extends Command {
     timer.start();
 
     candleSystem.showYellow();
-    System.out.println("**********enter autoalign with limelight**********");
+    System.out.println("**********enter autoalignWithSlowMode with limelight**********");
     Alliance alliance = DriverStation.getAlliance().isPresent()?DriverStation.getAlliance().get():DriverStation.Alliance.Blue;
     if(alliance == Alliance.Blue) {
       LimelightHelpers.setPipelineIndex(limelight.limelightName, 0);
@@ -91,16 +105,25 @@ public class AutoAlignWithLimelight extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    tY = limelight.getVisionTargetVerticalError();
-    // tX = -limelight.getVisionTargetHorizontalError();
-    robotYError =  tY - targettY;
-    // robotXError = targettX - tX;
-    intergratedError += robotYError * .005;
-    yErrorCalculated = kPY * Math.abs(robotYError);
-    // xErrorCalculated = kPX * Math.abs(robotXError);
-    ySpeed =  Math.min(maxSpeed, Math.abs(yErrorCalculated))* Math.signum(robotYError);
-    if(Math.abs(robotYError) < 2){
-    ySpeed += intergratedError * kIY;
+    
+   
+      xSpeed = joystickRobotX.getAsDouble() * slowModeSpeed;
+      rotationSpeed = joystickRobotRotation.getAsDouble() * slowModeRoationSpeed;
+
+      tY = limelight.getVisionTargetVerticalError();
+      // tX = -limelight.getVisionTargetHorizontalError();
+      robotYError =  tY - targettY;
+      // robotXError = targettX - tX;
+      intergratedError += robotYError * .005;
+      yErrorCalculated = kPY * Math.abs(robotYError);
+      // xErrorCalculated = kPX * Math.abs(robotXError);
+      ySpeed =  Math.min(maxSpeed, Math.abs(yErrorCalculated))* Math.signum(robotYError);
+      if(Math.abs(robotYError) < 2){
+      ySpeed += intergratedError * kIY;
+    
+    
+    
+    
   }
     // xSpeed = kPX * Math.min(maxSpeed, Math.abs(robotXError)) * Math.signum(robotXError);
     // movingAverage.putData(xSpeed);
@@ -108,7 +131,8 @@ public class AutoAlignWithLimelight extends Command {
     commandSwerveDrivetrain.setControl(
       robotCentricDrive
       .withVelocityY(ySpeed)
-      // .withVelocityX(xSpeed)
+      .withVelocityX(xSpeed)
+      .withRotationalRate(rotationSpeed)
       );
       System.out.println("******Robot Y Error******" + robotYError);
       SmartDashboard.putNumber("Successes for AutoAlign", isCorrect);

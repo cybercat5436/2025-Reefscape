@@ -134,8 +134,11 @@ public class Algae extends SubsystemBase {
       ClosedLoopSlot.kSlot0);
       System.out.println("Algae High");
     }
-    public void algaeHigh(double speed) {
+    public void algaeUp(double speed) {
       armMotor.set(speed);
+    }
+    public void algaeDown(double speed) {
+      armMotor.set(-speed);
     }
     public void algaeStop() {
       armMotor.set(0);

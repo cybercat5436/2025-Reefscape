@@ -72,6 +72,7 @@ import frc.robot.subsystems.GamePieceDetector;
 import frc.robot.subsystems.CANdleSystem.AnimationTypes;
 import frc.robot.subsystems.CANdleSystem.AvailableColors;
 import frc.robot.subsystems.ReefController.ReefPosition;
+import pabeles.concurrency.ConcurrencyOps.NewInstance;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.LimeLight;
 import frc.robot.subsystems.PhotonVision;
@@ -272,15 +273,18 @@ public class RobotContainer {
             .onTrue(new InstantCommand(() -> algae.algaeHigh()))
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
         joystick2.povDown()
-
             .onTrue(new InstantCommand(() -> algae.algaeLow()))
-            .onFalse(new InstantCommand(() -> algae.algaeStop()));
-        joystick2.povUpLeft()
-            .onTrue(new InstantCommand(() -> algae.algaeProcessor()))
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
         joystick2.povUpRight()
             .onTrue(new InstantCommand(() -> algae.algaeStart()))
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
+        joystick2.povUpLeft()
+            .whileTrue(new InstantCommand(() -> algae.algaeUp(0.3)))
+            .onFalse(new InstantCommand(() -> algae.algaeStop()));  
+        joystick2.povDownLeft()
+            .whileTrue(new InstantCommand(() -> algae.algaeDown(0.3)))
+            .onFalse(new InstantCommand(() -> algae.algaeStop()));
+        
         
         
 
