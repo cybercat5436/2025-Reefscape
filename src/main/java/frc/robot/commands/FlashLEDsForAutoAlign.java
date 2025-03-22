@@ -39,7 +39,7 @@ public class FlashLEDsForAutoAlign extends Command {
     timer.stop();
 
     CANdleSystem.getInstance().setIsAligned(false);
-    CANdleSystem.getInstance().turnOffColors();
+    CANdleSystem.getInstance().setLedsToAllianceColor();
     // LimelightHelpers.setLEDMode_ForceOff(limelight.getName());
   }
 

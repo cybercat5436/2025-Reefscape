@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -34,6 +36,7 @@ public class CANdleSystem extends SubsystemBase {
     LimeLight limeLightFront;
     public boolean animationOff = false;    
     private boolean isAligned = false;
+    private Alliance alliance = DriverStation.getAlliance().isPresent()?DriverStation.getAlliance().get():DriverStation.Alliance.Blue;
 
     public enum AnimationTypes {
         ColorFlow,
@@ -77,6 +80,18 @@ public class CANdleSystem extends SubsystemBase {
         configAll.vBatOutputMode = VBatOutputMode.Modulated;
         m_candle.configAllSettings(configAll, 100);
         isAligned = false;
+        setLedsToAllianceColor();
+
+
+    }
+
+    public void setLedsToAllianceColor(){
+        if (alliance == Alliance.Blue) {
+            showBlue();
+        }
+        else  {
+            showRed();
+        }
 
     }
     
@@ -324,10 +339,11 @@ public class CANdleSystem extends SubsystemBase {
     @Override
     public void periodic() {
         // This method will be called once per scheduler run
+
         if (isAligned == true) {
             flashLEDsForAutoAlign.schedule();
-
         }
+        
 
         /*if(m_toAnimate == null) {
             m_candle.setLEDs((int)(joystick.getLeftTriggerAxis() * 255), 
