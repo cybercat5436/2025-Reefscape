@@ -84,7 +84,6 @@ public class AutoAlignWithLimelight extends Command {
       LimelightHelpers.setPipelineIndex(limelight.limelightName, 0);
     }else{
       LimelightHelpers.setPipelineIndex(limelight.limelightName, 2);
-
     }
   }
 
@@ -111,6 +110,7 @@ public class AutoAlignWithLimelight extends Command {
       // .withVelocityX(xSpeed)
       );
       System.out.println("******Robot Y Error******" + robotYError);
+      System.out.println("********Limelight Pipeline*******          " + LimelightHelpers.getCurrentPipelineIndex(limelight.limelightName));
       SmartDashboard.putNumber("Successes for AutoAlign", isCorrect);
       SmartDashboard.putNumber("yError", robotYError);
       SmartDashboard.putNumber("intergrated Y Error", intergratedError);
