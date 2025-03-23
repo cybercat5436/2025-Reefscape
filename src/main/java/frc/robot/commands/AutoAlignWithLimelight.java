@@ -43,7 +43,7 @@ public class AutoAlignWithLimelight extends Command {
   private double kPX = 0.2;
   private double kPY = 0.075;
   private double kPA = 0.2;
-  private double kIY = 0.2; //0.24
+  private double kIY = 0.18;
   private double ySpeed;
   private double robotYError;
   private double xSpeed;
@@ -61,6 +61,11 @@ public class AutoAlignWithLimelight extends Command {
   private double intergratedError = 0;
   private int isCorrect = 0;
   private CANdleSystem candleSystem = CANdleSystem.getInstance();
+  private int snapShotCount = 0;
+  private int attemptCount;
+  private double cropAdjustment;
+  private boolean isCropMaxed;
+  private double cropValue = -0.53;
   /** Creates a new AutoAlignWithLimelight. */
   public AutoAlignWithLimelight(CommandSwerveDrivetrain commandSwerveDrivetrain, LimeLight limeLight, PhotonVision photonVision) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -76,8 +81,11 @@ public class AutoAlignWithLimelight extends Command {
   public void initialize() {
     timer.reset();
     timer.start();
-
+    attemptCount = 0;
+    cropAdjustment = 0.0;
+    LimelightHelpers.setCropWindow(limelight.limelightName, -0.05, 0.07, cropValue, 0.28);
     candleSystem.showYellow();
+    candleSystem.showMagenta();
     System.out.println("**********enter autoalign with limelight**********");
     // Alliance alliance = DriverStation.getAlliance().isPresent()?DriverStation.getAlliance().get():DriverStation.Alliance.Blue;
     // if(alliance == Alliance.Blue) {
@@ -86,6 +94,7 @@ public class AutoAlignWithLimelight extends Command {
     //   LimelightHelpers.setPipelineIndex(limelight.limelightName, 2);
 
     // }
+    LimelightHelpers.takeSnapshot(limelight.limelightName, snapShotCount++ + " --initialize");
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -101,6 +110,17 @@ public class AutoAlignWithLimelight extends Command {
     ySpeed =  Math.min(maxSpeed, Math.abs(yErrorCalculated))* Math.signum(robotYError);
     if(Math.abs(robotYError) < 2){
     ySpeed += intergratedError * kIY;
+  }
+  if(limelight.getVisionTargetStatus() == false){
+    attemptCount++;
+  }else{
+    attemptCount = 0;
+  }
+  if(attemptCount > 10) {
+    cropAdjustment++;
+    double newCropY = cropValue - (cropAdjustment * 0.05);
+    LimelightHelpers.setCropWindow(limelight.limelightName, -0.05, 0.07, newCropY, 0.28);
+    System.out.println("~~~~~  Crop Window adjusted to: " + newCropY + "     ~~~~~~~~~~~~~~~~"); 
   }
     // xSpeed = kPX * Math.min(maxSpeed, Math.abs(robotXError)) * Math.signum(robotXError);
     // movingAverage.putData(xSpeed);
@@ -143,14 +163,18 @@ public class AutoAlignWithLimelight extends Command {
     if(isCorrect > 3) {
       System.out.println("*&^%#$@#^*Alignment is correct***!@#$%^&**&^?/%$");
     }
-    CANdleSystem.getInstance().setIsAligned(isCorrect > 3);
+    if(interrupted){
+      System.out.println("~~~~~~~~~   Autoalign was interupted ~~~~~~~~~~~~~~~~");
+    }
+    // CANdleSystem.getInstance().setIsAligned(isCorrect > 3);
+    CANdleSystem.getInstance().turnOffColors();
     commandSwerveDrivetrain.setControl(
       robotCentricDrive
       .withVelocityY(0)
       .withVelocityX(0));
     
     
-
+      LimelightHelpers.takeSnapshot(limelight.limelightName,  snapShotCount++ + " --end");
   }
 
   // Returns true when the command should end.
@@ -165,7 +189,10 @@ public class AutoAlignWithLimelight extends Command {
     }
     // isXAligned = XDistanceError < verticalThreshold;
     isTimedOut = timer.get() > timeThreshold;
-    
+    isCropMaxed = (cropValue - (cropAdjustment * 0.05)) < -1;
+    if(isCropMaxed){
+      System.out.println("Crop is Maxed");
+    }
     if(isYAligned) {
       isCorrect++;
     }else {

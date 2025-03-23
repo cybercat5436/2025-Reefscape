@@ -24,33 +24,9 @@
           }
         },
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.1
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "driveForwardFor1Second"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.1
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "autoAlignWithLimelight"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.3
           }
         },
         {
@@ -93,13 +69,13 @@
         {
           "type": "named",
           "data": {
-            "name": "coralIntake"
+            "name": "driveForwardFor1Second"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "driveForwardFor1Second"
+            "name": "coralIntake"
           }
         },
         {
@@ -109,33 +85,9 @@
           }
         },
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.1
-          }
-        },
-        {
           "type": "named",
           "data": {
-            "name": "driveForwardFor1Second"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.1
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "driveForwardFor1Second"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.3
+            "name": "autoAlignWithLimelight"
           }
         },
         {

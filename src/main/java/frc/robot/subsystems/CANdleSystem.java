@@ -77,6 +77,7 @@ public class CANdleSystem extends SubsystemBase {
         configAll.vBatOutputMode = VBatOutputMode.Modulated;
         m_candle.configAllSettings(configAll, 100);
         isAligned = false;
+        showMagenta(0, 300);
 
     }
     

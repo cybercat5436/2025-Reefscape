@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.079750000000001,
-        "y": 3.0012499999999993
+        "x": 5.166700819672132,
+        "y": 3.251793032786885
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.885229508196721,
-        "y": 1.8964323770491793
+        "x": 4.972180327868852,
+        "y": 2.146975409836065
       },
       "isLocked": false,
       "linkedName": "Right Path 1 MT2 end"
@@ -54,8 +54,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 2.0,
-    "maxAcceleration": 4.0,
+    "maxVelocity": 2.5,
+    "maxAcceleration": 4.5,
     "maxAngularVelocity": 300.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,

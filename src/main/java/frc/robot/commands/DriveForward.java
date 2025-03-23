@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj.Timer;
 public class DriveForward extends Command {
   private Timer timer = new Timer();
   private boolean isTimedOut;
-  private double timerThreshold = .5;
+  private double timerThreshold = .25;
   private double speed;
 
   private CommandSwerveDrivetrain commandSwerveDrivetrain;
