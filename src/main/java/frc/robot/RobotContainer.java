@@ -284,7 +284,10 @@ public class RobotContainer {
         joystick2.povUpLeft()
             .whileTrue(new InstantCommand(() -> algae.algaeDown(0.3)))
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
-        
+        joystick2.povDownRight()
+            .whileTrue(new InstantCommand(() -> algae.algaeProcessor()))
+            .onFalse(new InstantCommand(() -> algae.algaeStop()));
+    
         
         
 

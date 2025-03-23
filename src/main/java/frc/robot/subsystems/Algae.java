@@ -35,7 +35,7 @@ public class Algae extends SubsystemBase {
   private SparkClosedLoopController armClosedLoopController;
   private RelativeEncoder encoder;
   private double targetPositionHigh = -19;
-  private double targetPositionLow = -23.5;
+  private double targetPositionLow = -23;
   private double targetPositionProcessor = -26;
   private double targetStartPosition = 0;
   private double targetVelocity = 500;

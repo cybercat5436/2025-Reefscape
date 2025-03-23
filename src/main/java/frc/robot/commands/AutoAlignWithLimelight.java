@@ -63,9 +63,11 @@ public class AutoAlignWithLimelight extends Command {
   private CANdleSystem candleSystem = CANdleSystem.getInstance();
   private int snapShotCount = 0;
   private int attemptCount;
-  private double cropAdjustment;
+  private double cropAdjustmentMin;
+  private double cropAdjustmentMax;
   private boolean isCropMaxed;
-  private double cropValue = -0.53;
+  private double cropValueMin = -0.53;
+  private double cropValueMax = 0.28;
   /** Creates a new AutoAlignWithLimelight. */
   public AutoAlignWithLimelight(CommandSwerveDrivetrain commandSwerveDrivetrain, LimeLight limeLight, PhotonVision photonVision) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -82,8 +84,9 @@ public class AutoAlignWithLimelight extends Command {
     timer.reset();
     timer.start();
     attemptCount = 0;
-    cropAdjustment = 0.0;
-    LimelightHelpers.setCropWindow(limelight.limelightName, -0.05, 0.07, cropValue, 0.28);
+    cropAdjustmentMin = 0.0;
+    cropAdjustmentMax = 0.0;
+    LimelightHelpers.setCropWindow(limelight.limelightName, -0.05, 0.07, cropValueMin, cropValueMax);
     candleSystem.showYellow();
     candleSystem.showMagenta();
     System.out.println("**********enter autoalign with limelight**********");
@@ -116,12 +119,25 @@ public class AutoAlignWithLimelight extends Command {
   }else{
     attemptCount = 0;
   }
+
   if(attemptCount > 10) {
-    cropAdjustment++;
-    double newCropY = cropValue - (cropAdjustment * 0.05);
-    LimelightHelpers.setCropWindow(limelight.limelightName, -0.05, 0.07, newCropY, 0.28);
-    System.out.println("~~~~~  Crop Window adjusted to: " + newCropY + "     ~~~~~~~~~~~~~~~~"); 
+    cropAdjustmentMin++;
+    double newCropYMin = cropValueMin - (cropAdjustmentMin * 0.05);
+
+    if(newCropYMin <= -1) {
+      cropAdjustmentMax++;
+      
+    }   
+
+    double newCropYMax = cropValueMax + (cropAdjustmentMax * 0.05);
+    
+    LimelightHelpers.setCropWindow(limelight.limelightName, -0.05, 0.07, newCropYMin, newCropYMax);
+    System.out.println("~~~~~  Crop Window adjusted to Y Min of: " + newCropYMin + "     ~~~~~~~~~~~~~~~~"); 
+    System.out.println("~~~~~  Crop Window adjusted to Y Max of: " + newCropYMax + "     ~~~~~~~~~~~~~~~~"); 
+
   }
+  
+
     // xSpeed = kPX * Math.min(maxSpeed, Math.abs(robotXError)) * Math.signum(robotXError);
     // movingAverage.putData(xSpeed);
     // System.out.println("tX "+tX + "xSpeed " + xSpeed);
@@ -189,7 +205,7 @@ public class AutoAlignWithLimelight extends Command {
     }
     // isXAligned = XDistanceError < verticalThreshold;
     isTimedOut = timer.get() > timeThreshold;
-    isCropMaxed = (cropValue - (cropAdjustment * 0.05)) < -1;
+    isCropMaxed = (cropValueMin - (cropAdjustmentMin * 0.05)) < -1;
     if(isCropMaxed){
       System.out.println("Crop is Maxed");
     }
