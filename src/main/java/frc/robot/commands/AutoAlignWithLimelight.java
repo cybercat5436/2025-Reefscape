@@ -38,12 +38,12 @@ public class AutoAlignWithLimelight extends Command {
   private double tXError;
   private double tY;
   private double tA;
-  private double targettY = 0;
+  private double targettY = 1.3;
   private double tYError;
   private double kPX = 0.2;
   private double kPY = 0.075;
   private double kPA = 0.2;
-  private double kIY = 0.24; //0.24
+  private double kIY = 0.2; //0.24
   private double ySpeed;
   private double robotYError;
   private double xSpeed;
@@ -79,13 +79,13 @@ public class AutoAlignWithLimelight extends Command {
 
     candleSystem.showYellow();
     System.out.println("**********enter autoalign with limelight**********");
-    Alliance alliance = DriverStation.getAlliance().isPresent()?DriverStation.getAlliance().get():DriverStation.Alliance.Blue;
-    if(alliance == Alliance.Blue) {
-      LimelightHelpers.setPipelineIndex(limelight.limelightName, 0);
-    }else{
-      LimelightHelpers.setPipelineIndex(limelight.limelightName, 2);
+    // Alliance alliance = DriverStation.getAlliance().isPresent()?DriverStation.getAlliance().get():DriverStation.Alliance.Blue;
+    // if(alliance == Alliance.Blue) {
+    //   LimelightHelpers.setPipelineIndex(limelight.limelightName, 0);
+    // }else{
+    //   LimelightHelpers.setPipelineIndex(limelight.limelightName, 2);
 
-    }
+    // }
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -111,12 +111,12 @@ public class AutoAlignWithLimelight extends Command {
       // .withVelocityX(xSpeed)
       );
       System.out.println("******Robot Y Error******" + robotYError);
+      System.out.println("LImelight Pipeline  " + LimelightHelpers.getCurrentPipelineIndex(limelight.limelightName));
       SmartDashboard.putNumber("Successes for AutoAlign", isCorrect);
       SmartDashboard.putNumber("yError", robotYError);
       SmartDashboard.putNumber("intergrated Y Error", intergratedError);
       SmartDashboard.putBoolean("is target visable", LimelightHelpers.getTV(limelight.limelightName));
       SmartDashboard.putNumber("Auto Align Timer", timer.get());
-      SmartDashboard.putNumber("Limelight Pipeline", LimelightHelpers.getCurrentPipelineIndex(limelight.limelightName));
    
 
   }
@@ -128,7 +128,7 @@ public class AutoAlignWithLimelight extends Command {
   @Override
   public void end(boolean interrupted) {
     timer.stop();
-    LimelightHelpers.setPipelineIndex(limelight.limelightName, 1);
+    // LimelightHelpers.setPipelineIndex(limelight.limelightName, 1);
     if(isYAligned && isXAligned) {
       System.out.println("************Robot is Aligned*********");
       candleSystem.setIsAutoAligned(true);
@@ -165,6 +165,7 @@ public class AutoAlignWithLimelight extends Command {
     }
     // isXAligned = XDistanceError < verticalThreshold;
     isTimedOut = timer.get() > timeThreshold;
+    
     if(isYAligned) {
       isCorrect++;
     }else {

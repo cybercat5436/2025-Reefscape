@@ -34,9 +34,9 @@ public class Algae extends SubsystemBase {
   SparkMaxConfig armConfig;
   private SparkClosedLoopController armClosedLoopController;
   private RelativeEncoder encoder;
-  private double targetPositionHigh = -21;
-  private double targetPositionLow = -18.4;
-  private double targetPositionProcessor = -25.1;
+  private double targetPositionHigh = -19;
+  private double targetPositionLow = -23.5;
+  private double targetPositionProcessor = -26;
   private double targetStartPosition = 0;
   private double targetVelocity = 500;
   private double stopVelocity = 0;
@@ -96,8 +96,8 @@ public class Algae extends SubsystemBase {
     armConfig.closedLoop.maxMotion
         // Set MAXMotion parameters for position control. We don't need to pass
         // a closed loop slot, as it will default to slot 0.
-        .maxVelocity(4000)
-        .maxAcceleration(4000)
+        .maxVelocity(3000)
+        .maxAcceleration(3000)
         .allowedClosedLoopError(1)
         // Set MAXMotion parameters for velocity control in slot 1
         .maxAcceleration(500, ClosedLoopSlot.kSlot1)
@@ -115,6 +115,7 @@ public class Algae extends SubsystemBase {
      * mid-operation.
      */
     armMotor.configure(armConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+
 
     armClosedLoopController = armMotor.getClosedLoopController();
 

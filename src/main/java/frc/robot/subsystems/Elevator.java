@@ -37,7 +37,7 @@ public class Elevator extends SubsystemBase {
   private double L3 = 2.89;
   private double L4 = 5.9;
  
-  private int blueHeightAdjustmentLevel4 = 1;
+  private int blueHeightAdjustmentLevel4 = 0;
   private int blueHeightAdjustmentLevel3 = 0;
   private int blueHeightAdjustmentLevel2 = 0;
  
@@ -123,7 +123,7 @@ public class Elevator extends SubsystemBase {
         System.out.println("Decreased Height Level 3 " + redHeightAdjustmentLevel3);
       }else if(elevatorLevel == 4){
         redHeightAdjustmentLevel4++;
-        elevator.setControl(m_motmag.withPosition(L4 + redHeightAdjustmentLevel4 * 0.1));
+        elevator.setControl(m_motmag.withPosition(L4 + redHeightAdjustmentLevel4 * 0.05));
         System.out.println("Increased Height Level 4 " + redHeightAdjustmentLevel4);
       }
     } else{

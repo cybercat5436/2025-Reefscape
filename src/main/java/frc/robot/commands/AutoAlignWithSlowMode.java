@@ -59,7 +59,7 @@ public class AutoAlignWithSlowMode extends Command {
   private boolean isTimedOut;
   private double horizontalThreshold = 0.5;
   private double verticalThreshold = 0.5;
-  private double timeThreshold = 30;
+  private double timeThreshold = 30;  
   private double yErrorCalculated;
   private double xErrorCalculated;
   private double intergratedError = 0;

@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
@@ -43,7 +44,7 @@ public class LimeLight extends SubsystemBase {
     tzLocal = tableLimelight.getEntry("tz");
     tLongLocal = tableLimelight.getEntry("tlong");
     limelightName = networkTableName;
-    LimelightHelpers.setPipelineIndex(limelightName, 0);
+    // LimelightHelpers.setPipelineIndex(limelightName, 1);
 
     
   }
@@ -128,4 +129,13 @@ public Color getStatusLed() {
     return Color.kGreen;
   }
 }
+
+@Override
+public void periodic() {
+  // TODO Auto-generated method stub
+  super.periodic();
+  SmartDashboard.putNumber("Pipeline " + this.limelightName, LimelightHelpers.getCurrentPipelineIndex(this.limelightName));
+
+}
+
 }

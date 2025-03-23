@@ -162,7 +162,7 @@ public class RobotContainer {
         //testReefController();
         autonChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auton Chooser", autonChooser);
-        LimelightHelpers.setPipelineIndex(limeLightFront.limelightName, 1);
+        // LimelightHelpers.setPipelineIndex(limeLightFront.limelightName, 1);
         LimelightHelpers.setPipelineIndex(limeLightFrontRight.limelightName, 1);
 
     }
@@ -219,7 +219,7 @@ public class RobotContainer {
            .whileTrue(new InstantCommand(() -> coral.forward(0.8)))
            .onFalse(new InstantCommand(() -> coral.stopMotor())); 
         joystick2.rightBumper()
-           .whileTrue(new InstantCommand(() -> algae.intakeBall(-1)))
+           .whileTrue(new InstantCommand(() -> algae.intakeBall(-0.7)))
            .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
         
         
@@ -278,10 +278,10 @@ public class RobotContainer {
         joystick2.povUpRight()
             .onTrue(new InstantCommand(() -> algae.algaeStart()))
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
-        joystick2.povUpLeft()
+        joystick2.povDownLeft()
             .whileTrue(new InstantCommand(() -> algae.algaeUp(0.3)))
             .onFalse(new InstantCommand(() -> algae.algaeStop()));  
-        joystick2.povDownLeft()
+        joystick2.povUpLeft()
             .whileTrue(new InstantCommand(() -> algae.algaeDown(0.3)))
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
         
@@ -470,7 +470,7 @@ public class RobotContainer {
 
 
         // standard deviation calculation commands
-        callibrationJoystick.a().whileTrue(standardDeviation);
+        // callibrationJoystick.a().whileTrue(standardDeviation);
 
         //joystick.povRight().onTrue(new ParallelRaceGroup(blinkLight, new WaitCommand(2.25)));
         //joystick.povRight().onTrue(new ColorBlinkCommand(AvailableColors.Red, candleSystem));
