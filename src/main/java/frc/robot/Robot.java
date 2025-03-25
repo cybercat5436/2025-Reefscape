@@ -73,10 +73,14 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
     // m_robotContainer.resetSimulationStartPose();
+
   }
 
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    generatePathCommand.schedule();
+  }
+
 
   @Override
   public void teleopExit() {}
@@ -97,4 +101,6 @@ public class Robot extends TimedRobot {
     // m_robotContainer.resetSimulationStartPose();
     generatePathCommand.schedule();
   }
+
+
 }

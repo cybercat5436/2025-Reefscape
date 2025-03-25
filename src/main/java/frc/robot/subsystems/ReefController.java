@@ -154,6 +154,7 @@ public class ReefController extends SubsystemBase {
     
     // Load the path we want to pathfind to and follow
     try {
+      System.out.println("Is Path planning configured >>>>>>>>>>>>>>>>>"+ AutoBuilder.isPathfindingConfigured());
       System.out.println("$$$$$$$$$$$$$"+ reefPositionStitchPath.get(targetReefPosition));
        PathPlannerPath path = PathPlannerPath.fromPathFile(reefPositionStitchPath.get(targetReefPosition));
        System.out.println("#############" + path);
@@ -179,6 +180,7 @@ public class ReefController extends SubsystemBase {
       System.out.println("$$$$$$$$$$$$$"+ reefPositionStitchPath.get(targetReefPosition));
        PathPlannerPath path = PathPlannerPath.fromPathFile(reefPositionStitchPath.get(targetReefPosition));
        System.out.println("#############" + path);
+       System.out.println("Is Path planning configured $$$$$$$$$$$$$$"+ AutoBuilder.isPathfindingConfigured());
         // Since AutoBuilder is configured, we can use it to build pathfinding commands
        return AutoBuilder.pathfindThenFollowPath(path,constraints);
 
