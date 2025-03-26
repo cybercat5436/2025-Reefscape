@@ -17,8 +17,9 @@ public class DetectReefWithCANrange extends Command {
   private double lowerdistanceThreshold = .42;
   private boolean readyToShoot = false;
   /** Creates a new DetectReefWithCANrange. */
-  public DetectReefWithCANrange() {
+  public DetectReefWithCANrange(Elevator elevator) {
     reefDetector = new CANrange(0);
+    this.elevator = new Elevator();
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
@@ -30,9 +31,12 @@ public class DetectReefWithCANrange extends Command {
   @Override
   public void execute() {
       if ((elevator.getEncoderValue() < 6) && (elevator.getEncoderValue() > 5.8)) {
-         if ((reefDetector.getDistance().getValueAsDouble() < higherdistanceThreshold) && (reefDetector.getDistance().getValueAsDouble() > lowerdistanceThreshold)) {
+        System.out.println("*******Encoder is Correct*******");
+        if ((reefDetector.getDistance().getValueAsDouble() < higherdistanceThreshold) && (reefDetector.getDistance().getValueAsDouble() > lowerdistanceThreshold)) {
+          System.out.println("*****Incrementing Elevator*****");
         elevator.incrementHeightAdjustment();
       } else {
+        System.out.println("******In Shooting Position******");
         readyToShoot = true;
       }
       }

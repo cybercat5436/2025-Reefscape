@@ -123,7 +123,7 @@ public class RobotContainer {
     private final AutoAlignWithLimelight autoALignWithLimelights = new AutoAlignWithLimelight(drivetrain,limeLightFront,photonVision);
     private final StandardDeviation standardDeviation = new StandardDeviation(poseUpdater, drivetrain, new Pose2d(7.82,4.026,Rotation2d.k180deg),limeLightFront, limeLightFrontRight);
     private final FlashLEDsForAutoAlign flashLEDsForAutoAlign = new FlashLEDsForAutoAlign();
-    private final DetectReefWithCANrange detectReefWithCANrange = new DetectReefWithCANrange();
+    
     private SendableChooser<Command> autonChooser;
     // public final Climber climber = new Climber();
     public final Climber2 climber2 = new Climber2();
@@ -133,6 +133,7 @@ public class RobotContainer {
     public final Coral coral = new Coral();
     public final Algae algae = new Algae();
     public final Elevator elevator = new Elevator();
+    private final DetectReefWithCANrange detectReefWithCANrange = new DetectReefWithCANrange(elevator);
     public CANdleSystem candleSystem = CANdleSystem.getInstance();
 
     private SequentialCommandGroup autoCoralHigh = new SequentialCommandGroup(
