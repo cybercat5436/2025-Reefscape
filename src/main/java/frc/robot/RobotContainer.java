@@ -111,7 +111,7 @@ public class RobotContainer {
     private final CommandXboxController joystick2 = new CommandXboxController(1);
     private final Joystick reefPositionJoystick = new Joystick(2);
     private final Joystick reefLevelJoystick = new Joystick(3);
-    private final CommandXboxController callibrationJoystick = new CommandXboxController(4);
+    private final CommandXboxController calibrationJoystick = new CommandXboxController(4);
     private final ReefController reefController = ReefController.getInstance();
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private final LimeLight limeLightFront = new LimeLight("limelight-front", 0.02, -0.3, 0.65, -90.0, 0.0, 0.0);
@@ -403,7 +403,7 @@ public class RobotContainer {
         joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
     
         joystick.y().whileTrue(new AutoAlignWithLimelight(drivetrain, limeLightFront, photonVision));
-        callibrationJoystick.a().onTrue(new WheelMovementsTest(drivetrain, 0.3, robotCentricDrive, null));
+        calibrationJoystick.a().onTrue(new WheelMovementsTest(drivetrain, 0.3, robotCentricDrive, drivetrain.getState().Pose));
         // climber commands
         
         drivetrain.registerTelemetry(logger::telemeterize);
