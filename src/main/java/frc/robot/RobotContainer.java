@@ -61,6 +61,7 @@ import frc.robot.commands.CoralIntakeWithDetection;
 import frc.robot.commands.DriveForward;
 import frc.robot.commands.FlashLEDsForAutoAlign;
 import frc.robot.commands.StandardDeviation;
+import frc.robot.commands.WheelMovementsTest;
 import frc.robot.generated.TunerConstants;
 // import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Climber2;
@@ -172,11 +173,6 @@ public class RobotContainer {
         //Command autoCoralHigh = Commands.sequence(new InstantCommand(() -> elevator.raiseLevel4()), new InstantCommand(() -> coral.forward(1)));
 
 
-
-
-
-    
-
     private void registerNamedCommands(){
         NamedCommands.registerCommand("printSomething", new InstantCommand(() -> System.out.println(">>>>>>>>>>>>>Printing Something")));
         NamedCommands.registerCommand("autoCoralHigh", autoCoralHigh);
@@ -287,7 +283,7 @@ public class RobotContainer {
         joystick2.povDownRight()
             .whileTrue(new InstantCommand(() -> algae.algaeProcessor()))
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
-    
+        
         
         
 
@@ -407,7 +403,7 @@ public class RobotContainer {
         joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
     
         joystick.y().whileTrue(new AutoAlignWithLimelight(drivetrain, limeLightFront, photonVision));
-        
+        callibrationJoystick.a().onTrue(new WheelMovementsTest(drivetrain, 0.3, robotCentricDrive, null));
         // climber commands
         
         drivetrain.registerTelemetry(logger::telemeterize);
