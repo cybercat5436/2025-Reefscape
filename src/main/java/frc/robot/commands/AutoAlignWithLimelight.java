@@ -82,8 +82,11 @@ public class AutoAlignWithLimelight extends Command {
     Alliance alliance = DriverStation.getAlliance().isPresent()?DriverStation.getAlliance().get():DriverStation.Alliance.Blue;
     if(alliance == Alliance.Blue) {
       LimelightHelpers.setPipelineIndex(limelight.limelightName, 0);
+      System.out.println("********Change Limelight Pipeline to 0 in autoalign with limelight********");
     }else{
       LimelightHelpers.setPipelineIndex(limelight.limelightName, 2);
+      System.out.println("********Change Limelight Pipeline to 2 in autoalign with limelight********");
+
 
     }
   }

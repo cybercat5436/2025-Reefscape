@@ -96,8 +96,12 @@ public class AutoAlignWithSlowMode extends Command {
     Alliance alliance = DriverStation.getAlliance().isPresent()?DriverStation.getAlliance().get():DriverStation.Alliance.Blue;
     if(alliance == Alliance.Blue) {
       LimelightHelpers.setPipelineIndex(limelight.limelightName, 0);
+      System.out.println("********Change Limelight Pipeline to 0 in autoalign slowmode********");
+
     }else{
       LimelightHelpers.setPipelineIndex(limelight.limelightName, 2);
+      System.out.println("********Change Limelight Pipeline to 2 in autoalign slowmode********");
+
 
     }
   }
@@ -153,6 +157,8 @@ public class AutoAlignWithSlowMode extends Command {
   public void end(boolean interrupted) {
     timer.stop();
     LimelightHelpers.setPipelineIndex(limelight.limelightName, 1);
+    System.out.println("********Change Limelight Pipeline to 0 in autoalign slowmode********");
+
     if(isYAligned && isXAligned) {
       System.out.println("************Robot is Aligned*********");
       candleSystem.setIsAutoAligned(true);

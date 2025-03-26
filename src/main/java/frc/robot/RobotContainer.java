@@ -163,7 +163,11 @@ public class RobotContainer {
         autonChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auton Chooser", autonChooser);
         LimelightHelpers.setPipelineIndex(limeLightFront.limelightName, 1);
+        System.out.println("********Change LimelightFront Pipeline to 1 in robotContainer********");
+
         LimelightHelpers.setPipelineIndex(limeLightFrontRight.limelightName, 1);
+        System.out.println("********Change LimelightRight Pipeline to 1 in robotContainer********");
+
 
     }
 

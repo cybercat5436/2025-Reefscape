@@ -43,6 +43,8 @@ public class StandardDeviation extends Command {
   public void initialize() {
     commandSwerveDrivetrain.resetPose(robotPose);
     LimelightHelpers.setPipelineIndex(limeLightFront.limelightName, 1);
+    System.out.println("********Change Limelight Pipeline to 1 in standard deviation********");
+
   }
 
   // Called every time the scheduler runs while the command is scheduled.

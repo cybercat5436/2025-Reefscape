@@ -44,6 +44,7 @@ public class LimeLight extends SubsystemBase {
     tLongLocal = tableLimelight.getEntry("tlong");
     limelightName = networkTableName;
     LimelightHelpers.setPipelineIndex(limelightName, 0);
+    System.out.println("********Change Limelight Pipeline to 0 in limelight Subsystem********");
 
     
   }

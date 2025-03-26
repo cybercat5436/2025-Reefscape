@@ -95,6 +95,8 @@ public class AutoAlign extends Command {
   @Override
   public void initialize() {
     LimelightHelpers.setPipelineIndex(limelight.limelightName, 0);
+    System.out.println("********Change Limelight Pipeline to 0 in autoalign ********");
+
     timer.reset();
     timer.start();
     System.out.println("starting auto align");
@@ -175,6 +177,8 @@ public class AutoAlign extends Command {
         .withRotationalRate(0)
     );
     LimelightHelpers.setPipelineIndex(limelight.limelightName, 1);
+    System.out.println("********Change Limelight Pipeline to 1 in autoalign ********");
+
     
     if(isYAligned) {
       System.out.println("Robot Y Aligned");
