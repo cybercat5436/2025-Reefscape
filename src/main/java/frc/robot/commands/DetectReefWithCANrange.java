@@ -12,8 +12,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class DetectReefWithCANrange extends Command {
   private final CANrange reefDetector;
 
-  private double higherdistanceThreshold;
-  private double lowerdistanceThreshold;
+  // private double higherdistanceThreshold = .46;
+  // private double lowerdistanceThreshold = .42;
   /** Creates a new DetectReefWithCANrange. */
   public DetectReefWithCANrange() {
     reefDetector = new CANrange(0);
@@ -35,6 +35,6 @@ public class DetectReefWithCANrange extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return lowerdistanceThreshold < reefDetector.getDistance().getValueAsDouble() && higherdistanceThreshold > reefDetector.getDistance().getValueAsDouble();
+    return false;
   }
 }
