@@ -106,6 +106,7 @@ public class Elevator extends SubsystemBase {
     SmartDashboard.putData(this);
   }
 
+  
 
   // public void raiseLevel1() {
   //   m_motmag.Slot = 0;
@@ -224,6 +225,10 @@ public class Elevator extends SubsystemBase {
   } 
   public void stopElevator() {
     elevator.setControl(m_request.withOutput(0));
+  }
+
+  public double getEncoderValue() {
+    return elevator.getPosition().getValueAsDouble();
   }
 
   @Override

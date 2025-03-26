@@ -58,6 +58,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.AutoAlign;
 import frc.robot.commands.AutoAlignWithLimelight;
 import frc.robot.commands.CoralIntakeWithDetection;
+import frc.robot.commands.DetectReefWithCANrange;
 import frc.robot.commands.DriveForward;
 import frc.robot.commands.FlashLEDsForAutoAlign;
 import frc.robot.commands.StandardDeviation;
@@ -122,6 +123,7 @@ public class RobotContainer {
     private final AutoAlignWithLimelight autoALignWithLimelights = new AutoAlignWithLimelight(drivetrain,limeLightFront,photonVision);
     private final StandardDeviation standardDeviation = new StandardDeviation(poseUpdater, drivetrain, new Pose2d(7.82,4.026,Rotation2d.k180deg),limeLightFront, limeLightFrontRight);
     private final FlashLEDsForAutoAlign flashLEDsForAutoAlign = new FlashLEDsForAutoAlign();
+    private final DetectReefWithCANrange detectReefWithCANrange = new DetectReefWithCANrange();
     private SendableChooser<Command> autonChooser;
     // public final Climber climber = new Climber();
     public final Climber2 climber2 = new Climber2();
@@ -239,6 +241,11 @@ public class RobotContainer {
             .onTrue(new InstantCommand(() -> elevator.raiseLevel3()));
         joystick2.y()
             .onTrue(new InstantCommand(() -> elevator.raiseLevel4()));
+
+        joystick2.y()
+            .onTrue(new InstantCommand(() -> elevator.raiseLevel4())
+            .andThen(detectReefWithCANrange).repeatedly()
+            .andThen(new InstantCommand(() -> coral.forward(1))));
            
         joystick2.povRight().onTrue(new InstantCommand(() -> elevator.incrementHeightAdjustment()));
         joystick2.povLeft().onTrue(new InstantCommand(() -> elevator.decrementHeightAdjustment()));
