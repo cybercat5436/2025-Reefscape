@@ -22,6 +22,7 @@ public class WheelMovementsTest extends Command {
   private boolean isTimedOut;
   private double timerThreshold = .5;
   private double speed;
+  private double distance;
   private Pose2d startPosition;
   private Pose2d endPosition;
   private CommandSwerveDrivetrain commandSwerveDrivetrain;
