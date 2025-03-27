@@ -148,8 +148,9 @@ public class RobotContainer {
     private SequentialCommandGroup detectReef = new SequentialCommandGroup(
         new InstantCommand(() -> elevator.raiseLevel4())
         .andThen(detectReefWithCANrange)
+        .andThen(Commands.waitSeconds(0.5))
         .andThen(new InstantCommand(() -> coral.backward(1)))
-        .andThen(Commands.waitSeconds(1)
+        .andThen(Commands.waitSeconds(0.5)
         .andThen(new InstantCommand(() -> coral.stopMotor()))));
            
     
