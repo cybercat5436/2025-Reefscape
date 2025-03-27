@@ -141,9 +141,18 @@ public class RobotContainer {
         ,Commands.waitSeconds(2.5)
         ,Commands.print("Auto Coral High")
         .andThen(new InstantCommand(() -> coral.backward(0.9)))
-        , Commands.waitSeconds(.5)
+        , Commands.waitSeconds(0.5)
          .andThen(new InstantCommand(() -> coral.stopMotor())))
          .andThen(new InstantCommand(() -> elevator.stopElevator()));
+
+    private SequentialCommandGroup detectReef = new SequentialCommandGroup(
+        new InstantCommand(() -> elevator.raiseLevel4())
+        .andThen(detectReefWithCANrange)
+        .andThen(new InstantCommand(() -> coral.backward(1)))
+        .andThen(Commands.waitSeconds(1)
+        .andThen(new InstantCommand(() -> coral.stopMotor()))));
+           
+    
     // private Command autoCoralHigh = Commands.sequence(
     //     new InstantCommand(() -> elevator.raiseLevel4())
     //     ,Commands.print("done raising.")
@@ -240,13 +249,11 @@ public class RobotContainer {
             .onTrue(new InstantCommand(() -> elevator.raiseLevel2()));
         joystick2.b()
             .onTrue(new InstantCommand(() -> elevator.raiseLevel3()));
-        joystick2.y()
-            .onTrue(new InstantCommand(() -> elevator.raiseLevel4()));
+        // joystick2.y()
+        //     .onTrue(new InstantCommand(() -> elevator.raiseLevel4()));
 
         joystick2.y()
-            .onTrue(new InstantCommand(() -> elevator.raiseLevel4())
-            .andThen(detectReefWithCANrange).repeatedly()
-            .andThen(new InstantCommand(() -> coral.forward(1))));
+            .onTrue(detectReef);
            
         joystick2.povRight().onTrue(new InstantCommand(() -> elevator.incrementHeightAdjustment()));
         joystick2.povLeft().onTrue(new InstantCommand(() -> elevator.decrementHeightAdjustment()));

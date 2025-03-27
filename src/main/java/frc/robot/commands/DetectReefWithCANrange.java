@@ -6,6 +6,7 @@ package frc.robot.commands;
 
 import com.ctre.phoenix6.hardware.CANrange;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
 
@@ -13,33 +14,36 @@ import frc.robot.subsystems.Elevator;
 public class DetectReefWithCANrange extends Command {
   private final CANrange reefDetector;
   private Elevator elevator;
-  private double higherdistanceThreshold = .46;
-  private double lowerdistanceThreshold = .42;
-  private boolean readyToShoot = false;
+  private double higherdistanceThreshold = .5;
+  private double lowerdistanceThreshold = .4;
+  private boolean readyToShoot;
+
   /** Creates a new DetectReefWithCANrange. */
   public DetectReefWithCANrange(Elevator elevator) {
-    reefDetector = new CANrange(0);
+    reefDetector = new CANrange(18 );
     this.elevator = new Elevator();
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    readyToShoot = false;
+    SmartDashboard.putBoolean("Ready to Shoot", readyToShoot);
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-      if ((elevator.getEncoderValue() < 6) && (elevator.getEncoderValue() > 5.8)) {
+      if ((elevator.getEncoderValue() < 6) && (elevator.getEncoderValue() > 5.5)) {
         System.out.println("*******Encoder is Correct*******");
-        if ((reefDetector.getDistance().getValueAsDouble() < higherdistanceThreshold) && (reefDetector.getDistance().getValueAsDouble() > lowerdistanceThreshold)) {
+        if (!((reefDetector.getDistance().getValueAsDouble() < higherdistanceThreshold) && (reefDetector.getDistance().getValueAsDouble() > lowerdistanceThreshold))) {
           System.out.println("*****Incrementing Elevator*****");
-        elevator.incrementHeightAdjustment();
       } else {
         System.out.println("******In Shooting Position******");
         readyToShoot = true;
       }
-      }
+    }
     
     
   }
