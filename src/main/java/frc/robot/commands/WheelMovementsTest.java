@@ -15,12 +15,14 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.Timer;
-
+//.106484, .2287544, .3460422, .463022, .696979
+//test 2: .42064 .43622 .42760 .42517 .41533
+//test 3 (0.8 speed 0.5 seconds): 0.3293 .3302 .3373 .331 .334 .338
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class WheelMovementsTest extends Command {
   private Timer timer = new Timer();
   private boolean isTimedOut;
-  private double timerThreshold = .5;
+  private double timerThreshold;
   private double speed;
   private double distance;
   private Pose2d startPosition;
@@ -30,12 +32,13 @@ public class WheelMovementsTest extends Command {
  
 
   /** Creates a new WheelMovementsTest. */
-  public WheelMovementsTest(CommandSwerveDrivetrain commandSwerveDrivetrain, double speed, SwerveRequest.RobotCentric robotCentricDrive, Pose2d startPosition) {
-    // Use addRequirements() here to declare subsystem dependencies.
+  public WheelMovementsTest(CommandSwerveDrivetrain commandSwerveDrivetrain, double speed, double timerThreshold, SwerveRequest.RobotCentric robotCentricDrive) {
+    //Use addRequirements() here to declare subsystem dependencies.
     this.commandSwerveDrivetrain = commandSwerveDrivetrain;
     this.robotCentricDrive = robotCentricDrive;
     this.speed = speed;
-    this.startPosition = startPosition;
+    this.timerThreshold = timerThreshold;
+    this.startPosition = commandSwerveDrivetrain.getState().Pose;
   }
 
   // Called when the command is initially scheduled.
@@ -48,14 +51,14 @@ public class WheelMovementsTest extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    commandSwerveDrivetrain.setControl(robotCentricDrive.withVelocityX(speed));
+    commandSwerveDrivetrain.setControl(robotCentricDrive.withVelocityY(speed));
     System.out.println("Driving Forward");
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    commandSwerveDrivetrain.setControl(robotCentricDrive.withVelocityX(0));
+    commandSwerveDrivetrain.setControl(robotCentricDrive.withVelocityY(0));
     endPosition = commandSwerveDrivetrain.getState().Pose;
     System.out.println("Stopped Driving: Drove for "+timerThreshold+" seconds at power "+speed+" and moved "+ startPosition.getTranslation().getDistance(endPosition.getTranslation()));
   }

@@ -403,7 +403,42 @@ public class RobotContainer {
         joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
     
         joystick.y().whileTrue(new AutoAlignWithLimelight(drivetrain, limeLightFront, photonVision));
-        calibrationJoystick.a().onTrue(new WheelMovementsTest(drivetrain, 0.3, robotCentricDrive, drivetrain.getState().Pose));
+        calibrationJoystick.a().onTrue(
+            new WheelMovementsTest(drivetrain, .8, 0.05,robotCentricDrive)
+        .andThen(new WheelMovementsTest(drivetrain, .8, 0.1,robotCentricDrive))
+        .andThen(new WheelMovementsTest(drivetrain, .8, 0.15,robotCentricDrive))
+        .andThen(new WheelMovementsTest(drivetrain, .8, 0.20,robotCentricDrive))
+        .andThen(new WheelMovementsTest(drivetrain, .8, 0.25,robotCentricDrive))
+        .andThen(new WheelMovementsTest(drivetrain, .8, 0.30,robotCentricDrive))
+        .andThen(new WheelMovementsTest(drivetrain, .8, 0.35,robotCentricDrive))
+        .andThen(new WheelMovementsTest(drivetrain, .8, 0.40,robotCentricDrive))
+        .andThen(new WheelMovementsTest(drivetrain, .8, 0.45,robotCentricDrive))
+        .andThen(new WheelMovementsTest(drivetrain, .8, 0.5,robotCentricDrive))
+        );
+        calibrationJoystick.b().onTrue(
+            new WheelMovementsTest(drivetrain, .5, 0.05,robotCentricDrive)
+        .andThen(new WheelMovementsTest(drivetrain, .5, 0.1,robotCentricDrive))
+        .andThen(new WheelMovementsTest(drivetrain, .5, 0.15,robotCentricDrive))
+        .andThen(new WheelMovementsTest(drivetrain, .5, 0.20,robotCentricDrive))
+        .andThen(new WheelMovementsTest(drivetrain, .5, 0.25,robotCentricDrive))
+        .andThen(new WheelMovementsTest(drivetrain, .5, 0.30,robotCentricDrive))
+        .andThen(new WheelMovementsTest(drivetrain, .5, 0.35,robotCentricDrive))
+        .andThen(new WheelMovementsTest(drivetrain, .5, 0.40,robotCentricDrive))
+        .andThen(new WheelMovementsTest(drivetrain, .5, 0.45,robotCentricDrive))
+        .andThen(new WheelMovementsTest(drivetrain, .5, 0.5,robotCentricDrive))
+        );
+        calibrationJoystick.x().onTrue(
+            new WheelMovementsTest(drivetrain, .3, 0.05,robotCentricDrive)
+        .andThen(new WheelMovementsTest(drivetrain, .3, 0.1,robotCentricDrive))
+        .andThen(new WheelMovementsTest(drivetrain, .3, 0.15,robotCentricDrive))
+        .andThen(new WheelMovementsTest(drivetrain, .3, 0.20,robotCentricDrive))
+        .andThen(new WheelMovementsTest(drivetrain, .3, 0.25,robotCentricDrive))
+        .andThen(new WheelMovementsTest(drivetrain, .3, 0.30,robotCentricDrive))
+        .andThen(new WheelMovementsTest(drivetrain, .3, 0.35,robotCentricDrive))
+        .andThen(new WheelMovementsTest(drivetrain, .3, 0.40,robotCentricDrive))
+        .andThen(new WheelMovementsTest(drivetrain, .3, 0.45,robotCentricDrive))
+        .andThen(new WheelMovementsTest(drivetrain, .3, 0.5,robotCentricDrive))
+        );
         // climber commands
         
         drivetrain.registerTelemetry(logger::telemeterize);
