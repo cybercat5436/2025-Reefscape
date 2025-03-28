@@ -8,6 +8,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
+import java.util.ArrayList;
+
 import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.RobotCentric;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -29,16 +31,16 @@ public class WheelMovementsTest extends Command {
   private Pose2d endPosition;
   private CommandSwerveDrivetrain commandSwerveDrivetrain;
   private SwerveRequest.RobotCentric robotCentricDrive;
- 
+  private ArrayList<Double> distances;
 
   /** Creates a new WheelMovementsTest. */
-  public WheelMovementsTest(CommandSwerveDrivetrain commandSwerveDrivetrain, double speed, double timerThreshold, SwerveRequest.RobotCentric robotCentricDrive) {
+  public WheelMovementsTest(CommandSwerveDrivetrain commandSwerveDrivetrain, double speed, double timerThreshold, SwerveRequest.RobotCentric robotCentricDrive/*, ArrayList<Double> distances*/) {
     //Use addRequirements() here to declare subsystem dependencies.
     this.commandSwerveDrivetrain = commandSwerveDrivetrain;
     this.robotCentricDrive = robotCentricDrive;
     this.speed = speed;
     this.timerThreshold = timerThreshold;
-    this.startPosition = commandSwerveDrivetrain.getState().Pose;
+    //this.distances = distances;
   }
 
   // Called when the command is initially scheduled.
@@ -46,13 +48,14 @@ public class WheelMovementsTest extends Command {
   public void initialize() {
     timer.reset();
     timer.start();
+    this.startPosition = commandSwerveDrivetrain.getState().Pose;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     commandSwerveDrivetrain.setControl(robotCentricDrive.withVelocityY(speed));
-    System.out.println("Driving Forward");
+    //System.out.println("Driving Forward");
   }
 
   // Called once the command ends or is interrupted.
@@ -60,7 +63,13 @@ public class WheelMovementsTest extends Command {
   public void end(boolean interrupted) {
     commandSwerveDrivetrain.setControl(robotCentricDrive.withVelocityY(0));
     endPosition = commandSwerveDrivetrain.getState().Pose;
-    System.out.println("Stopped Driving: Drove for "+timerThreshold+" seconds at power "+speed+" and moved "+ startPosition.getTranslation().getDistance(endPosition.getTranslation()));
+    double distance = startPosition.getTranslation().getDistance(endPosition.getTranslation());
+    System.out.println("*************************Stopped Driving: Drove for "+timerThreshold+" seconds at power "+speed+" and moved "+ distance + " from " +startPosition.getTranslation()+" to "+endPosition.getTranslation()+"*******************");
+    /*if (timerThreshold == 0.5) {
+      for (double d : distances) {
+        System.out.println("********"+d);
+      }
+    }*/
   }
 
   // Returns true when the command should end.

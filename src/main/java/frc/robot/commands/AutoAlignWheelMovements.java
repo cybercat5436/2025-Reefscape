@@ -27,7 +27,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class AutoAlignWheelMovements extends Command {
   private CommandSwerveDrivetrain commandSwerveDrivetrain;
@@ -66,8 +65,9 @@ public class AutoAlignWheelMovements extends Command {
 
     // this.movingAverage = new MovingAverage(20);
   }
-  public ArrayList<Double> wheelConfigurations(){
+  public ArrayList<Double> calculateMovements(){
       ArrayList<Double> returnValue = new ArrayList<>();
+      //we will fix a power and then calculate how far to moveeeeeeeeeeee
       return returnValue;
   }
   // Called when the command is initially scheduled.
