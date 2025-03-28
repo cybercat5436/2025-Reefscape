@@ -14,8 +14,8 @@ import frc.robot.subsystems.Elevator;
 public class DetectReefWithCANrange extends Command {
   private final CANrange reefDetector;
   private Elevator elevator;
-  private double higherdistanceThreshold = .5;
-  private double lowerdistanceThreshold = .4;
+  private double higherdistanceThresholdL4 = .5;
+  private double lowerdistanceThresholdL4 = .4;
   private boolean readyToShoot;
 
   /** Creates a new DetectReefWithCANrange. */
@@ -35,18 +35,20 @@ public class DetectReefWithCANrange extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-      if ((elevator.getEncoderValue() < 6) && (elevator.getEncoderValue() > 5.5)) {
-        System.out.println("*******Encoder is Correct*******");
-        if (!((reefDetector.getDistance().getValueAsDouble() < higherdistanceThreshold) && (reefDetector.getDistance().getValueAsDouble() > lowerdistanceThreshold))) {
-          System.out.println("*****Incrementing Elevator*****");
+      if ((elevator.getEncoderValue() < 6) && (elevator.getEncoderValue() > 5)) {
+        System.out.println("*******Encoder is Correct L4*******");
+        if (!((reefDetector.getDistance().getValueAsDouble() < higherdistanceThresholdL4) && (reefDetector.getDistance().getValueAsDouble() > lowerdistanceThresholdL4))) {
+          System.out.println("*****Incrementing Elevator L4*****");
       } else {
-        System.out.println("******In Shooting Position******");
+        System.out.println("******In Shooting Position L4******");
         readyToShoot = true;
       }
     }
     
-    
   }
+    
+    
+  
 
   // Called once the command ends or is interrupted.
   @Override

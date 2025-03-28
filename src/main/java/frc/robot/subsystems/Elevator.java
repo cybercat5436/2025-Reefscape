@@ -14,6 +14,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXSConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.ctre.phoenix6.signals.ExternalFeedbackSensorSourceValue;
@@ -26,6 +27,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.commands.DetectReefWithCANrange;
 
 
 public class Elevator extends SubsystemBase {
@@ -48,8 +50,16 @@ public class Elevator extends SubsystemBase {
 
   private int elevatorLevel;
   private final TalonFX elevator = new TalonFX(12);
+  private final CANrange reefDetector;
+  private boolean readyToShoot;
+  private double higherdistanceThresholdL3 = 0;
+  private double lowerdistanceThresholdL3 = 0;
+  private double higherdistanceThresholdL2 = 0;
+  private double lowerdistanceThresholdL2 = 0;
+
   private Alliance alliance;
   public Elevator() {
+    reefDetector = new CANrange(18);
     // var talonFXConfigs = new TalonFXConfiguration();
     // talonFXConfigs.Commutation.MotorArrangement = MotorArrangementValue.Minion_JST;
     // talonFXConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
@@ -229,6 +239,31 @@ public class Elevator extends SubsystemBase {
 
   public double getEncoderValue() {
     return elevator.getPosition().getValueAsDouble();
+  }
+
+  public boolean detectReefL3(){
+    if ((this.getEncoderValue() < 3) && (this.getEncoderValue() > 2)) {
+      System.out.println("*******Encoder is Correct L3*******");
+      if ((reefDetector.getDistance().getValueAsDouble() < higherdistanceThresholdL3) && (reefDetector.getDistance().getValueAsDouble() > lowerdistanceThresholdL3)) {
+      System.out.println("******In Shooting Position L3******");
+      readyToShoot = true;
+      return true;
+      }
+    }
+
+    return false;
+  }
+  public boolean detectReefL2(){
+    if ((this.getEncoderValue() < 1) && (this.getEncoderValue() > 0)) {
+      System.out.println("*******Encoder is Correct L2*******");
+      if ((reefDetector.getDistance().getValueAsDouble() < higherdistanceThresholdL2) && (reefDetector.getDistance().getValueAsDouble() > lowerdistanceThresholdL2)) {
+      System.out.println("******In Shooting Position L2******");
+      readyToShoot = true;
+      return true;
+      }
+    }
+
+    return false;
   }
 
   @Override

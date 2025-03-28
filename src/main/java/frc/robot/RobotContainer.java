@@ -145,13 +145,28 @@ public class RobotContainer {
          .andThen(new InstantCommand(() -> coral.stopMotor())))
          .andThen(new InstantCommand(() -> elevator.stopElevator()));
 
-    private SequentialCommandGroup detectReef = new SequentialCommandGroup(
+    private SequentialCommandGroup detectReefL4 = new SequentialCommandGroup(
         new InstantCommand(() -> elevator.raiseLevel4())
         .andThen(detectReefWithCANrange)
         .andThen(Commands.waitSeconds(0.5))
         .andThen(new InstantCommand(() -> coral.backward(1)))
         .andThen(Commands.waitSeconds(0.5)
         .andThen(new InstantCommand(() -> coral.stopMotor()))));
+    private SequentialCommandGroup detectReefL3 = new SequentialCommandGroup(
+        new InstantCommand(() -> elevator.raiseLevel3())
+        .andThen(new InstantCommand(() -> elevator.detectReefL3()))
+        .andThen(Commands.waitSeconds(0.5))
+        .andThen(new InstantCommand(() -> coral.backward(1)))
+        .andThen(Commands.waitSeconds(0.5)
+        .andThen(new InstantCommand(() -> coral.stopMotor()))));
+    private SequentialCommandGroup detectReefL2 = new SequentialCommandGroup(
+        new InstantCommand(() -> elevator.raiseLevel2())
+        .andThen(new InstantCommand(() -> elevator.detectReefL2()))
+        .andThen(Commands.waitSeconds(0.5))
+        .andThen(new InstantCommand(() -> coral.backward(1)))
+        .andThen(Commands.waitSeconds(0.5)
+        .andThen(new InstantCommand(() -> coral.stopMotor()))));
+               
            
     
     // private Command autoCoralHigh = Commands.sequence(
@@ -201,9 +216,11 @@ public class RobotContainer {
         .andThen(new InstantCommand(() -> climber2.stopClimb())
         ));
         NamedCommands.registerCommand("autoAlignWithLimelight", autoALignWithLimelights);
-        NamedCommands.registerCommand("driveForwardFor1Second" , new  DriveForward(drivetrain, 2, robotCentricDrive));
-        NamedCommands.registerCommand("faceWheels-120Degrees" , new InstantCommand(() -> drivetrain.applyRequest(() ->
+        NamedCommands.registerCommand("driveForwardFor1Second", new  DriveForward(drivetrain, 2, robotCentricDrive));
+        NamedCommands.registerCommand("faceWheels-120Degrees", new InstantCommand(() -> drivetrain.applyRequest(() ->
         point.withModuleDirection(new Rotation2d(-120)))));
+        NamedCommands.registerCommand("reefDetection", detectReefL4);
+        
 
     }
 
@@ -246,15 +263,18 @@ public class RobotContainer {
             .onTrue(new InstantCommand(() -> elevator.raiseStartLevel())
             .andThen(Commands.waitSeconds(1.5))
             .andThen(new InstantCommand(() -> elevator.stopElevator())));
-        joystick2.a()
-            .onTrue(new InstantCommand(() -> elevator.raiseLevel2()));
-        joystick2.b()
-            .onTrue(new InstantCommand(() -> elevator.raiseLevel3()));
+        // joystick2.a()
+        //     .onTrue(new InstantCommand(() -> elevator.raiseLevel2()));
+        // joystick2.b()
+        //     .onTrue(new InstantCommand(() -> elevator.raiseLevel3()));
         // joystick2.y()
         //     .onTrue(new InstantCommand(() -> elevator.raiseLevel4()));
-
+        joystick2.a()
+            .onTrue(detectReefL2);
+        joystick2.b()
+            .onTrue(detectReefL3);
         joystick2.y()
-            .onTrue(detectReef);
+            .onTrue(detectReefL4);
            
         joystick2.povRight().onTrue(new InstantCommand(() -> elevator.incrementHeightAdjustment()));
         joystick2.povLeft().onTrue(new InstantCommand(() -> elevator.decrementHeightAdjustment()));

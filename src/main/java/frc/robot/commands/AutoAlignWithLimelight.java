@@ -19,6 +19,7 @@ import frc.robot.subsystems.CANdleSystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LimeLight;
 import frc.robot.subsystems.PhotonVision;
+import frc.robot.subsystems.PoseUpdater;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
@@ -104,6 +105,9 @@ public class AutoAlignWithLimelight extends Command {
   @Override
   public void execute() {
     tY = limelight.getVisionTargetVerticalError();
+    if(limelight.getVisionTargetStatus() == false) {
+      robotYError = 0;
+    }else{
     // tX = -limelight.getVisionTargetHorizontalError();
     robotYError =  tY - targettY;
     // robotXError = targettX - tX;
@@ -113,6 +117,7 @@ public class AutoAlignWithLimelight extends Command {
     ySpeed =  Math.min(maxSpeed, Math.abs(yErrorCalculated))* Math.signum(robotYError);
     if(Math.abs(robotYError) < 2){
     ySpeed += intergratedError * kIY;
+    }
   }
   if(limelight.getVisionTargetStatus() == false){
     attemptCount++;
@@ -128,7 +133,6 @@ public class AutoAlignWithLimelight extends Command {
       cropAdjustmentMax++;
       
     }   
-
     double newCropYMax = cropValueMax + (cropAdjustmentMax * 0.05);
     
     LimelightHelpers.setCropWindow(limelight.limelightName, -0.05, 0.07, newCropYMin, newCropYMax);
