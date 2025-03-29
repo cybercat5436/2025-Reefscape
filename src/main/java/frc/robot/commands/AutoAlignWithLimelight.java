@@ -109,16 +109,16 @@ public class AutoAlignWithLimelight extends Command {
       robotYError = 0;
     }else{
     // tX = -limelight.getVisionTargetHorizontalError();
-    robotYError =  tY - targettY;
-    // robotXError = targettX - tX;
-    intergratedError += robotYError * .005;
-    yErrorCalculated = kPY * Math.abs(robotYError);
-    // xErrorCalculated = kPX * Math.abs(robotXError);
-    ySpeed =  Math.min(maxSpeed, Math.abs(yErrorCalculated))* Math.signum(robotYError);
-    if(Math.abs(robotYError) < 2){
-    ySpeed += intergratedError * kIY;
+      robotYError =  tY - targettY;
+      // robotXError = targettX - tX;
+      intergratedError += robotYError * .005;
+      yErrorCalculated = kPY * Math.abs(robotYError);
+      // xErrorCalculated = kPX * Math.abs(robotXError);
+      ySpeed =  Math.min(maxSpeed, Math.abs(yErrorCalculated))* Math.signum(robotYError);
+        if(Math.abs(robotYError) < 2){
+          ySpeed += intergratedError * kIY;
+        }
     }
-  }
   if(limelight.getVisionTargetStatus() == false){
     attemptCount++;
   }else{

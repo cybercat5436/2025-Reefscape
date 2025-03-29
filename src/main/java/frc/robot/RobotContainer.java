@@ -71,6 +71,11 @@ import frc.robot.subsystems.CANdleSystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Coral;
 import frc.robot.subsystems.GamePieceDetector;
+
+import com.ctre.phoenix6.configs.CANrangeConfiguration;
+import com.ctre.phoenix6.configs.FovParamsConfigs;
+import com.ctre.phoenix6.configs.ProximityParamsConfigs;
+import com.ctre.phoenix6.hardware.CANrange;
 import frc.robot.subsystems.CANdleSystem.AnimationTypes;
 import frc.robot.subsystems.CANdleSystem.AvailableColors;
 import frc.robot.subsystems.ReefController.ReefPosition;
@@ -128,12 +133,13 @@ public class RobotContainer {
     // public final Climber climber = new Climber();
     public final Climber2 climber2 = new Climber2();
     public final GamePieceDetector coralSensor = new GamePieceDetector(35000, GamePieceDetector.Sensors.coral);
-    public final GamePieceDetector algaeSensor = new GamePieceDetector(25000, GamePieceDetector.Sensors.algae, 0.1);
+    // public final GamePieceDetector algaeSensor = new GamePieceDetector(25000, GamePieceDetector.Sensors.algae, 0.1);
+    public final GamePieceDetector reefDetector = new GamePieceDetector(1500, GamePieceDetector.Sensors.reef);
     
     public final Coral coral = new Coral();
     public final Algae algae = new Algae();
     public final Elevator elevator = new Elevator();
-    private final DetectReefWithCANrange detectReefWithCANrange = new DetectReefWithCANrange(elevator);
+    private final DetectReefWithCANrange detectReefWithCANrange = new DetectReefWithCANrange(elevator, reefDetector);
     public CANdleSystem candleSystem = CANdleSystem.getInstance();
 
     private SequentialCommandGroup autoCoralHigh = new SequentialCommandGroup(
@@ -145,23 +151,26 @@ public class RobotContainer {
          .andThen(new InstantCommand(() -> coral.stopMotor())))
          .andThen(new InstantCommand(() -> elevator.stopElevator()));
 
-    private SequentialCommandGroup detectReefL4 = new SequentialCommandGroup(
+    private SequentialCommandGroup detectReefL4 = 
         new InstantCommand(() -> elevator.raiseLevel4())
-        .andThen(detectReefWithCANrange)
+        .andThen(new PrintCommand("This is running detectReefL4"))
+        .andThen(new DetectReefWithCANrange(elevator, reefDetector))
         .andThen(Commands.waitSeconds(0.5))
         .andThen(new InstantCommand(() -> coral.backward(1)))
         .andThen(Commands.waitSeconds(0.5)
-        .andThen(new InstantCommand(() -> coral.stopMotor()))));
+        .andThen(new InstantCommand(() -> coral.stopMotor())));
+
     private SequentialCommandGroup detectReefL3 = new SequentialCommandGroup(
         new InstantCommand(() -> elevator.raiseLevel3())
-        .andThen(new InstantCommand(() -> elevator.detectReefL3()))
+        .andThen(new DetectReefWithCANrange(elevator, reefDetector))
         .andThen(Commands.waitSeconds(0.5))
         .andThen(new InstantCommand(() -> coral.backward(1)))
         .andThen(Commands.waitSeconds(0.5)
         .andThen(new InstantCommand(() -> coral.stopMotor()))));
+        
     private SequentialCommandGroup detectReefL2 = new SequentialCommandGroup(
         new InstantCommand(() -> elevator.raiseLevel2())
-        .andThen(new InstantCommand(() -> elevator.detectReefL2()))
+        .andThen(new DetectReefWithCANrange(elevator, reefDetector))
         .andThen(Commands.waitSeconds(0.5))
         .andThen(new InstantCommand(() -> coral.backward(1)))
         .andThen(Commands.waitSeconds(0.5)
@@ -193,6 +202,8 @@ public class RobotContainer {
         SmartDashboard.putData("Auton Chooser", autonChooser);
         // LimelightHelpers.setPipelineIndex(limeLightFront.limelightName, 1);
         LimelightHelpers.setPipelineIndex(limeLightFrontRight.limelightName, 1);
+
+        
 
     }
 
@@ -383,6 +394,8 @@ public class RobotContainer {
             .andThen(getRumbleCommand())
             .andThen(Commands.waitSeconds(0.1))
             .andThen(getRumbleCommand()));
+    joystick.povLeft().onTrue(new InstantCommand(() -> candleSystem.decrementAnimation()));
+    joystick.povRight().onTrue(new InstantCommand(() -> candleSystem.incrementAnimation()));
 
     joystick.a().whileTrue(drivetrain.applyRequest(() -> {
             double xSpeed = slewRateLimiterX.calculate(-joystick.getLeftY()* maxSpeed);             
