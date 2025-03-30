@@ -57,7 +57,7 @@ public class Elevator extends SubsystemBase {
   private double higherdistanceThresholdL2 = 0;
   private double lowerdistanceThresholdL2 = 0;
 
-  private double standardIncrement = 0.1;
+  private double standardIncrement = 0.025;
 
   public Alliance alliance;
   public Elevator() {
@@ -227,12 +227,12 @@ public class Elevator extends SubsystemBase {
       elevatorLevel = 4;
       m_motmag.Slot = 0;
       elevator.setControl(m_motmag.withPosition(L4 + redHeightAdjustmentLevel4 * standardIncrement));
-      System.out.println("$$$$$$$$$$$$$$raised level 4$$$$%$$$$$$$");
     } else {
       elevatorLevel = 4;
       m_motmag.Slot = 0;
       elevator.setControl(m_motmag.withPosition(L4 + blueHeightAdjustmentLevel4 * standardIncrement));
     }
+    System.out.println("$$$$$$$$$$$$$$raised level 4$$$$%$$$$$$$");
    
   } 
   public void stopElevator() {

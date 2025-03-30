@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -144,7 +145,9 @@ public class RobotContainer {
         .andThen(new InstantCommand(() -> coral.backward(1)))
         .andThen(Commands.waitSeconds(0.5)
         .andThen(new InstantCommand(() -> coral.stopMotor()))));
-               
+    
+
+    
            
     // private Command autoCoralHigh = Commands.sequence(
     //     new InstantCommand(() -> elevator.raiseLevel4())
@@ -173,6 +176,55 @@ public class RobotContainer {
         // LimelightHelpers.setPipelineIndex(limeLightFront.limelightName, 1);
         LimelightHelpers.setPipelineIndex(limeLightFrontRight.limelightName, 1);
 
+    }
+
+    private Command getElevatorHeightCheckCommand() {
+        return Commands.print("~~~~  Starting elevator height check   ~~~~~")
+                    .andThen(Commands.waitUntil(() -> elevator.atTargetHeight())
+                    .withTimeout(1.0)
+        ).andThen(Commands.print("~~~~~~~~~  Completed Elevator Raise  ~~~~~~~~~~~"));
+    }
+
+    private Command getDetectReefCommand(){
+        return Commands.print("~~~~~~~   Starting Detect Reef with CAN Range    ~~~~~~")
+                    .andThen(new DetectReefWithCANrange(elevator, reefDetector)
+                    .withTimeout(1.5)
+        ).andThen(Commands.print("~~~~~~~~~  Completed Detect Reef with CAN Range  ~~~~~~~~~~~"));
+    }
+
+    private Command getCoralShootCommand(){
+        return Commands.print("~~~~~~~   Staring coral shoot    ~~~~~~~~~")
+            .andThen(new InstantCommand(() -> coral.backward(1)))
+            .andThen(Commands.waitSeconds(0.5))
+            .andThen(new InstantCommand(() -> coral.stopMotor()))
+            .andThen(Commands.print("~~~~~~~~~   Coral shoot complete    ~~~~~~~~~"));
+    }
+
+    private Command getLevel4Command(){
+        return Commands.print("~~~~~~~~~~  Starting L4 command  ~~~~~~~~~~~~~")
+            .andThen(new InstantCommand(() -> elevator.raiseLevel4()))
+            .andThen(getElevatorHeightCheckCommand())
+            .andThen(getDetectReefCommand())
+            .andThen(getCoralShootCommand())
+            .handleInterrupt(() -> System.out.println("~~~~~~~~~~   Interrupted!  ~~~~~~~~~~~~~~~"));
+    }
+
+    private Command getLevel3Command(){
+        return Commands.print("~~~~~~~~~~  Starting L3 command  ~~~~~~~~~~~~~")
+            .andThen(new InstantCommand(() -> elevator.raiseLevel3()))
+            .andThen(getElevatorHeightCheckCommand())
+            .andThen(getDetectReefCommand())
+            .andThen(getCoralShootCommand())
+            .handleInterrupt(() -> System.out.println("~~~~~~~~~~   Interrupted!  ~~~~~~~~~~~~~~~"));
+    }
+
+    private Command getLevel2Command(){
+        return Commands.print("~~~~~~~~~~  Starting L32 command  ~~~~~~~~~~~~~")
+            .andThen(new InstantCommand(() -> elevator.raiseLevel2()))
+            .andThen(getElevatorHeightCheckCommand())
+            .andThen(getDetectReefCommand())
+            .andThen(getCoralShootCommand())
+            .handleInterrupt(() -> System.out.println("~~~~~~~~~~   Interrupted!  ~~~~~~~~~~~~~~~"));
     }
 
         //Command autoCoralHigh = Commands.sequence(new InstantCommand(() -> elevator.raiseLevel4()), new InstantCommand(() -> coral.forward(1)));
@@ -362,7 +414,7 @@ public class RobotContainer {
         // *************************************************
         joystick2.x()
             .onTrue(new InstantCommand(() -> elevator.raiseStartLevel())
-            .andThen(Commands.waitSeconds(1.5))
+            .andThen(Commands.waitSeconds(1.0))
             .andThen(new InstantCommand(() -> elevator.stopElevator())));
         // joystick2.a()
         //     .onTrue(new InstantCommand(() -> elevator.raiseLevel2()));
@@ -371,11 +423,14 @@ public class RobotContainer {
         // joystick2.y()
         //     .onTrue(new InstantCommand(() -> elevator.raiseLevel4()));
         joystick2.a()
-            .onTrue(detectReefL2);
+            .onTrue(getLevel2Command());
+            // .onTrue(detectReefL2);
         joystick2.b()
-            .onTrue(detectReefL3);
+            .onTrue(getLevel3Command());
+            // .onTrue(detectReefL3);
         joystick2.y()
-            .onTrue(detectReefL4);
+            .onTrue(getLevel4Command());
+            // .onTrue(detectReefL4);
         
         joystick2.povRight().onTrue(new InstantCommand(() -> elevator.incrementHeightAdjustment()));
         joystick2.povLeft().onTrue(new InstantCommand(() -> elevator.decrementHeightAdjustment()));
@@ -506,11 +561,9 @@ public class RobotContainer {
         // calibrationJoystick.a().whileTrue(standardDeviation);
 
 
-        calibrationJoystick.a().whileTrue(
-            new InstantCommand(() -> elevator.raiseLevel4())
-            .andThen(Commands.waitUntil(() -> elevator.atTargetHeight()))
-            .handleInterrupt(() -> System.out.println("~~~~~~~~~~   Interrupted!  ~~~~~~~~~~~~~~~"))
-        );
+        calibrationJoystick.a().whileTrue(getLevel4Command());
+        calibrationJoystick.b().whileTrue(getLevel3Command());
+        calibrationJoystick.y().whileTrue(getLevel2Command());
 
         // calibrationJoystick.a().onTrue(new WheelMovementsTest(drivetrain, 0.3, robotCentricDrive, null));
 
@@ -522,7 +575,6 @@ public class RobotContainer {
          .andThen(Commands.waitSeconds(0.5))
          .andThen(new InstantCommand(() -> climber2.stopClimb())
          ));
-
     }
 
     private void bindReefController(){
