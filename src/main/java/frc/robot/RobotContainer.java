@@ -58,9 +58,11 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.AutoAlign;
 import frc.robot.commands.AutoAlignWithLimelight;
 import frc.robot.commands.CoralIntakeWithDetection;
+import frc.robot.commands.DetectReefWithCANrange;
 import frc.robot.commands.DriveForward;
 import frc.robot.commands.FlashLEDsForAutoAlign;
 import frc.robot.commands.StandardDeviation;
+import frc.robot.commands.WheelMovementsTest;
 import frc.robot.generated.TunerConstants;
 // import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Climber2;
@@ -69,6 +71,11 @@ import frc.robot.subsystems.CANdleSystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Coral;
 import frc.robot.subsystems.GamePieceDetector;
+
+import com.ctre.phoenix6.configs.CANrangeConfiguration;
+import com.ctre.phoenix6.configs.FovParamsConfigs;
+import com.ctre.phoenix6.configs.ProximityParamsConfigs;
+import com.ctre.phoenix6.hardware.CANrange;
 import frc.robot.subsystems.CANdleSystem.AnimationTypes;
 import frc.robot.subsystems.CANdleSystem.AvailableColors;
 import frc.robot.subsystems.ReefController.ReefPosition;
@@ -121,15 +128,18 @@ public class RobotContainer {
     private final AutoAlignWithLimelight autoALignWithLimelights = new AutoAlignWithLimelight(drivetrain,limeLightFront,photonVision);
     private final StandardDeviation standardDeviation = new StandardDeviation(poseUpdater, drivetrain, new Pose2d(7.82,4.026,Rotation2d.k180deg),limeLightFront, limeLightFrontRight);
     private final FlashLEDsForAutoAlign flashLEDsForAutoAlign = new FlashLEDsForAutoAlign();
+    
     private SendableChooser<Command> autonChooser;
     // public final Climber climber = new Climber();
     public final Climber2 climber2 = new Climber2();
     public final GamePieceDetector coralSensor = new GamePieceDetector(35000, GamePieceDetector.Sensors.coral);
-    public final GamePieceDetector algaeSensor = new GamePieceDetector(25000, GamePieceDetector.Sensors.algae, 0.1);
+    // public final GamePieceDetector algaeSensor = new GamePieceDetector(25000, GamePieceDetector.Sensors.algae, 0.1);
+    public final GamePieceDetector reefDetector = new GamePieceDetector(1500, GamePieceDetector.Sensors.reef);
     
     public final Coral coral = new Coral();
     public final Algae algae = new Algae();
     public final Elevator elevator = new Elevator();
+    private final DetectReefWithCANrange detectReefWithCANrange = new DetectReefWithCANrange(elevator, reefDetector);
     public CANdleSystem candleSystem = CANdleSystem.getInstance();
 
     private SequentialCommandGroup autoCoralHigh = new SequentialCommandGroup(
@@ -137,9 +147,37 @@ public class RobotContainer {
         ,Commands.waitSeconds(2.5)
         ,Commands.print("Auto Coral High")
         .andThen(new InstantCommand(() -> coral.backward(0.9)))
-        , Commands.waitSeconds(.5)
+        , Commands.waitSeconds(0.5)
          .andThen(new InstantCommand(() -> coral.stopMotor())))
          .andThen(new InstantCommand(() -> elevator.stopElevator()));
+
+    private SequentialCommandGroup detectReefL4 = 
+        new InstantCommand(() -> elevator.raiseLevel4())
+        .andThen(new PrintCommand("This is running detectReefL4"))
+        .andThen(new DetectReefWithCANrange(elevator, reefDetector))
+        .andThen(Commands.waitSeconds(0.5))
+        .andThen(new InstantCommand(() -> coral.backward(1)))
+        .andThen(Commands.waitSeconds(0.5)
+        .andThen(new InstantCommand(() -> coral.stopMotor())));
+
+    private SequentialCommandGroup detectReefL3 = new SequentialCommandGroup(
+        new InstantCommand(() -> elevator.raiseLevel3())
+        .andThen(new DetectReefWithCANrange(elevator, reefDetector))
+        .andThen(Commands.waitSeconds(0.5))
+        .andThen(new InstantCommand(() -> coral.backward(1)))
+        .andThen(Commands.waitSeconds(0.5)
+        .andThen(new InstantCommand(() -> coral.stopMotor()))));
+        
+    private SequentialCommandGroup detectReefL2 = new SequentialCommandGroup(
+        new InstantCommand(() -> elevator.raiseLevel2())
+        .andThen(new DetectReefWithCANrange(elevator, reefDetector))
+        .andThen(Commands.waitSeconds(0.5))
+        .andThen(new InstantCommand(() -> coral.backward(1)))
+        .andThen(Commands.waitSeconds(0.5)
+        .andThen(new InstantCommand(() -> coral.stopMotor()))));
+               
+           
+    
     // private Command autoCoralHigh = Commands.sequence(
     //     new InstantCommand(() -> elevator.raiseLevel4())
     //     ,Commands.print("done raising.")
@@ -165,17 +203,14 @@ public class RobotContainer {
         // LimelightHelpers.setPipelineIndex(limeLightFront.limelightName, 1);
         LimelightHelpers.setPipelineIndex(limeLightFrontRight.limelightName, 1);
 
+        
+
     }
 
     
 
         //Command autoCoralHigh = Commands.sequence(new InstantCommand(() -> elevator.raiseLevel4()), new InstantCommand(() -> coral.forward(1)));
 
-
-
-
-
-    
 
     private void registerNamedCommands(){
         NamedCommands.registerCommand("printSomething", new InstantCommand(() -> System.out.println(">>>>>>>>>>>>>Printing Something")));
@@ -192,9 +227,11 @@ public class RobotContainer {
         .andThen(new InstantCommand(() -> climber2.stopClimb())
         ));
         NamedCommands.registerCommand("autoAlignWithLimelight", autoALignWithLimelights);
-        NamedCommands.registerCommand("driveForwardFor1Second" , new  DriveForward(drivetrain, 2, robotCentricDrive));
-        NamedCommands.registerCommand("faceWheels-120Degrees" , new InstantCommand(() -> drivetrain.applyRequest(() ->
+        NamedCommands.registerCommand("driveForwardFor1Second", new  DriveForward(drivetrain, 2, robotCentricDrive));
+        NamedCommands.registerCommand("faceWheels-120Degrees", new InstantCommand(() -> drivetrain.applyRequest(() ->
         point.withModuleDirection(new Rotation2d(-120)))));
+        NamedCommands.registerCommand("reefDetection", detectReefL4);
+        
 
     }
 
@@ -237,12 +274,18 @@ public class RobotContainer {
             .onTrue(new InstantCommand(() -> elevator.raiseStartLevel())
             .andThen(Commands.waitSeconds(1.5))
             .andThen(new InstantCommand(() -> elevator.stopElevator())));
+        // joystick2.a()
+        //     .onTrue(new InstantCommand(() -> elevator.raiseLevel2()));
+        // joystick2.b()
+        //     .onTrue(new InstantCommand(() -> elevator.raiseLevel3()));
+        // joystick2.y()
+        //     .onTrue(new InstantCommand(() -> elevator.raiseLevel4()));
         joystick2.a()
-            .onTrue(new InstantCommand(() -> elevator.raiseLevel2()));
+            .onTrue(detectReefL2);
         joystick2.b()
-            .onTrue(new InstantCommand(() -> elevator.raiseLevel3()));
+            .onTrue(detectReefL3);
         joystick2.y()
-            .onTrue(new InstantCommand(() -> elevator.raiseLevel4()));
+            .onTrue(detectReefL4);
            
         joystick2.povRight().onTrue(new InstantCommand(() -> elevator.incrementHeightAdjustment()));
         joystick2.povLeft().onTrue(new InstantCommand(() -> elevator.decrementHeightAdjustment()));
@@ -287,7 +330,7 @@ public class RobotContainer {
         joystick2.povDownRight()
             .whileTrue(new InstantCommand(() -> algae.algaeProcessor()))
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
-    
+        
         
         
 
@@ -351,6 +394,8 @@ public class RobotContainer {
             .andThen(getRumbleCommand())
             .andThen(Commands.waitSeconds(0.1))
             .andThen(getRumbleCommand()));
+    joystick.povLeft().onTrue(new InstantCommand(() -> candleSystem.decrementAnimation()));
+    joystick.povRight().onTrue(new InstantCommand(() -> candleSystem.incrementAnimation()));
 
     joystick.a().whileTrue(drivetrain.applyRequest(() -> {
             double xSpeed = slewRateLimiterX.calculate(-joystick.getLeftY()* maxSpeed);             
@@ -407,7 +452,7 @@ public class RobotContainer {
         joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
     
         joystick.y().whileTrue(new AutoAlignWithLimelight(drivetrain, limeLightFront, photonVision));
-        
+        callibrationJoystick.a().onTrue(new WheelMovementsTest(drivetrain, 0.3, robotCentricDrive, null));
         // climber commands
         
         drivetrain.registerTelemetry(logger::telemeterize);

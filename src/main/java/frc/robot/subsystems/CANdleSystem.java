@@ -22,7 +22,7 @@ import com.ctre.phoenix.led.TwinkleOffAnimation.TwinkleOffPercent;
 
 public class CANdleSystem extends SubsystemBase {
     private final CANdle m_candle = new CANdle(TunerConstants.kCANdleID, "rio");
-    private final int LedCount = 512;
+    private final int LedCount = 450;
     private XboxController joystick;
     private GamePieceDetector coralSensor;
     private GamePieceDetector algaeSensor;
@@ -77,7 +77,7 @@ public class CANdleSystem extends SubsystemBase {
         configAll.vBatOutputMode = VBatOutputMode.Modulated;
         m_candle.configAllSettings(configAll, 100);
         isAligned = false;
-        showMagenta(0, 300);
+        showMagenta(0, LedCount);
 
     }
     
