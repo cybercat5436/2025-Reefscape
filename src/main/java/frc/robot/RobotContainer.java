@@ -8,40 +8,20 @@ import static edu.wpi.first.units.Units.*;
 
 import java.io.IOException;
 import org.json.simple.parser.ParseException;
-import java.lang.annotation.Repeatable;
-import java.time.Instant;
-import java.time.temporal.TemporalAccessor;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.jar.Attributes.Name;
-
-import javax.sound.sampled.SourceDataLine;
-
-import org.photonvision.PhotonCamera;
-
-import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
-import com.fasterxml.jackson.databind.util.Named;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
-import com.revrobotics.spark.SparkBase;
-
-import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
-import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -50,7 +30,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -62,7 +41,6 @@ import frc.robot.commands.DetectReefWithCANrange;
 import frc.robot.commands.DriveForward;
 import frc.robot.commands.FlashLEDsForAutoAlign;
 import frc.robot.commands.StandardDeviation;
-import frc.robot.commands.WheelMovementsTest;
 import frc.robot.generated.TunerConstants;
 // import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Climber2;
@@ -72,17 +50,10 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Coral;
 import frc.robot.subsystems.GamePieceDetector;
 
-import com.ctre.phoenix6.configs.CANrangeConfiguration;
-import com.ctre.phoenix6.configs.FovParamsConfigs;
-import com.ctre.phoenix6.configs.ProximityParamsConfigs;
-import com.ctre.phoenix6.hardware.CANrange;
-import frc.robot.subsystems.CANdleSystem.AnimationTypes;
 import frc.robot.subsystems.CANdleSystem.AvailableColors;
 import frc.robot.subsystems.ReefController.ReefPosition;
-import pabeles.concurrency.ConcurrencyOps.NewInstance;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.LimeLight;
-import frc.robot.subsystems.PhotonVision;
 import frc.robot.subsystems.PoseUpdater;
 import frc.robot.subsystems.ReefController;
 
@@ -112,7 +83,7 @@ public class RobotContainer {
             .withHeadingPID(3, 0, 0);
    
     private final Telemetry logger = new Telemetry(maxSpeed);
-    private final PhotonVision photonVision = new PhotonVision();
+    // private final PhotonVision photonVision = new PhotonVision();
     private final CommandXboxController joystick = new CommandXboxController(0);
     private final CommandXboxController joystick2 = new CommandXboxController(1);
 
@@ -121,9 +92,9 @@ public class RobotContainer {
     private final LimeLight limeLightFront = new LimeLight("limelight-front", 0.02, -0.3, 0.65, -90.0, 0.0, 0.0);
     private final LimeLight limeLightFrontRight = new LimeLight("limelight-right", 0.15, 0.13, 0.45, 0.0, 0.0, 0.0);
     private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, limeLightFrontRight, drivetrain);
-    private final AutoAlign autoAlign = new AutoAlign(drivetrain,limeLightFront,photonVision);
+    private final AutoAlign autoAlign = new AutoAlign(drivetrain,limeLightFront);
     private final DriveForward driveForward = new DriveForward(drivetrain, HalfSpeed, robotCentricDrive);
-    private final AutoAlignWithLimelight autoALignWithLimelights = new AutoAlignWithLimelight(drivetrain,limeLightFront,photonVision);
+    private final AutoAlignWithLimelight autoALignWithLimelights = new AutoAlignWithLimelight(drivetrain,limeLightFront);
     private final StandardDeviation standardDeviation = new StandardDeviation(poseUpdater, drivetrain, new Pose2d(7.82,4.026,Rotation2d.k180deg),limeLightFront, limeLightFrontRight);
     private final FlashLEDsForAutoAlign flashLEDsForAutoAlign = new FlashLEDsForAutoAlign();
     
@@ -285,7 +256,7 @@ public class RobotContainer {
         // *************************************************
         // AutoAlign to reef pole
         // *************************************************
-        joystick.y().whileTrue(new AutoAlignWithLimelight(drivetrain, limeLightFront, photonVision));
+        joystick.y().whileTrue(new AutoAlignWithLimelight(drivetrain, limeLightFront));
         
         
         // *************************************************
@@ -532,8 +503,14 @@ public class RobotContainer {
         // *************************************************
         // Camera calibration for apriltag pipeline
         // *************************************************
-        calibrationJoystick.a().whileTrue(standardDeviation);
+        // calibrationJoystick.a().whileTrue(standardDeviation);
 
+
+        calibrationJoystick.a().whileTrue(
+            new InstantCommand(() -> elevator.raiseLevel4())
+            .andThen(Commands.waitUntil(() -> elevator.atTargetHeight()))
+            .handleInterrupt(() -> System.out.println("~~~~~~~~~~   Interrupted!  ~~~~~~~~~~~~~~~"))
+        );
 
         // calibrationJoystick.a().onTrue(new WheelMovementsTest(drivetrain, 0.3, robotCentricDrive, null));
 

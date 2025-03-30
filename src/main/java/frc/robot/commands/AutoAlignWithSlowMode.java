@@ -6,22 +6,14 @@ package frc.robot.commands;
 
 import java.util.function.DoubleSupplier;
 
-import org.opencv.photo.Photo;
-
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
-import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
-import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.ApplyChassisSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.LimelightHelpers;
-import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CANdleSystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LimeLight;
-import frc.robot.subsystems.PhotonVision;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
@@ -34,7 +26,6 @@ public class AutoAlignWithSlowMode extends Command {
   private final SwerveRequest.RobotCentric robotCentricDrive = new SwerveRequest.RobotCentric()
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
   private LimeLight limelight;
-  private PhotonVision photonVision;
   // private MovingAverage movingAverage;
   private double tX;
   private double targettA = 1.4;
@@ -71,14 +62,12 @@ public class AutoAlignWithSlowMode extends Command {
   private double slowModeSpeed = 0.78;
   private double slowModeRoationSpeed = 1.18;
   /** Creates a new AutoAlignWithLimelight. */
-  public AutoAlignWithSlowMode(CommandSwerveDrivetrain commandSwerveDrivetrain, LimeLight limeLight, PhotonVision photonVision, 
+  public AutoAlignWithSlowMode(CommandSwerveDrivetrain commandSwerveDrivetrain, LimeLight limeLight, 
   DoubleSupplier joystickRobotX, DoubleSupplier joystickRobotY, DoubleSupplier joystickRobotRotation) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.addRequirements(commandSwerveDrivetrain);
     this.commandSwerveDrivetrain = commandSwerveDrivetrain;
-    this.limelight = limeLight;
-    this.photonVision = photonVision;
-    this.joystickRobotX = joystickRobotX;
+    this.limelight = limeLight;    this.joystickRobotX = joystickRobotX;
     this.joystickRobotY = joystickRobotY;
     this.joystickRobotRotation = joystickRobotRotation;
     

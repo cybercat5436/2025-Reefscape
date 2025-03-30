@@ -39,7 +39,7 @@ public class AutoAlign extends Command {
   /** Creates a new AutoAlign. */
   private CommandSwerveDrivetrain commandSwerveDrivetrain;
   private LimeLight limelight;
-  private PhotonVision photonVision;
+  // private PhotonVision photonVision;
   private double ySpeed = 0.0;
   private double xSpeed = 0.0;
   private double turningSpeed = 0.0;
@@ -76,12 +76,11 @@ public class AutoAlign extends Command {
   private double rotationSpeed;
 
 
-  public AutoAlign(CommandSwerveDrivetrain commandSwerveDrivetrain, LimeLight limeLight, PhotonVision photonVision) {
+  public AutoAlign(CommandSwerveDrivetrain commandSwerveDrivetrain, LimeLight limeLight) {
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(commandSwerveDrivetrain);
     this.commandSwerveDrivetrain = commandSwerveDrivetrain;
     this.limelight = limeLight;
-    this.photonVision = photonVision;
     
     SendableRegistry.addLW(this, this.getClass().getSimpleName(), this.getClass().getSimpleName());
   
@@ -122,8 +121,6 @@ public class AutoAlign extends Command {
     // rotationRate = kP * Math.min(MaxAngularRate, Math.abs(robotY)) * Math.signum(robotY);
     // robotXError = limelight.getVisionArea();
     currentRotation =commandSwerveDrivetrain.getState().Pose.getRotation().getDegrees();
-    currentArea = photonVision.observedArea;
-    currentYaw = photonVision.observedYaw;
     robotYError = targetYaw - currentYaw;
     robotYErrorChange = robotYError - previousYError;
     robotXError = currentArea == 0 ? 0.0 : targetArea - currentArea;

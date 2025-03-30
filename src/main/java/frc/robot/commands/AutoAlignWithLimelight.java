@@ -4,24 +4,14 @@
 
 package frc.robot.commands;
 
-import org.opencv.photo.Photo;
-
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
-import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
-import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.ApplyChassisSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.LimelightHelpers;
 import frc.robot.subsystems.CANdleSystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LimeLight;
-import frc.robot.subsystems.PhotonVision;
-import frc.robot.subsystems.PoseUpdater;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -32,7 +22,6 @@ public class AutoAlignWithLimelight extends Command {
   private final SwerveRequest.RobotCentric robotCentricDrive = new SwerveRequest.RobotCentric()
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
   private LimeLight limelight;
-  private PhotonVision photonVision;
   // private MovingAverage movingAverage;
   private double tX;
   private double targettA = 1.4;
@@ -70,12 +59,11 @@ public class AutoAlignWithLimelight extends Command {
   private double cropValueMin = -0.53;
   private double cropValueMax = 0.28;
   /** Creates a new AutoAlignWithLimelight. */
-  public AutoAlignWithLimelight(CommandSwerveDrivetrain commandSwerveDrivetrain, LimeLight limeLight, PhotonVision photonVision) {
+  public AutoAlignWithLimelight(CommandSwerveDrivetrain commandSwerveDrivetrain, LimeLight limeLight) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.addRequirements(commandSwerveDrivetrain);
     this.commandSwerveDrivetrain = commandSwerveDrivetrain;
     this.limelight = limeLight;
-    this.photonVision = photonVision;
     // this.movingAverage = new MovingAverage(20);
   }
 
