@@ -115,9 +115,7 @@ public class RobotContainer {
     private final PhotonVision photonVision = new PhotonVision();
     private final CommandXboxController joystick = new CommandXboxController(0);
     private final CommandXboxController joystick2 = new CommandXboxController(1);
-    private final Joystick reefPositionJoystick = new Joystick(2);
-    private final Joystick reefLevelJoystick = new Joystick(3);
-    private final CommandXboxController callibrationJoystick = new CommandXboxController(4);
+
     private final ReefController reefController = ReefController.getInstance();
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private final LimeLight limeLightFront = new LimeLight("limelight-front", 0.02, -0.3, 0.65, -90.0, 0.0, 0.0);
@@ -177,7 +175,6 @@ public class RobotContainer {
         .andThen(new InstantCommand(() -> coral.stopMotor()))));
                
            
-    
     // private Command autoCoralHigh = Commands.sequence(
     //     new InstantCommand(() -> elevator.raiseLevel4())
     //     ,Commands.print("done raising.")
@@ -200,14 +197,12 @@ public class RobotContainer {
         //testReefController();
         autonChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auton Chooser", autonChooser);
+
+        drivetrain.registerTelemetry(logger::telemeterize);
         // LimelightHelpers.setPipelineIndex(limeLightFront.limelightName, 1);
         LimelightHelpers.setPipelineIndex(limeLightFrontRight.limelightName, 1);
 
-        
-
     }
-
-    
 
         //Command autoCoralHigh = Commands.sequence(new InstantCommand(() -> elevator.raiseLevel4()), new InstantCommand(() -> coral.forward(1)));
 
@@ -235,41 +230,165 @@ public class RobotContainer {
 
     }
 
+    private void bindPrimaryController(){
 
-    private void configureBindings() {
-        // Note that X is defined as forward according to WPILib convention,
-        // and Y is defined as to the left according to WPILib convention.
+        // *************************************************
+        // Standard drive mode
+        // *************************************************
+        SlewRateLimiter slewRateLimiterX = new SlewRateLimiter(maxSpeed * 2);  //Note: setting slewratelimiter to 2x speed means it takes 0.5s to accelerate to full speed
+        SlewRateLimiter slewRateLimiterY = new SlewRateLimiter(maxSpeed * 2);
+        SlewRateLimiter slewRateLimiterTurnX = new SlewRateLimiter(maxAngularRate * 2);  //corrected from using MaxSpeed
         
-        Trigger algaeIntakeTrigger = new Trigger ((joystick2.rightTrigger()));
-        Trigger coralIntakeTrigger = new Trigger ((joystick2.leftTrigger()));
+        SlewRateLimiter slowModeSlewRateLimiterX = new SlewRateLimiter(maxSpeed * 5);  //Note: setting slewratelimiter to 2x speed means it takes 0.5s to accelerate to full speed
+        SlewRateLimiter slowModeSlewRateLimiterY = new SlewRateLimiter(maxSpeed * 5);
+        SlewRateLimiter slowModeSlewRateLimiterTurnX = new SlewRateLimiter(maxAngularRate * 3);  //corrected from using MaxSpeed
+        
+        drivetrain.setDefaultCommand(
+            // Drivetrain will execute this command periodically
+            drivetrain.applyRequest(() ->{
+                // Note that X is defined as forward according to WPILib convention,
+                // and Y is defined as to the left according to WPILib convention.
+                double xSpeed = slewRateLimiterX.calculate(-joystick.getLeftY()* maxSpeed);
+                double ySpeed = slewRateLimiterY.calculate(-joystick.getLeftX()* maxSpeed);
+                double yTurnSpeed = slewRateLimiterTurnX.calculate(joystick.getRightX()* maxAngularRate);
+
+                // SmartDashboard.putNumber("xSpeed",xSpeed);
+                // SmartDashboard.putNumber("ySpeed",ySpeed);
+                // SmartDashboard.putNumber("yTurnSpeed",yTurnSpeed);
+
+                return drive.withVelocityX(xSpeed * Math.abs(xSpeed)) // Drive forward with negative Y (forward)
+                    .withVelocityY(ySpeed * Math.abs(ySpeed)) // Drive left with negative X (left)
+                    .withRotationalRate(-(yTurnSpeed * Math.abs(yTurnSpeed))); // Drive counterclockwise with negative X (left)
+            })
+        );
 
 
-        coralIntakeTrigger
-            .whileTrue(new InstantCommand(() -> coral.backward(0.9)))
-            .onFalse(new InstantCommand(() -> coral.stopMotor()));
-        
-        algaeIntakeTrigger
-            .whileTrue(new InstantCommand(() -> algae.intakeBall(1)))
-            .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
+        // *************************************************
+        // SloMo driving
+        // *************************************************
+        joystick.leftTrigger().whileTrue(drivetrain.applyRequest(() ->{
+            
+            double xSpeed = slowModeSlewRateLimiterX.calculate(-joystick.getLeftY()* HalfSpeed);
+            double ySpeed = slowModeSlewRateLimiterY.calculate(-joystick.getLeftX()* HalfSpeed);
+            double yTurnSpeed = slowModeSlewRateLimiterTurnX.calculate(joystick.getRightX()* HalfAngularRate);
+            
+            // SmartDashboard.putNumber("RBySpeed",ySpeed);
+            // SmartDashboard.putNumber("RBxSpeed",xSpeed);
+            // SmartDashboard.putNumber("RByTurnSpeed",yTurnSpeed);
 
-        joystick2.leftBumper()
-           .whileTrue(new InstantCommand(() -> coral.forward(0.8)))
-           .onFalse(new InstantCommand(() -> coral.stopMotor())); 
-        joystick2.rightBumper()
-           .whileTrue(new InstantCommand(() -> algae.intakeBall(-0.7)))
-           .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
+            return drive.withVelocityX(xSpeed * Math.abs(xSpeed)) // Drive forward with negative Y (forward)
+                .withVelocityY(ySpeed * Math.abs(ySpeed)) // Drive left with negative X (left)
+                .withRotationalRate(-(yTurnSpeed * Math.abs(yTurnSpeed) ));
+        }));
+
+
+        // *************************************************
+        // AutoAlign to reef pole
+        // *************************************************
+        joystick.y().whileTrue(new AutoAlignWithLimelight(drivetrain, limeLightFront, photonVision));
         
         
-        //Trigger autoAlignTrigger = new Trigger(() -> autoAlign.);
+        // *************************************************
+        // reset the field-centric heading on left bumper press
+        // *************************************************
+        joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+
+
+        // *************************************************
+        // Robot-Centric driving
+        // *************************************************
+        joystick.b().whileTrue(drivetrain.applyRequest(() -> {
+            double xSpeed = slewRateLimiterX.calculate(-joystick.getLeftY()* maxSpeed);             
+            double ySpeed = slewRateLimiterY.calculate(-joystick.getLeftX()* maxSpeed);          
+            double yTurnSpeed = slewRateLimiterTurnX.calculate(joystick.getRightX()* maxAngularRate);
+
+            return robotCentricDrive.withVelocityX(xSpeed * Math.abs(xSpeed)) 
+            .withVelocityY(ySpeed * Math.abs(ySpeed))
+            .withRotationalRate(-(yTurnSpeed * Math.abs(yTurnSpeed)));
+        }));    
+
+
+        // *************************************************
+        // Heading-locked drive mode (for ReefController)
+        // *************************************************
+        joystick.a().whileTrue(drivetrain.applyRequest(() -> {
+            double xSpeed = slewRateLimiterX.calculate(-joystick.getLeftY()* maxSpeed);             
+            double ySpeed = slewRateLimiterY.calculate(-joystick.getLeftX()* maxSpeed);          
+
+        return fieldCentricFacingAngle.withVelocityX(xSpeed * Math.abs(xSpeed)) 
+            .withVelocityY(ySpeed * Math.abs(ySpeed)) 
+            .withTargetDirection(reefController.getTargetRobotPose().getRotation());
+        }));
         
-        // joystick2.a()
-        //     .whileTrue(new InstantCommand(() -> elevator.raise()))
-        //     .onFalse(new InstantCommand(() -> elevator.stopElevator()));
-        // joystick2.x()
-        //     .whileTrue(new InstantCommand(() -> elevator.lower()))
-        //     .onFalse(new InstantCommand(() -> elevator.stopElevator()));
+
+        // *************************************************
+        // Brake mode
+        // *************************************************
+        //joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
+
+
+        // *************************************************
+        // Point wheels but don't translate
+        // *************************************************
+        joystick.x().whileTrue(drivetrain.applyRequest(() ->
+        point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
+        ));
         
-        
+
+        // *************************************************
+        // Reef Controller
+        // *************************************************
+        joystick.povUp().onTrue(new InstantCommand(() -> reefController.setTargetReefPosition(ReefPosition.G))
+                .andThen(getRumbleCommand()));
+        joystick.povDown().onTrue(new InstantCommand(()-> reefController.setTargetReefPosition(ReefPosition.A))
+                .andThen(getRumbleCommand()));
+        joystick.povDownLeft().onTrue(new InstantCommand(()-> reefController.setTargetReefPosition(ReefPosition.L))
+                .andThen(getRumbleCommand())
+                .andThen(Commands.waitSeconds(0.1))
+                .andThen(getRumbleCommand()));
+        joystick.povDownRight().onTrue(new InstantCommand(()-> reefController.setTargetReefPosition(ReefPosition.C))
+                .andThen(getRumbleCommand())
+                .andThen(Commands.waitSeconds(0.1))
+                .andThen(getRumbleCommand()));
+        joystick.povUpLeft().onTrue(new InstantCommand(()-> reefController.setTargetReefPosition(ReefPosition.I))
+                .andThen(getRumbleCommand())
+                .andThen(Commands.waitSeconds(0.1))
+                .andThen(getRumbleCommand()));
+        joystick.povUpRight().onTrue(new InstantCommand(()-> reefController.setTargetReefPosition(ReefPosition.E))
+                .andThen(getRumbleCommand())
+                .andThen(Commands.waitSeconds(0.1))
+                .andThen(getRumbleCommand()));
+
+
+        // *************************************************
+        // LEDs
+        // *************************************************
+        joystick.povLeft().onTrue(new InstantCommand(() -> candleSystem.decrementAnimation()));
+        joystick.povRight().onTrue(new InstantCommand(() -> candleSystem.incrementAnimation()));
+
+        /*joystick.povRight()
+            .onTrue(new InstantCommand(() -> candleSystem.flashColor(AvailableColors.Red))
+            .andThen(new WaitCommand(0.5))
+            .andThen(new InstantCommand(()->candleSystem.turnOffColors()))
+            .andThen(new WaitCommand(0.25))
+            .andThen(new InstantCommand(() -> candleSystem.flashColor(AvailableColors.Yellow)))
+            .andThen(new WaitCommand(0.5))
+            .andThen(new InstantCommand(()->candleSystem.turnOffColors()))
+            .andThen(new WaitCommand(0.25))
+            .andThen(new InstantCommand(() -> candleSystem.flashColor(AvailableColors.Green)))
+            .andThen(new WaitCommand(0.5))
+            .andThen(new InstantCommand(()->candleSystem.turnOffColors()))
+            );*/
+
+        //joystick.povRight().onTrue(new ParallelRaceGroup(getBlinkLightCommand(), new WaitCommand(2.25)));
+        //joystick.povRight().onTrue(new ColorBlinkCommand(AvailableColors.Red, candleSystem));
+
+    }
+
+    private void bindSecondaryControls(){
+        // *************************************************
+        // Elevator Controls
+        // *************************************************
         joystick2.x()
             .onTrue(new InstantCommand(() -> elevator.raiseStartLevel())
             .andThen(Commands.waitSeconds(1.5))
@@ -286,32 +405,72 @@ public class RobotContainer {
             .onTrue(detectReefL3);
         joystick2.y()
             .onTrue(detectReefL4);
-           
+        
         joystick2.povRight().onTrue(new InstantCommand(() -> elevator.incrementHeightAdjustment()));
         joystick2.povLeft().onTrue(new InstantCommand(() -> elevator.decrementHeightAdjustment()));
 
-        // joystick2.povUp().and(joystick2.rightBumper())
-        //     .whileTrue(new InstantCommand(() -> algae.releaseBall(-0.3))) 
-        //     .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
-        // joystick2.povRight().and(joystick2.rightBumper())
-        //     .whileTrue(new InstantCommand(() -> algae.releaseBall(-0.3))) 
-        //     .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
-        //joystick2.povLeft()
-         // .whileTrue(new InstantCommand(() -> algae.releaseBall(-0.3))) 
-         //  .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
+        // *************************************************
+        // Climber Controls
+        // *************************************************
+        // right/left for these triggers is ROBOT-CENTRIC
+        Trigger rightClimbUpTrigger = new Trigger (() -> (joystick2.getRightY() < -0.2));
+        Trigger rightClimbDownTrigger = new Trigger(() -> (joystick2.getRightY() > 0.2));
+        Trigger leftClimbUpTrigger = new Trigger(() -> (joystick2.getLeftY() < -0.2));
+        Trigger leftClimbDownTrigger = new Trigger(() -> (joystick2.getLeftY() > 0.2));
+        Trigger rightClimberStopTrigger = new Trigger(() -> joystick2.getRightY() >= -0.2 && joystick2.getRightY() <= 0.2);
+        Trigger leftClimberStopTrigger = new Trigger(() -> joystick2.getLeftY() >= -0.2 && joystick2.getLeftY() <= 0.2);
 
-        // joystick2.povUp()
-        //     .whileTrue(new InstantCommand(() -> algae.algaeHigh()).repeatedly())
-        //     .onFalse(new InstantCommand(() -> algae.algaeStop()));
-        // joystick2.povLeft()
-        // .onTrue(autoCoralHigh);
+        // Motors controlled from these triggers are OPERATOR-CENTRIC
+        // Because the robot is facing 180 during climb, the right/left sticks correspond to opposite side motors
+        leftClimbUpTrigger
+            .whileTrue(new InstantCommand(() -> climber2.rightClimb(0.2)).repeatedly());
+        rightClimbUpTrigger
+            .whileTrue(new InstantCommand(() -> climber2.leftClimb(0.2)).repeatedly());
+        leftClimbDownTrigger
+            .whileTrue(new InstantCommand(() -> climber2.rightClimb(-0.2)).repeatedly());
+        rightClimbDownTrigger
+            .whileTrue(new InstantCommand(() -> climber2.leftClimb(-0.2)).repeatedly());
+        rightClimberStopTrigger
+            .whileTrue(new InstantCommand(() -> climber2.leftClimb(0)));
+        leftClimberStopTrigger
+            .whileTrue(new InstantCommand(() -> climber2.rightClimb(0)));
 
-        // joystick2.povUp()
-        //     .whileTrue(new InstantCommand(() -> algae.algaeHigh(-0.3)).repeatedly())
-        //     .onFalse(new InstantCommand(() -> algae.algaeStop()));
-        // joystick2.povDown()
-        //     .whileTrue(new InstantCommand(() -> algae.algaeHigh(0.3)))
-        //     .onFalse(new InstantCommand(() -> algae.algaeStop()));
+        // Climber Encoder overrides
+        joystick2.back().and(leftClimbUpTrigger).whileTrue(new InstantCommand(() -> climber2.rightClimbOveride(0.2)).repeatedly());
+        joystick2.back().and(rightClimbUpTrigger).whileTrue(new InstantCommand(() -> climber2.leftClimbOveride(0.2)).repeatedly());
+        joystick2.back().and(leftClimbDownTrigger).whileTrue(new InstantCommand(() -> climber2.rightClimbOveride(-0.2)).repeatedly());
+        joystick2.back().and(rightClimbDownTrigger).whileTrue(new InstantCommand(() -> climber2.leftClimbOveride(-0.2)).repeatedly());
+        joystick2.back().and(leftClimberStopTrigger).whileTrue(new InstantCommand(() -> climber2.rightClimbOveride(0)));
+        joystick2.back().and(rightClimberStopTrigger).whileTrue(new InstantCommand(() -> climber2.leftClimbOveride(0)));
+        
+
+        // *************************************************
+        // Coral Controls
+        // *************************************************
+        // Trigger coralIntakeTrigger = new Trigger ((joystick2.leftTrigger()));
+
+        joystick2.leftTrigger()
+            .whileTrue(new InstantCommand(() -> coral.backward(0.9)))
+            .onFalse(new InstantCommand(() -> coral.stopMotor()));
+
+        joystick2.leftBumper()
+                .whileTrue(new InstantCommand(() -> coral.forward(0.8)))
+                .onFalse(new InstantCommand(() -> coral.stopMotor())); 
+
+
+        // *************************************************
+        // Algae Controls
+        // *************************************************
+        // Trigger algaeIntakeTrigger = new Trigger ((joystick2.rightTrigger()));
+
+        joystick2.rightTrigger()
+            .whileTrue(new InstantCommand(() -> algae.intakeBall(1)))
+            .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
+
+        joystick2.rightBumper()
+            .whileTrue(new InstantCommand(() -> algae.intakeBall(-0.7)))
+            .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
+
         joystick2.povUp()
             .onTrue(new InstantCommand(() -> algae.algaeHigh()))
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
@@ -330,235 +489,114 @@ public class RobotContainer {
         joystick2.povDownRight()
             .whileTrue(new InstantCommand(() -> algae.algaeProcessor()))
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
+
+        // joystick2.povUp().and(joystick2.rightBumper())
+        //     .whileTrue(new InstantCommand(() -> algae.releaseBall(-0.3))) 
+        //     .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
+        // joystick2.povRight().and(joystick2.rightBumper())
+        //     .whileTrue(new InstantCommand(() -> algae.releaseBall(-0.3))) 
+        //     .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
         
-        
-        
+        //joystick2.povLeft()
+         // .whileTrue(new InstantCommand(() -> algae.releaseBall(-0.3))) 
+         //  .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
 
-        SlewRateLimiter slewRateLimiterX = new SlewRateLimiter(maxSpeed * 2);  //Note: setting slewratelimiter to 2x speed means it takes 0.5s to accelerate to full speed
-        SlewRateLimiter slewRateLimiterY = new SlewRateLimiter(maxSpeed * 2);
-        SlewRateLimiter slewRateLimiterTurnX = new SlewRateLimiter(maxAngularRate * 2);  //corrected from using MaxSpeed
-        
-        SlewRateLimiter slowModeSlewRateLimiterX = new SlewRateLimiter(maxSpeed * 5);  //Note: setting slewratelimiter to 2x speed means it takes 0.5s to accelerate to full speed
-        SlewRateLimiter slowModeSlewRateLimiterY = new SlewRateLimiter(maxSpeed * 5);
-        SlewRateLimiter slowModeSlewRateLimiterTurnX = new SlewRateLimiter(maxAngularRate * 3);  //corrected from using MaxSpeed
-        drivetrain.setDefaultCommand(
-            // Drivetrain will execute this command periodically
-            drivetrain.applyRequest(() ->{
-                double xSpeed = slewRateLimiterX.calculate(-joystick.getLeftY()* maxSpeed);
-                
-                double ySpeed = slewRateLimiterY.calculate(-joystick.getLeftX()* maxSpeed);
-                
-                double yTurnSpeed = slewRateLimiterTurnX.calculate(joystick.getRightX()* maxAngularRate);
+        // joystick2.povUp()
+        //     .whileTrue(new InstantCommand(() -> algae.algaeHigh()).repeatedly())
+        //     .onFalse(new InstantCommand(() -> algae.algaeStop()));
+        // joystick2.povLeft()
+        // .onTrue(autoCoralHigh);
 
-                SmartDashboard.putNumber("xSpeed",xSpeed);
-                SmartDashboard.putNumber("ySpeed",ySpeed);
-                SmartDashboard.putNumber("yTurnSpeed",yTurnSpeed);
+        // joystick2.povUp()
+        //     .whileTrue(new InstantCommand(() -> algae.algaeHigh(-0.3)).repeatedly())
+        //     .onFalse(new InstantCommand(() -> algae.algaeStop()));
+        // joystick2.povDown()
+        //     .whileTrue(new InstantCommand(() -> algae.algaeHigh(0.3)))
+        //     .onFalse(new InstantCommand(() -> algae.algaeStop()));
+    }
 
-                return drive.withVelocityX(xSpeed * Math.abs(xSpeed)) // Drive forward with negative Y (forward)
-                    .withVelocityY(ySpeed * Math.abs(ySpeed)) // Drive left with negative X (left)
-                    .withRotationalRate(-(yTurnSpeed * Math.abs(yTurnSpeed))); // Drive counterclockwise with negative X (left)
-            }
-            )
-        );
-    
+    private void bindCalibrationControls(){
+        // only create controller if needed
+        CommandXboxController calibrationJoystick = new CommandXboxController(4);
 
-    //     joystick.x().whileTrue(drivetrain.applyRequest(() -> {
-    //     robotX = limeLightFront.getVisionArea();
-    //     robotY = -limeLightFront.getVisionTargetHorizontalError();
-    //     xSpeed = robotX * kP * maxSpeed;
-    //     ySpeed = robotY * kP * maxSpeed;
-    //         SmartDashboard.putNumber("robot y velocity", joystick.getLeftX() * maxSpeed);
-    //     return robotCentricDrive.withVelocityX(0) // Drive forward with negative Y (forward)
-    //         .withVelocityY(ySpeed) // Drive left with negative X (left)
-    //         .withRotationalRate(-joystick.getRightX() * maxAngularRate); // Drive counterclockwise with negative X (left)
-        
-    // })
-    // );
-    joystick.povUp().onTrue(new InstantCommand(() -> reefController.setTargetReefPosition(ReefPosition.G))
-            .andThen(getRumbleCommand()));
-    joystick.povDown().onTrue(new InstantCommand(()-> reefController.setTargetReefPosition(ReefPosition.A))
-            .andThen(getRumbleCommand()));
-    joystick.povDownLeft().onTrue(new InstantCommand(()-> reefController.setTargetReefPosition(ReefPosition.L))
-            .andThen(getRumbleCommand())
-            .andThen(Commands.waitSeconds(0.1))
-            .andThen(getRumbleCommand()));
-    joystick.povDownRight().onTrue(new InstantCommand(()-> reefController.setTargetReefPosition(ReefPosition.C))
-            .andThen(getRumbleCommand())
-            .andThen(Commands.waitSeconds(0.1))
-            .andThen(getRumbleCommand()));
-    joystick.povUpLeft().onTrue(new InstantCommand(()-> reefController.setTargetReefPosition(ReefPosition.I))
-            .andThen(getRumbleCommand())
-            .andThen(Commands.waitSeconds(0.1))
-            .andThen(getRumbleCommand()));
-    joystick.povUpRight().onTrue(new InstantCommand(()-> reefController.setTargetReefPosition(ReefPosition.E))
-            .andThen(getRumbleCommand())
-            .andThen(Commands.waitSeconds(0.1))
-            .andThen(getRumbleCommand()));
-    joystick.povLeft().onTrue(new InstantCommand(() -> candleSystem.decrementAnimation()));
-    joystick.povRight().onTrue(new InstantCommand(() -> candleSystem.incrementAnimation()));
-
-    joystick.a().whileTrue(drivetrain.applyRequest(() -> {
-            double xSpeed = slewRateLimiterX.calculate(-joystick.getLeftY()* maxSpeed);             
-            double ySpeed = slewRateLimiterY.calculate(-joystick.getLeftX()* maxSpeed);          
-
-        return fieldCentricFacingAngle.withVelocityX(xSpeed * Math.abs(xSpeed)) 
-        .withVelocityY(ySpeed * Math.abs(ySpeed)) 
-        .withTargetDirection(reefController.getTargetRobotPose().getRotation());
-        }
-    ));
-    joystick.b().whileTrue(drivetrain.applyRequest(() -> {
-            double xSpeed = slewRateLimiterX.calculate(-joystick.getLeftY()* maxSpeed);             
-            double ySpeed = slewRateLimiterY.calculate(-joystick.getLeftX()* maxSpeed);          
-            double yTurnSpeed = slewRateLimiterTurnX.calculate(joystick.getRightX()* maxAngularRate);
-
-        return robotCentricDrive.withVelocityX(xSpeed * Math.abs(xSpeed)) 
-        .withVelocityY(ySpeed * Math.abs(ySpeed))
-        .withRotationalRate(-(yTurnSpeed * Math.abs(yTurnSpeed)));
-        }
-    ));    
-        Trigger slowModeTrigger = new Trigger ((joystick.leftTrigger()));
-
-        slowModeTrigger.whileTrue(drivetrain.applyRequest(() ->{
-            
-                double xSpeed = slowModeSlewRateLimiterX.calculate(-joystick.getLeftY()* HalfSpeed);
-                
-                
-                double ySpeed = slowModeSlewRateLimiterY.calculate(-joystick.getLeftX()* HalfSpeed);
-                
-                
-                double yTurnSpeed = slowModeSlewRateLimiterTurnX.calculate(joystick.getRightX()* HalfAngularRate);
-                SmartDashboard.putNumber("RBySpeed",ySpeed);
-                SmartDashboard.putNumber("RBxSpeed",xSpeed);
-                SmartDashboard.putNumber("RByTurnSpeed",yTurnSpeed);
-
-        return drive.withVelocityX(xSpeed * Math.abs(xSpeed)) // Drive forward with negative Y (forward)
-            .withVelocityY(ySpeed * Math.abs(ySpeed)) // Drive left with negative X (left)
-            .withRotationalRate(-(yTurnSpeed * Math.abs(yTurnSpeed) ));
-        } // Drive counterclockwise with negative X (left)
-    ));
-        //joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        joystick.x().whileTrue(drivetrain.applyRequest(() ->
-            point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
-        ));
-
+        // *************************************************
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
-        joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+        // *************************************************
+        calibrationJoystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+        calibrationJoystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+        calibrationJoystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+        calibrationJoystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
-        // reset the field-centric heading on left bumper press
-        joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
-    
-        joystick.y().whileTrue(new AutoAlignWithLimelight(drivetrain, limeLightFront, photonVision));
-        callibrationJoystick.a().onTrue(new WheelMovementsTest(drivetrain, 0.3, robotCentricDrive, null));
-        // climber commands
-        
-        drivetrain.registerTelemetry(logger::telemeterize);
-        SmartDashboard.putData("reset odymetry to 0,0",new InstantCommand(() -> drivetrain.resetPose(new Pose2d(0.0,0.0, new Rotation2d()))));
-        
-        Trigger rightClimbUpTrigger = new Trigger (() -> (joystick2.getRightY() < -0.2));
-        Trigger rightClimbDownTrigger = new Trigger(() -> (joystick2.getRightY() > 0.2));
-        Trigger leftClimbUpTrigger = new Trigger(() -> (joystick2.getLeftY() < -0.2));
-        Trigger leftClimbDownTrigger = new Trigger(() -> (joystick2.getLeftY() > 0.2));
-        Trigger rightClimberStopTrigger = new Trigger(() -> joystick2.getRightY() >= -0.2 && joystick2.getRightY() <= 0.2);
-        Trigger leftClimberStopTrigger = new Trigger(() -> joystick2.getLeftY() >= -0.2 && joystick2.getLeftY() <= 0.2);
 
-        leftClimbUpTrigger
-            .whileTrue(new InstantCommand(() -> climber2.rightClimb(0.2)).repeatedly());
-        rightClimbUpTrigger
-            .whileTrue(new InstantCommand(() -> climber2.leftClimb(0.2)).repeatedly());
-        leftClimbDownTrigger
-            .whileTrue(new InstantCommand(() -> climber2.rightClimb(-0.2)).repeatedly());
-        rightClimbDownTrigger
-            .whileTrue(new InstantCommand(() -> climber2.leftClimb(-0.2)).repeatedly());
-        rightClimberStopTrigger
-            .whileTrue(new InstantCommand(() -> climber2.leftClimb(0)));
-        leftClimberStopTrigger
-            .whileTrue(new InstantCommand(() -> climber2.rightClimb(0)));
-        joystick.povLeft().onTrue(new InstantCommand(() -> candleSystem.changeAnimation(AnimationTypes.Fire)));
-        joystick.povDown().onTrue(new InstantCommand(() -> candleSystem.turnOffColors()));
-        joystick.povUp().onTrue(new InstantCommand(() -> candleSystem.showTeamColors()));
+        // *************************************************
+        // Camera calibration for apriltag pipeline
+        // *************************************************
+        calibrationJoystick.a().whileTrue(standardDeviation);
 
-        joystick2.back().and(leftClimbUpTrigger).whileTrue(new InstantCommand(() -> climber2.rightClimbOveride(0.2)).repeatedly());
-        joystick2.back().and(rightClimbUpTrigger).whileTrue(new InstantCommand(() -> climber2.leftClimbOveride(0.2)).repeatedly());
-        joystick2.back().and(leftClimbDownTrigger).whileTrue(new InstantCommand(() -> climber2.rightClimbOveride(-0.2)).repeatedly());
-        joystick2.back().and(rightClimbDownTrigger).whileTrue(new InstantCommand(() -> climber2.leftClimbOveride(-0.2)).repeatedly());
-        joystick2.back().and(leftClimberStopTrigger).whileTrue(new InstantCommand(() -> climber2.rightClimbOveride(0)));
-        joystick2.back().and(rightClimberStopTrigger).whileTrue(new InstantCommand(() -> climber2.leftClimbOveride(0)));
-        
-        
+
+        // calibrationJoystick.a().onTrue(new WheelMovementsTest(drivetrain, 0.3, robotCentricDrive, null));
+
+        // *************************************************
+        // Testing climber arm position for anti-coral position
+        // *************************************************
         SmartDashboard.putData(" Climber arms to auton start position",
          new InstantCommand(() -> climber2.climberAutonStartPosition())
          .andThen(Commands.waitSeconds(0.5))
          .andThen(new InstantCommand(() -> climber2.stopClimb())
          ));
-        
-        /*joystick.povRight()
-            .onTrue(new InstantCommand(() -> candleSystem.flashColor(AvailableColors.Red))
-            .andThen(new WaitCommand(0.5))
-            .andThen(new InstantCommand(()->candleSystem.turnOffColors()))
-            .andThen(new WaitCommand(0.25))
-            .andThen(new InstantCommand(() -> candleSystem.flashColor(AvailableColors.Yellow)))
-            .andThen(new WaitCommand(0.5))
-            .andThen(new InstantCommand(()->candleSystem.turnOffColors()))
-            .andThen(new WaitCommand(0.25))
-            .andThen(new InstantCommand(() -> candleSystem.flashColor(AvailableColors.Green)))
-            .andThen(new WaitCommand(0.5))
-            .andThen(new InstantCommand(()->candleSystem.turnOffColors()))
-            );*/
 
-        Command blinkLight = Commands.repeatingSequence(
-            new InstantCommand(() -> candleSystem.flashColor(AvailableColors.Red)),
-            new WaitCommand(0.5),
-            new InstantCommand(()->candleSystem.turnOffColors()),
-            new WaitCommand(0.25)
-        );
+    }
 
+    private void bindReefController(){
+        Joystick reefPositionJoystick = new Joystick(2);
+        Joystick reefLevelJoystick = new Joystick(3);
 
-        // standard deviation calculation commands
-        // callibrationJoystick.a().whileTrue(standardDeviation);
-
-        //joystick.povRight().onTrue(new ParallelRaceGroup(blinkLight, new WaitCommand(2.25)));
-        //joystick.povRight().onTrue(new ColorBlinkCommand(AvailableColors.Red, candleSystem));
-    //     Trigger button1 = new Trigger(() -> reefPositionJoystick.getRawButton(1));
-    //     button1.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.A)));
-    //     Trigger button2 = new Trigger(() -> reefPositionJoystick.getRawButton(2));
-    //     button2.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.B)));
-    //     Trigger button3 = new Trigger(() -> reefPositionJoystick.getRawButton(3));
-    //     button3.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.C)));
-    //     Trigger button4 = new Trigger(() -> reefPositionJoystick.getRawButton(4));
-    //     button4.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.D)));
-    //     Trigger button5 = new Trigger(() -> reefPositionJoystick.getRawButton(5));
-    //     button5.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.E)));
-    //     Trigger button6 = new Trigger(() -> reefPositionJoystick.getRawButton(6));
-    //     button6.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.F)));
-    //     Trigger button7 = new Trigger(() -> reefPositionJoystick.getRawButton(7));
-    //     button7.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.G)));
-    //     Trigger button8 = new Trigger(() -> reefPositionJoystick.getRawButton(8));
-    //     button8.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.H)));
-    //     Trigger button9 = new Trigger(() -> reefPositionJoystick.getRawButton(9));
-    //     button9.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.I)));
-    //     Trigger button10 = new Trigger(() -> reefPositionJoystick.getRawButton(10));
-    //     button10.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.J)));
-    //     Trigger button11 = new Trigger(() -> reefPositionJoystick.getRawButton(11));
-    //     button11.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.K)));
-    //     Trigger button12 = new Trigger(() -> reefPositionJoystick.getRawButton(12));
-    //     button12.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.L)));
+        Trigger button1 = new Trigger(() -> reefPositionJoystick.getRawButton(1));
+        button1.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.A)));
+        Trigger button2 = new Trigger(() -> reefPositionJoystick.getRawButton(2));
+        button2.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.B)));
+        Trigger button3 = new Trigger(() -> reefPositionJoystick.getRawButton(3));
+        button3.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.C)));
+        Trigger button4 = new Trigger(() -> reefPositionJoystick.getRawButton(4));
+        button4.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.D)));
+        Trigger button5 = new Trigger(() -> reefPositionJoystick.getRawButton(5));
+        button5.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.E)));
+        Trigger button6 = new Trigger(() -> reefPositionJoystick.getRawButton(6));
+        button6.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.F)));
+        Trigger button7 = new Trigger(() -> reefPositionJoystick.getRawButton(7));
+        button7.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.G)));
+        Trigger button8 = new Trigger(() -> reefPositionJoystick.getRawButton(8));
+        button8.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.H)));
+        Trigger button9 = new Trigger(() -> reefPositionJoystick.getRawButton(9));
+        button9.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.I)));
+        Trigger button10 = new Trigger(() -> reefPositionJoystick.getRawButton(10));
+        button10.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.J)));
+        Trigger button11 = new Trigger(() -> reefPositionJoystick.getRawButton(11));
+        button11.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.K)));
+        Trigger button12 = new Trigger(() -> reefPositionJoystick.getRawButton(12));
+        button12.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.L)));
 
        
-    //     Trigger buttonLevel1Trigger = new Trigger(() -> reefLevelJoystick.getRawButton(1));
-    //     buttonLevel1Trigger.onTrue(new InstantCommand(() ->reefController.setTargetReefLevel(1)));
-    //     Trigger buttonLevel2Trigger = new Trigger(() -> reefLevelJoystick.getRawButton(2));
-    //     buttonLevel2Trigger.onTrue(new InstantCommand(() ->reefController.setTargetReefLevel(2)));
-    //     Trigger buttonLevel3Trigger = new Trigger(() -> reefLevelJoystick.getRawButton(3));
-    //     buttonLevel3Trigger.onTrue(new InstantCommand(() ->reefController.setTargetReefLevel(3)));
-    //     Trigger buttonLevel4Trigger = new Trigger(() -> reefLevelJoystick.getRawButton(4));
-    //     buttonLevel4Trigger.onTrue(new InstantCommand(() ->reefController.setTargetReefLevel(4)));
+        Trigger buttonLevel1Trigger = new Trigger(() -> reefLevelJoystick.getRawButton(1));
+        buttonLevel1Trigger.onTrue(new InstantCommand(() ->reefController.setTargetReefLevel(1)));
+        Trigger buttonLevel2Trigger = new Trigger(() -> reefLevelJoystick.getRawButton(2));
+        buttonLevel2Trigger.onTrue(new InstantCommand(() ->reefController.setTargetReefLevel(2)));
+        Trigger buttonLevel3Trigger = new Trigger(() -> reefLevelJoystick.getRawButton(3));
+        buttonLevel3Trigger.onTrue(new InstantCommand(() ->reefController.setTargetReefLevel(3)));
+        Trigger buttonLevel4Trigger = new Trigger(() -> reefLevelJoystick.getRawButton(4));
+        buttonLevel4Trigger.onTrue(new InstantCommand(() ->reefController.setTargetReefLevel(4)));
 
+    }
 
+    private void configureBindings() {
+        // Set the controller bindings
 
+        bindPrimaryController();
+        bindSecondaryControls();
+        bindCalibrationControls();
+        // bindReefController();
+        
     }
 
     // private void testReefController(){
@@ -577,14 +615,24 @@ public class RobotContainer {
     //     reefController.setTargetReefPosition(ReefPosition.H);
     //     System.out.println(reefController.toString());        
     // }
+
+
     private Command getRumbleCommand(){
         return new InstantCommand(()-> joystick.setRumble(RumbleType.kBothRumble, 1))
         .andThen(Commands.waitSeconds(0.15))
         .andThen(new InstantCommand(()-> joystick.setRumble(RumbleType.kBothRumble, 0)));
         
-        }
+    }
 
-
+    
+    private Command getBlinkLightCommand(){
+        return Commands.repeatingSequence(
+            new InstantCommand(() -> candleSystem.flashColor(AvailableColors.Red)),
+            new WaitCommand(0.5),
+            new InstantCommand(()->candleSystem.turnOffColors()),
+            new WaitCommand(0.25)
+        );
+    }
 
 
     public void setOdometryPoseFromSelectedAuto(String autonName){
@@ -607,6 +655,7 @@ public class RobotContainer {
         drivetrain.resetPose(startPose);
     }
 
+
     public Alliance getAlliance(){
         if(!DriverStation.isDSAttached()){
             // System.out.println("~~~~~" + DriverStationSim.getAllianceStationId());
@@ -620,6 +669,7 @@ public class RobotContainer {
         return DriverStation.getAlliance().orElse(Alliance.Blue);
     }
 
+
     private Pose2d getFirstPose(List<PathPlannerPath> paths){
         Pose2d firstPose = new Pose2d();
         // Guard against empty paths list
@@ -627,7 +677,6 @@ public class RobotContainer {
             System.out.println("Auto has no paths, returing origin");
             return new Pose2d();
         }
-
 
         System.out.println("~~~~ Is Driver Station Attached: " + DriverStation.isDSAttached());
         // figure out if path flipping has to happen
@@ -645,18 +694,8 @@ public class RobotContainer {
         
 
     public Command getAutonomousCommand() {
-        //return Commands.print("No autonomous command configured");
-        
         return autonChooser.getSelected();
         
     }
-
-
-
-    public void resetGyroAfterAuton() {
-        drivetrain.setPigeonHeadingToOdometry();
-    }
-
-   
 }
 
