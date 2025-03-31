@@ -44,13 +44,13 @@ public class StandardDeviation extends Command {
   @Override
   public void initialize() {
     commandSwerveDrivetrain.resetPose(robotPose);
-    LimelightHelpers.setPipelineIndex(limeLightFront.limelightName, 1);
+    LimelightHelpers.setPipelineIndex(limeLightRight.limelightName, 1);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    Pose2d visionPose = poseUpdater.visionDataCollection(limeLightFront);
+    Pose2d visionPose = poseUpdater.visionDataCollection(limeLightRight);
     distanceEstimateX = commandSwerveDrivetrain.getState().Pose.getX() - visionPose.getX();
     distancesX.add(distanceEstimateX);
     distanceEstimateY = commandSwerveDrivetrain.getState().Pose.getY() - visionPose.getY();
