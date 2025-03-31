@@ -41,6 +41,7 @@ public class DetectReefWithCANrange extends Command {
   private boolean reefNoLongerVisible;
   private boolean reefNeverSeen;
   private boolean isTimedOut;
+  private boolean hasRunBefore = false;
 
   /** Creates a new DetectReefWithCANrange. */
   public DetectReefWithCANrange(Elevator elevator, GamePieceDetector reefDetector) {
@@ -75,6 +76,7 @@ public class DetectReefWithCANrange extends Command {
   @Override
   public void execute() {
     if(!elevator.atTargetHeight()) return;
+    if(hasRunBefore) return;
     lockOutCounter++;
     if(lockOutCounter >= lockOutLimit) isLockedOut = false;
     
@@ -99,6 +101,8 @@ public class DetectReefWithCANrange extends Command {
     }else{
       numOfFailedAttempts = 0;
     }
+
+    
   }
         
   // }
@@ -124,6 +128,7 @@ public class DetectReefWithCANrange extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    hasRunBefore = true;
   }
 
   // Returns true when the command should end.
@@ -132,6 +137,7 @@ public class DetectReefWithCANrange extends Command {
     reefNoLongerVisible = !isReefSeen && numIncrements > 0;
     isAbleToShoot = reefNoLongerVisible && !isLockedOut;
     if(isAbleToShoot) {
+      elevator.decrementHeightAdjustment();
       System.out.println(" #$^&*()$#3^$is able to shoot*&^%^#&$#$#$)");
     }
     reefNeverSeen = numOfFailedAttempts > 20;
@@ -141,6 +147,6 @@ public class DetectReefWithCANrange extends Command {
     // isTimedOut = timer.get() > 3;
     isTimedOut = false;
     // return false;
-    return reefNeverSeen || isAbleToShoot || isTimedOut;
+    return elevator.atTargetHeight() && (reefNeverSeen || isAbleToShoot || isTimedOut || hasRunBefore);
   }
 }

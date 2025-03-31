@@ -86,26 +86,16 @@ public enum Sensors{
         .withFOVRangeX(6.75)
         .withFOVRangeY(6.75)
       );
-    if(level == 4) {
+    
       maxDistanceThreshold = 0.525;
       minDistanceThreshold = 0.4;
       config = config
           .withProximityParams(new ProximityParamsConfigs()
               .withProximityHysteresis(0.05)
-              .withProximityThreshold(0.45)
+              .withProximityThreshold(0.75)
               .withMinSignalStrengthForValidMeasurement(1500)
           );
-    } else {
-      maxDistanceThreshold = 0.6;
-      maxDistanceThreshold = 0.5;
-      config = config
-        .withProximityParams(new ProximityParamsConfigs()
-            .withProximityHysteresis(0.05)
-            .withProximityThreshold(0.55)
-            .withMinSignalStrengthForValidMeasurement(1500)
-            );
-
-    }
+    
     canRange.getConfigurator().apply(config);
   }
   @Override
