@@ -193,7 +193,7 @@ public class RobotContainer {
     }
 
     private Command getCoralShootCommand(){
-        return Commands.print("~~~~~~~   Staring coral shoot    ~~~~~~~~~")
+        return Commands.print("~~~~~~~   Starting coral shoot    ~~~~~~~~~")
             .andThen(new InstantCommand(() -> coral.backward(1)))
             .andThen(Commands.waitSeconds(0.5))
             .andThen(new InstantCommand(() -> coral.stopMotor()))
@@ -219,7 +219,7 @@ public class RobotContainer {
     }
 
     private Command getLevel2Command(){
-        return Commands.print("~~~~~~~~~~  Starting L32 command  ~~~~~~~~~~~~~")
+        return Commands.print("~~~~~~~~~~  Starting L2 command  ~~~~~~~~~~~~~")
             .andThen(new InstantCommand(() -> elevator.raiseLevel2()))
             .andThen(getElevatorHeightCheckCommand())
             .andThen(getDetectReefCommand())

@@ -4,43 +4,20 @@
 
 package frc.robot.commands;
 
-import java.util.ArrayList;
-
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.util.sendable.SendableRegistry;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.GamePieceDetector;
-import frc.robot.subsystems.LimeLight;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class DetectReefWithCANrange extends Command {
   private final GamePieceDetector reefDetector;
   private Elevator elevator;
-  private double higherdistanceThresholdL4 = .5;
-  private double lowerdistanceThresholdL4 = .4;
-  private boolean readyToShoot;
-  private int lockOutCounter;
-  private boolean isLockedOut;
-  private int lockOutLimit = 3;
-  private int numIncrements;
   private boolean isReefSeen;
-  private boolean isReefNotSeen;
-  private Timer timer = new Timer();
-  private boolean reefNoLongerVisible;
-  private boolean reefNeverSeen;
-  private boolean isTimedOut;
-  private ArrayList<Integer> reefObservations = new ArrayList<>();
-  
-  // change these two together
-  private int limitObservations = 20;    // check minValuesForCofidence is not greater
-  private int minValuesForConfidence = 10;
-
-  private double confidenceThreshold = 0.7;
+  private boolean isHeightAdjusted;
   private boolean hasCommandExecuted = false;
-  private boolean isObservationBufferFull = false;
 
   /** Creates a new DetectReefWithCANrange. */
   public DetectReefWithCANrange(Elevator elevator, GamePieceDetector reefDetector) {
@@ -48,7 +25,8 @@ public class DetectReefWithCANrange extends Command {
     this.elevator = elevator;
     hasCommandExecuted = false;
     // Use addRequirements() here to declare subsystem dependencies.
-    
+    addRequirements(elevator);
+
     SendableRegistry.addLW(this, this.getClass().getSimpleName(), this.getClass().getSimpleName());
     SmartDashboard.putData(this);
   }
@@ -56,94 +34,57 @@ public class DetectReefWithCANrange extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    isLockedOut = false;
-    isReefSeen = false;
-    isReefNotSeen = false;
-    lockOutCounter = 0;
-    numIncrements = 0;
-    timer.reset();
-    timer.start();
-    reefObservations.clear();
-    isObservationBufferFull = false;
-    reefDetector.setConfiguration(elevator.elevatorLevel);
-  }
-
-  private void addObservation(boolean observation){
-    // manage the size of the buffer
-    if(reefObservations.size() >= limitObservations) reefObservations.remove(0);
-    // add the item
-    reefObservations.add(observation ? 1 : 0);
-  }
-
-  private double getReefConfidence(){
-    // guard if buffer is sparse
-    var minLimit = Math.min(minValuesForConfidence, limitObservations);  // just in case entered wrong
-    if (reefObservations.size() < minLimit) return -1.0;
-    
-    // calculate the average of the values in the array
-    double confidence = reefObservations.stream().mapToInt(Integer::intValue).average().orElse(-1.0);
-    return confidence;
+    isHeightAdjusted = false;
+    isReefSeen = true;
+    // reefDetector.setConfiguration(elevator.elevatorLevel);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    // guard against execution if command has already run
     if (hasCommandExecuted) return;
 
-    lockOutCounter++;
+    isReefSeen = reefDetector.isGamePieceClose;
 
-    if(lockOutCounter >= lockOutLimit) isLockedOut = false;
-    
-    // add reef observation
-    addObservation(reefDetector.isGamePieceClose);
-    isObservationBufferFull = (reefObservations.size() >= limitObservations);
-
-    // apply conficence level to reef observation, this is instead of using consecutive readings
-    // note that it leaves a buffer zone where both can be false
-    var confidence = getReefConfidence();
-    isReefSeen = confidence > confidenceThreshold;
-    boolean isBufferTooSmall = (confidence == -1.0);
-    isReefNotSeen = isBufferTooSmall ? false : (1.0 - confidence) > confidenceThreshold;
-    
-    //  trying to find when the CANrange does not detect reef.
-    // if we see the reef increment elevator height.
-    if(isReefSeen && !isLockedOut){
-      isLockedOut = true;
-      lockOutCounter = 0;
-      System.out.println("*****Incrementing Elevator*****"); 
-      elevator.incrementHeightAdjustment();
-      numIncrements++;
+    // if reef is visible, move the elevator up slowly until it is no longer seen
+    if(isReefSeen){
+      elevator.moveUpSlowlyUntilReefNotSeen();
+      isHeightAdjusted = true;
     }
-    
   }
   
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    reefNoLongerVisible = isReefNotSeen && numIncrements > 0;
-
-    if(reefNoLongerVisible) {
-      System.out.println(" #$^&*()$#3^$   is able to shoot     *&^%^#&$#$#$)");
-    }
-
-
-    reefNeverSeen = isReefNotSeen && isObservationBufferFull;
-    if(reefNeverSeen) {
-      System.out.println("##$%^&*$#@      Reef was never seen      **&^%&*(&^%$)");
-    }
-
     if(hasCommandExecuted) System.out.println("~~~~~~   Command has already been executed, skipping   ~~~~~~~~");
+    if(isReefSeen) System.out.println("~~~~~~   Reef is visible   ~~~~~~~~");
+    if(!isReefSeen) System.out.println("~~~~~~   Reef is not visible   ~~~~~~~~");
 
     // return false;
-    return reefNoLongerVisible || reefNeverSeen || hasCommandExecuted;
+    return !isReefSeen || hasCommandExecuted;
   }
         
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
     System.out.println("~~~~~~~~~~  Running end from DetectReefWithCANrange  ~~~~~~~~~~~~");
-    if(interrupted) System.out.println("~~~~~~~~~~~  Inside command and INTERRUPTED   ~~~~~~~~~~~");
+    
+    // if interrupted, don't apply clean-up commands and don't set as executed
+    if(interrupted) {
+      System.out.println("~~~~~~~~~~~  Inside command and INTERRUPTED   ~~~~~~~~~~~");
+      return;
+    }
+    
+    if(isHeightAdjusted){
+      // command executed for the first time and is ready to score
+      // if the height was adjusted then transfer the new height to elevator
+      double newValue = elevator.holdCurrentPosition();
+      elevator.transferPositionToLevel(newValue);
+      System.out.println("~~~~~~~~~~~  New height set for level " + elevator.elevatorLevel + " new Position: " + newValue + "   ~~~~~~~~~~~");
+    }
 
+    // set this flag to avoid execution next time command is scheduled
     hasCommandExecuted = true;
   }
 
@@ -151,16 +92,9 @@ public class DetectReefWithCANrange extends Command {
   public void initSendable(SendableBuilder builder) {
     // TODO Auto-generated method stub
     super.initSendable(builder);
-    builder.addIntegerProperty("lock out count", () -> this.lockOutCounter, null);
-    builder.addBooleanProperty("Reef is Seen", () -> this.isReefSeen, null);
-    builder.addBooleanProperty("Reef is NOT Seen", () -> this.isReefNotSeen, null);
-    builder.addBooleanProperty("is Locked Out", () -> this.isLockedOut, null);
-    builder.addIntegerProperty("Number of Increments", () -> this.numIncrements, null);
-    builder.addBooleanProperty("Reef no longer visible", () -> this.reefNoLongerVisible, null);
-    builder.addBooleanProperty("Reef never  visible", () -> this.reefNeverSeen, null);
-    builder.addBooleanProperty("is Timed Out", () -> this.isTimedOut, null);
     builder.addBooleanProperty("Target Height", () -> elevator.atTargetHeight(), null);
     builder.addBooleanProperty("hasCommandExecuted", () -> this.hasCommandExecuted, null);
-    builder.addDoubleProperty("Reef Confidence", () -> getReefConfidence(), null);
+    builder.addBooleanProperty("Reef is Seen", () -> this.isReefSeen, null);
+    builder.addBooleanProperty("Reef no longer visible", () -> this.isHeightAdjusted, null);
   }
 }

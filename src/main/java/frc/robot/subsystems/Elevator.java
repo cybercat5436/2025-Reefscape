@@ -6,18 +6,24 @@ package frc.robot.subsystems;
 
 import java.lang.reflect.Array;
 
+import static edu.wpi.first.units.Units.*;
+
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.HardwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXSConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.ctre.phoenix6.signals.ExternalFeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.ForwardLimitTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorArrangementValue;
 
@@ -34,6 +40,8 @@ public class Elevator extends SubsystemBase {
   /** Creates a new Elevator. */
   MotionMagicVoltage m_motmag = new MotionMagicVoltage(0);
   final VoltageOut m_request = new VoltageOut(0);
+  private final VelocityVoltage m_velocityVoltage = new VelocityVoltage(0).withSlot(1);  // velocity control
+
   private double L1 = 0;
   private double L2 = 0.91;
   private double L3 = 2.89;
@@ -50,52 +58,20 @@ public class Elevator extends SubsystemBase {
 
   public int elevatorLevel;
   private final TalonFX elevator = new TalonFX(12);
-  // private final CANrange reefDetector;
-  private boolean readyToShoot;
-  private double higherdistanceThresholdL3 = 0;
-  private double lowerdistanceThresholdL3 = 0;
-  private double higherdistanceThresholdL2 = 0;
-  private double lowerdistanceThresholdL2 = 0;
 
-  private double standardIncrement = 0.025;
+  private double standardIncrement = 0.05;
 
   public Alliance alliance;
   public Elevator() {
-    // reefDetector = new CANrange(18);
-    // var talonFXConfigs = new TalonFXConfiguration();
-    // talonFXConfigs.Commutation.MotorArrangement = MotorArrangementValue.Minion_JST;
-    // talonFXConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-    // talonFXConfigs.ExternalFeedback.ExternalFeedbackSensorSource = ExternalFeedbackSensorSourceValue.Commutation;
-    // elevator.setPosition(0);
-    // // set slot 0 gains
-    // var slot0Configs = talonFXConfigs.Slot0;
-    // slot0Configs.kS = 0.24; // add 0.24 V to overcome friction
-    // slot0Configs.kV = 0.12; // apply 12 V for a target velocity of 100 rps
-    // // PID runs on position
-    // slot0Configs.kP = 4.8;
-    // slot0Configs.kI = 0;
-    // slot0Configs.kD = 0.1;
-
-    // set Motion Magic settings
-    // var motionMagicConfigs = talonFXConfigs.MotionMagic;
-    // motionMagicConfigs.MotionMagicCruiseVelocity = 300; // 80 rps cruise velocity
-    // motionMagicConfigs.MotionMagicAcceleration = 1000; // 160 rps/s acceleration (0.5 seconds)
-    // motionMagicConfigs.MotionMagicJerk = 200; // 1600 rps/s^2 jerk (0.1 seconds)
 
     // elevator.getConfigurator().apply(talonFXConfigs, 0.050);
      TalonFXConfiguration cfg = new TalonFXConfiguration();
      cfg.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
-    /* Configure gear ratio */
-    FeedbackConfigs fdb = cfg.Feedback;
-    fdb.SensorToMechanismRatio = 12.8; // 12.8 rotor rotations per mechanism rotation
-
-    /* Configure Motion Magic */
     MotionMagicConfigs mm = cfg.MotionMagic;
-    mm.withMotionMagicCruiseVelocity(75) // 75 // 5 (mechanism) rotations per second cruise
-      .withMotionMagicAcceleration(30) //30 // Take approximately 0.5 seconds to reach max vel
-      // Take approximately 0.1 seconds to reach max accel 
-      .withMotionMagicJerk(300);
+    mm.withMotionMagicCruiseVelocity(RotationsPerSecond.of(80))    // 100 rps is top speed for Kraken (6000 RPM)
+      .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(160))  // 160 rps/s acceleration (0.5 seconds)
+      .withMotionMagicJerk(RotationsPerSecondPerSecond.per(Second).of(1600));  // 1600 rps/s^2 jerk (0.1 seconds)
 
     Slot0Configs slot0 = cfg.Slot0;
     slot0.kS = 0.25; // Add 0.25 V output to overcome static friction
@@ -104,6 +80,24 @@ public class Elevator extends SubsystemBase {
     slot0.kP = 60; // A position error of 0.2 rotations results in 12 V output
     slot0.kI = 0; // No output for integrated error
     slot0.kD = 0.5; // A velocity error of 1 rps results in 0.5 V output
+    
+    Slot1Configs slot1 = cfg.Slot1;
+    /* Voltage-based velocity requires a velocity feed forward to account for the back-emf of the motor */
+    slot1.kS = 0.1; // To account for friction, add 0.1 V of static feedforward
+    slot1.kV = 0.12; // Kraken X60 is a 500 kV motor, 500 rpm per V = 8.333 rps per V, 1/8.33 = 0.12 volts / rotation per second
+    slot1.kP = 0.11; // An error of 1 rotation per second results in 0.11 V output
+    slot1.kI = 0; // No output for integrated error
+    slot1.kD = 0; // No output for error derivative
+    // Peak output of 8 volts
+    cfg.Voltage.withPeakForwardVoltage(Volts.of(8))
+      .withPeakReverseVoltage(Volts.of(-8));
+
+
+    // HardwareLimitSwitchConfigs limitConfig = cfg.HardwareLimitSwitch;
+    // limitConfig.withForwardLimitRemoteCANrange(reefDetector.getCaNrange())
+    //   .withForwardLimitType(ForwardLimitTypeValue.NormallyClosed)
+    //   .withForwardLimitEnable(false);
+    
     StatusCode status = StatusCode.StatusCodeNotInitialized;
     for (int i = 0; i < 5; ++i) {
       status = elevator.getConfigurator().apply(cfg);
@@ -118,12 +112,6 @@ public class Elevator extends SubsystemBase {
     SmartDashboard.putData(this);
   }
 
-  
-
-  // public void raiseLevel1() {
-  //   m_motmag.Slot = 0;
-  //   elevator.setControl(m_motmag.withPosition(L1));
-  // } 
   public void incrementHeightAdjustment() {
     if(alliance == Alliance.Red){
       if(elevatorLevel == 2){
@@ -154,70 +142,73 @@ public class Elevator extends SubsystemBase {
       System.out.println("Increased Height Level 4 " + blueHeightAdjustmentLevel4);
     }
   }
+
   }
   public void decrementHeightAdjustment() {
     if(alliance == Alliance.Red){
-          if(elevatorLevel == 2) {
-      redHeightAdjustmentLevel2--;
-    elevator.setControl(m_motmag.withPosition(L2 + redHeightAdjustmentLevel2 * standardIncrement));
-    System.out.println("Decreased Height Level 2 " + redHeightAdjustmentLevel2);
-    }else if(elevatorLevel == 3) {
-      redHeightAdjustmentLevel3--;
-      elevator.setControl(m_motmag.withPosition(L3 + redHeightAdjustmentLevel3 * standardIncrement));
-      System.out.println("Decreased Height Level 3 " + redHeightAdjustmentLevel3);
-    }else if(elevatorLevel == 4) {
-      redHeightAdjustmentLevel4--;
-      elevator.setControl(m_motmag.withPosition(L4 + redHeightAdjustmentLevel4 * standardIncrement));
-      System.out.println("Decreased Height Level 4 " + redHeightAdjustmentLevel4);
-    }
+      if(elevatorLevel == 2) {
+        redHeightAdjustmentLevel2--;
+        elevator.setControl(m_motmag.withPosition(L2 + redHeightAdjustmentLevel2 * standardIncrement));
+        System.out.println("Decreased Height Level 2 " + redHeightAdjustmentLevel2);
+      }else if(elevatorLevel == 3) {
+        redHeightAdjustmentLevel3--;
+        elevator.setControl(m_motmag.withPosition(L3 + redHeightAdjustmentLevel3 * standardIncrement));
+        System.out.println("Decreased Height Level 3 " + redHeightAdjustmentLevel3);
+      }else if(elevatorLevel == 4) {
+        redHeightAdjustmentLevel4--;
+        elevator.setControl(m_motmag.withPosition(L4 + redHeightAdjustmentLevel4 * standardIncrement));
+        System.out.println("Decreased Height Level 4 " + redHeightAdjustmentLevel4);
+      }
     }else{
-    if(elevatorLevel == 2) {
-      blueHeightAdjustmentLevel2--;
-    elevator.setControl(m_motmag.withPosition(L2 + blueHeightAdjustmentLevel2 * standardIncrement));
-    System.out.println("Decreased Height Level 2 " + blueHeightAdjustmentLevel2);
-    }else if(elevatorLevel == 3) {
-      blueHeightAdjustmentLevel3--;
-      elevator.setControl(m_motmag.withPosition(L3 + blueHeightAdjustmentLevel3 * standardIncrement));
-      System.out.println("Decreased Height Level 3 " + blueHeightAdjustmentLevel3);
-    }else if(elevatorLevel == 4) {
-      blueHeightAdjustmentLevel4--;
-      elevator.setControl(m_motmag.withPosition(L4 + blueHeightAdjustmentLevel4 * standardIncrement));
-      System.out.println("Decreased Height Level 4 " + blueHeightAdjustmentLevel4);
+      if(elevatorLevel == 2) {
+        blueHeightAdjustmentLevel2--;
+        elevator.setControl(m_motmag.withPosition(L2 + blueHeightAdjustmentLevel2 * standardIncrement));
+        System.out.println("Decreased Height Level 2 " + blueHeightAdjustmentLevel2);
+      }else if(elevatorLevel == 3) {
+        blueHeightAdjustmentLevel3--;
+        elevator.setControl(m_motmag.withPosition(L3 + blueHeightAdjustmentLevel3 * standardIncrement));
+        System.out.println("Decreased Height Level 3 " + blueHeightAdjustmentLevel3);
+      }else if(elevatorLevel == 4) {
+        blueHeightAdjustmentLevel4--;
+        elevator.setControl(m_motmag.withPosition(L4 + blueHeightAdjustmentLevel4 * standardIncrement));
+        System.out.println("Decreased Height Level 4 " + blueHeightAdjustmentLevel4);
+      }
     }
-  }
   }
   
-
-
   public void raise() { 
     elevator.set(0.1);
   }
+
   public void lower() { 
     elevator.set(-0.1);
   }
+
   public void raiseStartLevel() {
     elevatorLevel = 0;
     m_motmag.Slot = 0;
     elevator.setControl(m_motmag.withPosition(L1));
-  } 
+  }
+
   public void raiseLevel2() {
     if(alliance == Alliance.Red){
       elevatorLevel = 2;
       m_motmag.Slot = 0;
-       elevator.setControl(m_motmag.withPosition(L2 + redHeightAdjustmentLevel2 * standardIncrement));
+      elevator.setControl(m_motmag.withPosition(L2 + redHeightAdjustmentLevel2 * standardIncrement));
     } else{
-    elevatorLevel = 2;
-    m_motmag.Slot = 0;
-    elevator.setControl(m_motmag.withPosition(L2 + blueHeightAdjustmentLevel2 * standardIncrement));
+      elevatorLevel = 2;
+      m_motmag.Slot = 0;
+      elevator.setControl(m_motmag.withPosition(L2 + blueHeightAdjustmentLevel2 * standardIncrement));
     }
   }
+
   public void raiseLevel3() {
     if(alliance == Alliance.Red){
       elevatorLevel = 3;
       m_motmag.Slot = 0;
       elevator.setControl(m_motmag.withPosition(L3 + redHeightAdjustmentLevel3 * standardIncrement));
     } else {
-     elevatorLevel = 3;
+      elevatorLevel = 3;
       m_motmag.Slot = 0;
       elevator.setControl(m_motmag.withPosition(L3 + blueHeightAdjustmentLevel3 * standardIncrement));
     }
@@ -235,6 +226,34 @@ public class Elevator extends SubsystemBase {
     System.out.println("$$$$$$$$$$$$$$raised level 4$$$$%$$$$$$$");
    
   } 
+
+  public void moveUpSlowlyUntilReefNotSeen(){
+    elevator.setControl(m_velocityVoltage
+      .withVelocity(RotationsPerSecond.of(5))
+      // .withLimitForwardMotion(true)
+    );
+  }
+
+  public double holdCurrentPosition(){
+    // set motion magic target to current position
+    double currentPosition = elevator.getPosition().getValueAsDouble();
+    elevator.setControl(m_motmag
+      .withPosition(currentPosition)
+      .withSlot(0)
+    );
+
+    return currentPosition;
+  }
+
+  public void transferPositionToLevel(double setPosition){
+    // take the current motor position and set as target level
+    switch (elevatorLevel){
+      case (4): L4 = setPosition; break;
+      case (3): L3 = setPosition; break;
+      case (2): L2 = setPosition; break;
+    }
+  }
+
   public void stopElevator() {
     elevator.setControl(m_request.withOutput(0));
   }

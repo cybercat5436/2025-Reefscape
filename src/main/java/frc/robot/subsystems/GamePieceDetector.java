@@ -12,6 +12,8 @@ import com.ctre.phoenix6.configs.FovParamsConfigs;
 import com.ctre.phoenix6.configs.ProximityParamsConfigs;
 import com.ctre.phoenix6.hardware.CANrange;
 
+import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
  
@@ -64,21 +66,28 @@ public enum Sensors{
                 .withFOVRangeY(6.75)
             ).withProximityParams(new ProximityParamsConfigs()
                 .withProximityHysteresis(0.05)
-                .withProximityThreshold(0.45)
+                .withProximityThreshold(0.7)
                 .withMinSignalStrengthForValidMeasurement(1500)
             );
     }
     
     canRange.clearStickyFaults();
     canRange.getConfigurator().apply(config);
-    
-    
+
+    SendableRegistry.addLW(this, this.getClass().getSimpleName(), "CANrange: " + this.gamePiece);
+    SmartDashboard.putData(this);
   }
   public GamePieceDetector(double signalStrength, Sensors sensor, double distanceThreshold) {
     this(signalStrength, sensor);
     this.distanceThreshold = distanceThreshold;
 
   }
+
+  public CANrange getCaNrange(){
+    return this.canRange;
+  }
+
+
   public void setConfiguration(int level) {
     if(sensor != Sensors.reef) return;
     var config = new CANrangeConfiguration()
@@ -116,19 +125,14 @@ public enum Sensors{
     if(this.sensor == Sensors.algae) {
       isGamePieceClose = isGamePieceClose && (canRange.getDistance().getValueAsDouble() < this.distanceThreshold);
     }else if( this.sensor == Sensors.reef) {
-      // isGamePieceClose = canRange.getIsDetected().getValue();
+      isGamePieceClose = canRange.getIsDetected().getValue();
       
-      boolean isSignalStrong = canRange.getSignalStrength().getValueAsDouble() > signalStrengthThreshhold;
-      double currentDistance = canRange.getDistance().getValueAsDouble();
-      boolean isDistanceCorrect = (currentDistance > minDistanceThreshold) && (currentDistance < maxDistanceThreshold);
-      isGamePieceClose = isSignalStrong && isDistanceCorrect;
+      // boolean isSignalStrong = canRange.getSignalStrength().getValueAsDouble() > signalStrengthThreshhold;
+      // double currentDistance = canRange.getDistance().getValueAsDouble();
+      // boolean isDistanceCorrect = (currentDistance > minDistanceThreshold) && (currentDistance < maxDistanceThreshold);
+      // isGamePieceClose = isSignalStrong && isDistanceCorrect;
     }
     
-
-    //System.out.println(isCoralClose + " signal: " + sensorUsed.getSignalStrength().getValueAsDouble());
-    SmartDashboard.putBoolean(this.gamePiece + " is present" , isGamePieceClose);
-    SmartDashboard.putNumber(this.gamePiece + " signal strength" , canRange.getSignalStrength(false).getValueAsDouble());
-    SmartDashboard.putNumber(this.gamePiece + " Distance" , canRange.getDistance(false).getValueAsDouble());
   }
 
   private void addValueToBuffer(){
@@ -149,6 +153,15 @@ public enum Sensors{
     }
     
     return average / numValues;
+  }
+
+    public void initSendable(SendableBuilder builder) {
+    // TODO Auto-generated method stub
+    super.initSendable(builder);
+    builder.addStringProperty("isGamePieceDetected", () -> this.gamePiece, null);
+    builder.addBooleanProperty("isGamePieceDetected", () -> this.isGamePieceClose, null);
+    builder.addDoubleProperty("Signal Strength", () -> this.canRange.getSignalStrength().getValueAsDouble(), null);
+    builder.addDoubleProperty("Distance", () -> this.canRange.getDistance().getValueAsDouble(), null);
   }
 
 }
