@@ -10,9 +10,11 @@ import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXSConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -28,16 +30,19 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.commands.DetectReefWithCANrange;
+import static edu.wpi.first.units.Units.*;
+
 
 
 public class Elevator extends SubsystemBase {
   /** Creates a new Elevator. */
   MotionMagicVoltage m_motmag = new MotionMagicVoltage(0);
+  private final VelocityVoltage m_velocityVoltage = new VelocityVoltage(0).withSlot(1);
   final VoltageOut m_request = new VoltageOut(0);
   private double L1 = 0;
   private double L2 = 0.91;
   private double L3 = 2.89;
-  private double L4 = 5.9;
+  private double L4 = 5.9; //5.9
  
   public int blueHeightAdjustmentLevel4 = 0;
   private int blueHeightAdjustmentLevel3 = 0;
@@ -58,6 +63,10 @@ public class Elevator extends SubsystemBase {
   private double lowerdistanceThresholdL2 = 0;
 
   private double standardIncrement = 0.1;
+  public boolean l4HasRun;
+  public boolean l3HasRun;
+  public boolean l2HasRun;
+  
 
   public Alliance alliance;
   public Elevator() {
@@ -104,6 +113,17 @@ public class Elevator extends SubsystemBase {
     slot0.kP = 60; // A position error of 0.2 rotations results in 12 V output
     slot0.kI = 0; // No output for integrated error
     slot0.kD = 0.5; // A velocity error of 1 rps results in 0.5 V output
+    Slot1Configs slot1 = cfg.Slot1;
+    slot1.kS = 0.1; // To account for friction, add 0.1 V of static feedforward
+    slot1.kV = 0.12; // Kraken X60 is a 500 kV motor, 500 rpm per V = 8.333 rps per V, 1/8.33 = 0.12 volts / rotation per second
+    slot1.kP = 0.11; // An error of 1 rotation per second results in 0.11 V output
+    slot1.kI = 0; // No output for integrated error
+    slot1.kD = 0; // No output for error derivative
+    // Peak output of 8 volts
+    cfg.Voltage.withPeakForwardVoltage(Volts.of(8))
+      .withPeakReverseVoltage(Volts.of(-8));
+
+
     StatusCode status = StatusCode.StatusCodeNotInitialized;
     for (int i = 0; i < 5; ++i) {
       status = elevator.getConfigurator().apply(cfg);
@@ -116,6 +136,8 @@ public class Elevator extends SubsystemBase {
      //Register the sendables
     SendableRegistry.addLW(this, this.getClass().getSimpleName(), this.getClass().getSimpleName());
     SmartDashboard.putData(this);
+
+    elevator.setPosition(0);
   }
 
   
@@ -233,10 +255,27 @@ public class Elevator extends SubsystemBase {
       m_motmag.Slot = 0;
       elevator.setControl(m_motmag.withPosition(L4 + blueHeightAdjustmentLevel4 * standardIncrement));
     }
+  }
+  public void moveUpSlowly() {
+    elevator.setControl(m_velocityVoltage.withVelocity(RotationsPerSecond.of(10)));
+  }
+  public void holdPosition() {
+    elevator.setControl(m_motmag.withPosition(this.getEncoderValue()));
+  }
    
-  } 
+  
   public void stopElevator() {
     elevator.setControl(m_request.withOutput(0));
+  }
+  public void transferTargetHeight() {
+    switch (elevatorLevel) {
+      case 4: L4 = getEncoderValue(); break;
+      case 3: L3 = getEncoderValue(); break;
+      case 2: L2 = getEncoderValue(); break;
+
+      default: 
+        break;
+    }
   }
 
   public double getEncoderValue() {

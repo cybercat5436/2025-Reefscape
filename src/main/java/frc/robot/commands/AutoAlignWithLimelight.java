@@ -58,6 +58,7 @@ public class AutoAlignWithLimelight extends Command {
   private boolean isCropMaxed;
   private double cropValueMin = -0.53;
   private double cropValueMax = 0.4;
+
   /** Creates a new AutoAlignWithLimelight. */
   public AutoAlignWithLimelight(CommandSwerveDrivetrain commandSwerveDrivetrain, LimeLight limeLight) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -92,6 +93,7 @@ public class AutoAlignWithLimelight extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    LimelightHelpers.setPipelineIndex(limelight.limelightName, 3);
     tY = limelight.getVisionTargetVerticalError();
     if(limelight.getVisionTargetStatus() == false) {
       robotYError = 0;
@@ -183,6 +185,7 @@ public class AutoAlignWithLimelight extends Command {
     
     
       LimelightHelpers.takeSnapshot(limelight.limelightName,  snapShotCount++ + " --end");
+      LimelightHelpers.setPipelineIndex(limelight.limelightName, 1);
   }
 
   // Returns true when the command should end.

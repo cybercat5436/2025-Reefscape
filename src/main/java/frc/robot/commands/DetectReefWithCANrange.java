@@ -75,7 +75,6 @@ public class DetectReefWithCANrange extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(!elevator.atTargetHeight()) return;
     if(hasRunBefore) return;
     lockOutCounter++;
     if(lockOutCounter >= lockOutLimit) isLockedOut = false;
@@ -147,6 +146,6 @@ public class DetectReefWithCANrange extends Command {
     // isTimedOut = timer.get() > 3;
     isTimedOut = false;
     // return false;
-    return elevator.atTargetHeight() && (reefNeverSeen || isAbleToShoot || isTimedOut || hasRunBefore);
+    return reefNeverSeen || isAbleToShoot || isTimedOut || hasRunBefore;
   }
 }
