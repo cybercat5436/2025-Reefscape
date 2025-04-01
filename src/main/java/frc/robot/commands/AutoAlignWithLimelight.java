@@ -57,7 +57,7 @@ public class AutoAlignWithLimelight extends Command {
   private double cropAdjustmentMax;
   private boolean isCropMaxed;
   private double cropValueMin = -0.53;
-  private double cropValueMax = 0.28;
+  private double cropValueMax = 0.4;
   /** Creates a new AutoAlignWithLimelight. */
   public AutoAlignWithLimelight(CommandSwerveDrivetrain commandSwerveDrivetrain, LimeLight limeLight) {
     // Use addRequirements() here to declare subsystem dependencies.
