@@ -101,14 +101,15 @@ public class Elevator extends SubsystemBase {
         // );
         
      cfg.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-
+     FeedbackConfigs fdb = cfg.Feedback;
+     fdb.SensorToMechanismRatio = 12.8;
     /* Configure gear ratio */
     /* Configure Motion Magic */
     MotionMagicConfigs mm = cfg.MotionMagic;
-    mm.withMotionMagicCruiseVelocity(80) // 75 // 5 (mechanism) rotations per second cruise
-      .withMotionMagicAcceleration(80) //30 // Take approximately 0.5 seconds to reach max vel
+    mm.withMotionMagicCruiseVelocity(75) // 75 // 5 (mechanism) rotations per second cruise
+      .withMotionMagicAcceleration(30) //30 // Take approximately 0.5 seconds to reach max vel
       // Take approximately 0.1 seconds to reach max accel 
-      .withMotionMagicJerk(1600);
+      .withMotionMagicJerk(300);
 
     Slot0Configs slot0 = cfg.Slot0;
     slot0.kS = 0.25; // Add 0.25 V output to overcome static friction
