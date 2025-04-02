@@ -37,6 +37,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.AutoAlign;
+import frc.robot.commands.AutoAlignWheelMovements;
 import frc.robot.commands.AutoAlignWithLimelight;
 import frc.robot.commands.CoralIntakeWithDetection;
 import frc.robot.commands.DetectReefWithCANrange;
@@ -525,11 +526,11 @@ public class RobotContainer {
         // calibrationJoystick.a().whileTrue(standardDeviation);
 
 
-        calibrationJoystick.a().whileTrue(
+        /*calibrationJoystick.a().whileTrue(
             new InstantCommand(() -> elevator.raiseLevel4())
             .andThen(Commands.waitUntil(() -> elevator.atTargetHeight()))
             .handleInterrupt(() -> System.out.println("~~~~~~~~~~   Interrupted!  ~~~~~~~~~~~~~~~"))
-        );
+        );*/
 
         // calibrationJoystick.a().onTrue(new WheelMovementsTest(drivetrain, 0.3, robotCentricDrive, null));
 
@@ -541,7 +542,7 @@ public class RobotContainer {
          .andThen(Commands.waitSeconds(0.5))
          .andThen(new InstantCommand(() -> climber2.stopClimb())
          ));
-
+        calibrationJoystick.x().onTrue(new AutoAlignWheelMovements(drivetrain, limeLightFront, reefController));
     }
 
     private void bindReefController(){
