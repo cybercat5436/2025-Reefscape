@@ -381,7 +381,8 @@ public class RobotContainer {
         joystick2.x()
             .onTrue(new InstantCommand(() -> elevator.raiseStartLevel())
             .andThen(Commands.waitSeconds(.25))
-            .andThen(new InstantCommand(() -> elevator.stopElevator())));
+            .andThen(new InstantCommand(() -> elevator.stopElevator()))
+            .andThen(new InstantCommand(() -> elevator.resetEncoder())));
         // joystick2.a()
         //     .onTrue(new InstantCommand(() -> elevator.raiseLevel2()));
         // joystick2.b()

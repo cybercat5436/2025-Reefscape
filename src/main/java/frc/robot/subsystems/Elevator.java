@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import java.lang.reflect.Array;
 
 import com.ctre.phoenix6.StatusCode;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -93,18 +94,21 @@ public class Elevator extends SubsystemBase {
 
     // elevator.getConfigurator().apply(talonFXConfigs, 0.050);
      TalonFXConfiguration cfg = new TalonFXConfiguration();
+    //  .withCurrentLimits(
+    //         new CurrentLimitsConfigs()
+    //             .withStatorCurrentLimit(Amps.of(60))
+    //             .withStatorCurrentLimitEnable(true)
+        // );
+        
      cfg.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
     /* Configure gear ratio */
-    FeedbackConfigs fdb = cfg.Feedback;
-    fdb.SensorToMechanismRatio = 12.8; // 12.8 rotor rotations per mechanism rotation
-
     /* Configure Motion Magic */
     MotionMagicConfigs mm = cfg.MotionMagic;
-    mm.withMotionMagicCruiseVelocity(75) // 75 // 5 (mechanism) rotations per second cruise
-      .withMotionMagicAcceleration(30) //30 // Take approximately 0.5 seconds to reach max vel
+    mm.withMotionMagicCruiseVelocity(80) // 75 // 5 (mechanism) rotations per second cruise
+      .withMotionMagicAcceleration(80) //30 // Take approximately 0.5 seconds to reach max vel
       // Take approximately 0.1 seconds to reach max accel 
-      .withMotionMagicJerk(300);
+      .withMotionMagicJerk(1600);
 
     Slot0Configs slot0 = cfg.Slot0;
     slot0.kS = 0.25; // Add 0.25 V output to overcome static friction
@@ -138,6 +142,7 @@ public class Elevator extends SubsystemBase {
     SmartDashboard.putData(this);
 
     elevator.setPosition(0);
+    SmartDashboard.putNumber("Level 4 target ehight", L4);
   }
 
   
@@ -262,6 +267,9 @@ public class Elevator extends SubsystemBase {
   public void holdPosition() {
     elevator.setControl(m_motmag.withPosition(this.getEncoderValue()));
   }
+  public void resetEncoder() {
+    elevator.setPosition(0);
+  }
    
   
   public void stopElevator() {
@@ -276,6 +284,8 @@ public class Elevator extends SubsystemBase {
       default: 
         break;
     }
+
+    SmartDashboard.putNumber("Set Height ", getEncoderValue());
   }
 
   public double getEncoderValue() {
