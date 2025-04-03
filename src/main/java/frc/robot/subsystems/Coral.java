@@ -30,15 +30,16 @@ public class Coral extends SubsystemBase {
     // This method will be called once per scheduler run
   }
 
-  public void forward(double speed) {
+  public void intake(double speed) {
     coralMotor.set(speed);
     
   }
   
-  public void backward(double speed) {
+  public void shoot(double speed) {
     System.out.println("Backward%%%%%%%%");
     coralMotor.set(-speed);
   }
+  
 
   public void stopMotor() {
     System.out.println("Stopped^^^^^^");

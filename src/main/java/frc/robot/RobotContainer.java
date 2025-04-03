@@ -33,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -118,13 +119,13 @@ public class RobotContainer {
         new InstantCommand(() -> elevator.raiseLevel4())
         ,Commands.waitSeconds(2.5)
         ,Commands.print("Auto Coral High")
-        .andThen(new InstantCommand(() -> coral.backward(0.9)))
+        .andThen(new InstantCommand(() -> coral.shoot(0.9)))
         , Commands.waitSeconds(0.5)
          .andThen(new InstantCommand(() -> coral.stopMotor())))
          .andThen(new InstantCommand(() -> elevator.stopElevator()));
 
     private SequentialCommandGroup detectReefL4Auton = 
-        new InstantCommand(() -> elevator.resetEncoder())
+        new InstantCommand(() -> {if(elevator.atTargetHeight()) elevator.resetEncoder();})
         .andThen(new InstantCommand(() -> elevator.l4HasRun = false))
         .andThen(new InstantCommand(() -> elevator.raiseLevel4()))
         .andThen(Commands.waitUntil(() -> elevator.atTargetHeight()).withTimeout(1))
@@ -135,7 +136,7 @@ public class RobotContainer {
         // .andThen(new InstantCommand(() -> elevator.transferTargetHeight()))
         .andThen(new InstantCommand(() -> elevator.l4HasRun = true))
         .andThen(new PrintCommand("This is running detectReefL4"))
-        .andThen(new InstantCommand(() -> coral.backward(1)))
+        .andThen(new InstantCommand(() -> coral.shoot(1)))
         .andThen(Commands.waitSeconds(0.5)
         .andThen(new InstantCommand(() -> coral.stopMotor())));
 
@@ -144,25 +145,40 @@ public class RobotContainer {
         .andThen(Commands.waitUntil(() -> elevator.atTargetHeight()).withTimeout(1))
         .andThen(Commands.waitSeconds(0.5))
         .andThen(new PrintCommand("This is running detectReefL4"))
-        .andThen(new InstantCommand(() -> coral.backward(1)))
+        .andThen(new InstantCommand(() -> coral.shoot(1)))
         .andThen(Commands.waitSeconds(0.5)
         .andThen(new InstantCommand(() -> coral.stopMotor())));
 
-    private SequentialCommandGroup detectReefL3 = new SequentialCommandGroup(
+    private SequentialCommandGroup detectReefL3 =
         new InstantCommand(() -> elevator.raiseLevel3())
-        .andThen(new DetectReefWithCANrange(elevator, reefDetector))
+        .andThen(Commands.waitUntil(() -> elevator.atTargetHeight()).withTimeout(1))
         .andThen(Commands.waitSeconds(0.5))
-        .andThen(new InstantCommand(() -> coral.backward(1)))
+        .andThen(new InstantCommand(() -> elevator.moveUpSlowly()))
+        .andThen(Commands.waitUntil(() -> !reefDetector.isGamePieceClose).withTimeout(1))
+        .andThen(new InstantCommand(() -> elevator.holdPosition()))
+        // .andThen(new InstantCommand(() -> elevator.transferTargetHeight()))
+        .andThen(new PrintCommand("This is running detectReefL3"))
+        .andThen(new InstantCommand(() -> coral.shoot(0.50)))
         .andThen(Commands.waitSeconds(0.5)
-        .andThen(new InstantCommand(() -> coral.stopMotor()))));
+        .andThen(new InstantCommand(() -> coral.stopMotor()))); // new InstantCommand(() -> elevator.raiseLevel3())
+        // .andThen(new DetectReefWithCANrange(elevator, reefDetector))
+        // .andThen(Commands.waitSeconds(0.5))
+        // .andThen(new InstantCommand(() -> coral.backward(1)))
+        // .andThen(Commands.waitSeconds(0.5)
+        // .andThen(new InstantCommand(() -> coral.stopMotor()))));
         
-    private SequentialCommandGroup detectReefL2 = new SequentialCommandGroup(
+    private SequentialCommandGroup detectReefL2 = 
         new InstantCommand(() -> elevator.raiseLevel2())
-        .andThen(new DetectReefWithCANrange(elevator, reefDetector))
+        .andThen(Commands.waitUntil(() -> elevator.atTargetHeight()).withTimeout(1))
         .andThen(Commands.waitSeconds(0.5))
-        .andThen(new InstantCommand(() -> coral.backward(1)))
+        .andThen(new InstantCommand(() -> elevator.moveUpSlowly()))
+        .andThen(Commands.waitUntil(() -> !reefDetector.isGamePieceClose).withTimeout(1))
+        .andThen(new InstantCommand(() -> elevator.holdPosition()))
+        // .andThen(new InstantCommand(() -> elevator.transferTargetHeight()))
+        .andThen(new PrintCommand("This is running detectReefL2"))
+        .andThen(new InstantCommand(() -> coral.shoot(0.50)))
         .andThen(Commands.waitSeconds(0.5)
-        .andThen(new InstantCommand(() -> coral.stopMotor()))));
+        .andThen(new InstantCommand(() -> coral.stopMotor())));
                
            
     // private Command autoCoralHigh = Commands.sequence(
@@ -202,10 +218,10 @@ public class RobotContainer {
         NamedCommands.registerCommand("autoCoralHigh", autoCoralHigh);
         NamedCommands.registerCommand("autoAlign", autoAlign);
         NamedCommands.registerCommand("raiseArmHigh", new InstantCommand(() -> elevator.raiseLevel4()));
-        NamedCommands.registerCommand("shootCoral", new InstantCommand(() -> coral.backward(1)).andThen(Commands.waitSeconds(0.3)).andThen(new InstantCommand(() -> coral.stopMotor())));
+        NamedCommands.registerCommand("shootCoral", new InstantCommand(() -> coral.shoot(1)).andThen(Commands.waitSeconds(0.3)).andThen(new InstantCommand(() -> coral.stopMotor())));
         NamedCommands.registerCommand("lowerElevator", new InstantCommand(() -> elevator.raiseStartLevel()).andThen(Commands.waitSeconds(2).andThen(new InstantCommand(() -> elevator.stopElevator()))));
         NamedCommands.registerCommand("coralIntake", new CoralIntakeWithDetection(coral, coralSensor));
-        NamedCommands.registerCommand("stopCoralIntake", new InstantCommand(() -> coral.forward(0)));
+        NamedCommands.registerCommand("stopCoralIntake", new InstantCommand(() -> coral.intake(0)));
         NamedCommands.registerCommand("setClimberArmsToAutonStartPosition", 
         new InstantCommand(() -> climber2.climberAutonStartPosition())
         .andThen(Commands.waitSeconds(0.5))
@@ -320,41 +336,41 @@ public class RobotContainer {
         // *************************************************
         // Point wheels but don't translate
         // *************************************************
-        joystick.x().whileTrue(drivetrain.applyRequest(() ->
-        point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
-        ));
+        // joystick.x().whileTrue(drivetrain.applyRequest(() ->
+        // point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
+        // ));
         
 
         // *************************************************
         // Reef Controller
         // *************************************************
-        joystick.povUp().onTrue(new InstantCommand(() -> reefController.setTargetReefPosition(ReefPosition.G))
-                .andThen(getRumbleCommand()));
-        joystick.povDown().onTrue(new InstantCommand(()-> reefController.setTargetReefPosition(ReefPosition.A))
-                .andThen(getRumbleCommand()));
-        joystick.povDownLeft().onTrue(new InstantCommand(()-> reefController.setTargetReefPosition(ReefPosition.L))
-                .andThen(getRumbleCommand())
-                .andThen(Commands.waitSeconds(0.1))
-                .andThen(getRumbleCommand()));
-        joystick.povDownRight().onTrue(new InstantCommand(()-> reefController.setTargetReefPosition(ReefPosition.C))
-                .andThen(getRumbleCommand())
-                .andThen(Commands.waitSeconds(0.1))
-                .andThen(getRumbleCommand()));
-        joystick.povUpLeft().onTrue(new InstantCommand(()-> reefController.setTargetReefPosition(ReefPosition.I))
-                .andThen(getRumbleCommand())
-                .andThen(Commands.waitSeconds(0.1))
-                .andThen(getRumbleCommand()));
-        joystick.povUpRight().onTrue(new InstantCommand(()-> reefController.setTargetReefPosition(ReefPosition.E))
-                .andThen(getRumbleCommand())
-                .andThen(Commands.waitSeconds(0.1))
-                .andThen(getRumbleCommand()));
+        // joystick.povUp().onTrue(new InstantCommand(() -> reefController.setTargetReefPosition(ReefPosition.G))
+        //         .andThen(getRumbleCommand()));
+        // joystick.povDown().onTrue(new InstantCommand(()-> reefController.setTargetReefPosition(ReefPosition.A))
+        //         .andThen(getRumbleCommand()));
+        // joystick.povDownLeft().onTrue(new InstantCommand(()-> reefController.setTargetReefPosition(ReefPosition.L))
+        //         .andThen(getRumbleCommand())
+        //         .andThen(Commands.waitSeconds(0.1))
+        //         .andThen(getRumbleCommand()));
+        // joystick.povDownRight().onTrue(new InstantCommand(()-> reefController.setTargetReefPosition(ReefPosition.C))
+        //         .andThen(getRumbleCommand())
+        //         .andThen(Commands.waitSeconds(0.1))
+        //         .andThen(getRumbleCommand()));
+        // joystick.povUpLeft().onTrue(new InstantCommand(()-> reefController.setTargetReefPosition(ReefPosition.I))
+        //         .andThen(getRumbleCommand())
+        //         .andThen(Commands.waitSeconds(0.1))
+        //         .andThen(getRumbleCommand()));
+        // joystick.povUpRight().onTrue(new InstantCommand(()-> reefController.setTargetReefPosition(ReefPosition.E))
+        //         .andThen(getRumbleCommand())
+        //         .andThen(Commands.waitSeconds(0.1))
+        //         .andThen(getRumbleCommand()));
 
 
         // *************************************************
         // LEDs
         // *************************************************
-        joystick.povLeft().onTrue(new InstantCommand(() -> candleSystem.decrementAnimation()));
-        joystick.povRight().onTrue(new InstantCommand(() -> candleSystem.incrementAnimation()));
+        joystick.povDown().onTrue(new InstantCommand(() -> candleSystem.decrementAnimation()));
+        joystick.povUp().onTrue(new InstantCommand(() -> candleSystem.incrementAnimation()));
 
         /*joystick.povRight()
             .onTrue(new InstantCommand(() -> candleSystem.flashColor(AvailableColors.Red))
@@ -379,63 +395,102 @@ public class RobotContainer {
         // *************************************************
         // Elevator Controls
         // *************************************************
-        joystick2.x()
-            .onTrue(new InstantCommand(() -> elevator.raiseStartLevel())
-            .andThen(Commands.waitSeconds(.25))
-            .andThen(new InstantCommand(() -> elevator.stopElevator()))
-            );
+        // joystick2.x()
+        //     .onTrue(new InstantCommand(() -> elevator.raiseLevel2())
+        //     .andThen(new WaitUntilCommand(() -> elevator.atTargetHeight()))
+        //     .andThen(new InstantCommand(() -> elevator.holdPosition()).withTimeout(0.25))
+        //     .andThen(new InstantCommand(() -> elevator.stopElevator()))
+        //     .andThen(new InstantCommand(() -> elevator.elevatorLevel = 0))
+        //     .andThen(new InstantCommand(() -> {if(elevator.atTargetHeight()) elevator.resetEncoder();}))
+        //     );
         
         // joystick2.a()
         //     .onTrue(new InstantCommand(() -> elevator.raiseLevel2()));
         // joystick2.b()
         //     .onTrue(new InstantCommand(() -> elevator.raiseLevel3()));
-        joystick2.b()
-            .onTrue(detectReefL4Auton);
         joystick2.a()
             .onTrue(detectReefL2);
-        // joystick2.b()
-        //     .onTrue(detectReefL3);
+        joystick2.b()
+            .onTrue(detectReefL3);
         joystick2.y()
-            .onTrue(reefL4);
+            .onTrue(detectReefL4Auton);
         // joystick2.y().whileTrue(new InstantCommand(() -> elevator.moveUpSlowly()))
         // .onFalse(new InstantCommand(() -> elevator.stopElevator()));
         
-        joystick2.povRight().onTrue(new InstantCommand(() -> elevator.incrementHeightAdjustment()));
-        joystick2.povLeft().onTrue(new InstantCommand(() -> elevator.decrementHeightAdjustment()));
+        
+        Trigger l4Trigger = new Trigger (() -> (joystick2.getLeftY() < -0.75));
+        Trigger l3Trigger = new Trigger (() -> (joystick2.getLeftX() > 0.75));
+        Trigger l2Trigger = new Trigger (() -> (joystick2.getLeftY() > 0.75));
+        Trigger l1Trigger = new Trigger (() -> (joystick2.getLeftX() < -0.75));
+        Trigger upAdjustmentTrigger = new Trigger (() -> (joystick2.getRightY() < -0.75));
+        Trigger downAdjustmentTrigger = new Trigger (() -> (joystick2.getRightY() > 0.75));
+
+        l4Trigger.onTrue(new InstantCommand(() -> elevator.raiseLevel4()));
+        l3Trigger.onTrue(new InstantCommand(() -> elevator.raiseLevel3()));
+        l2Trigger.onTrue(new InstantCommand(() -> elevator.raiseLevel2()));
+        
+        l1Trigger.onTrue(new InstantCommand(() -> elevator.raiseLevel2())
+            .andThen(new WaitUntilCommand(() -> elevator.atTargetHeight()))
+            .andThen(new InstantCommand(() -> elevator.holdPosition()).withTimeout(0.25))
+            .andThen(new InstantCommand(() -> elevator.stopElevator()))
+            .andThen(new InstantCommand(() -> elevator.elevatorLevel = 0))
+            .andThen(new InstantCommand(() -> {if(elevator.atTargetHeight()) elevator.resetEncoder();}))
+        );
+
+        upAdjustmentTrigger.onTrue(new InstantCommand(() -> elevator.incrementHeightAdjustment()));
+        downAdjustmentTrigger.onTrue(new InstantCommand(() -> elevator.decrementHeightAdjustment()));
 
         // *************************************************
         // Climber Controls
         // *************************************************
         // right/left for these triggers is ROBOT-CENTRIC
-        Trigger rightClimbUpTrigger = new Trigger (() -> (joystick2.getRightY() < -0.2));
-        Trigger rightClimbDownTrigger = new Trigger(() -> (joystick2.getRightY() > 0.2));
-        Trigger leftClimbUpTrigger = new Trigger(() -> (joystick2.getLeftY() < -0.2));
-        Trigger leftClimbDownTrigger = new Trigger(() -> (joystick2.getLeftY() > 0.2));
-        Trigger rightClimberStopTrigger = new Trigger(() -> joystick2.getRightY() >= -0.2 && joystick2.getRightY() <= 0.2);
-        Trigger leftClimberStopTrigger = new Trigger(() -> joystick2.getLeftY() >= -0.2 && joystick2.getLeftY() <= 0.2);
+        // Trigger rightClimbUpTrigger = new Trigger (() -> (joystick2.getRightY() < -0.2));
+        // Trigger rightClimbDownTrigger = new Trigger(() -> (joystick2.getRightY() > 0.2));
+        // Trigger leftClimbUpTrigger = new Trigger(() -> (joystick2.getLeftY() < -0.2));
+        // Trigger leftClimbDownTrigger = new Trigger(() -> (joystick2.getLeftY() > 0.2));
+        // Trigger rightClimberStopTrigger = new Trigger(() -> joystick2.getRightY() >= -0.2 && joystick2.getRightY() <= 0.2);
+        // Trigger leftClimberStopTrigger = new Trigger(() -> joystick2.getLeftY() >= -0.2 && joystick2.getLeftY() <= 0.2);
 
         // Motors controlled from these triggers are OPERATOR-CENTRIC
         // Because the robot is facing 180 during climb, the right/left sticks correspond to opposite side motors
-        leftClimbUpTrigger
-            .whileTrue(new InstantCommand(() -> climber2.rightClimb(0.2)).repeatedly());
-        rightClimbUpTrigger
-            .whileTrue(new InstantCommand(() -> climber2.leftClimb(0.2)).repeatedly());
-        leftClimbDownTrigger
-            .whileTrue(new InstantCommand(() -> climber2.rightClimb(-0.2)).repeatedly());
-        rightClimbDownTrigger
-            .whileTrue(new InstantCommand(() -> climber2.leftClimb(-0.2)).repeatedly());
-        rightClimberStopTrigger
-            .whileTrue(new InstantCommand(() -> climber2.leftClimb(0)));
-        leftClimberStopTrigger
-            .whileTrue(new InstantCommand(() -> climber2.rightClimb(0)));
+        // leftClimbUpTrigger
+        //     .whileTrue(new InstantCommand(() -> climber2.rightClimb(0.2)).repeatedly());
+        // rightClimbUpTrigger
+        //     .whileTrue(new InstantCommand(() -> climber2.leftClimb(0.2)).repeatedly());
+        // leftClimbDownTrigger
+        //     .whileTrue(new InstantCommand(() -> climber2.rightClimb(-0.2)).repeatedly());
+        // rightClimbDownTrigger
+        //     .whileTrue(new InstantCommand(() -> climber2.leftClimb(-0.2)).repeatedly());
+        // rightClimberStopTrigger
+        //     .whileTrue(new InstantCommand(() -> climber2.leftClimb(0)));
+        // leftClimberStopTrigger
+        //     .whileTrue(new InstantCommand(() -> climber2.rightClimb(0)));
 
         // Climber Encoder overrides
-        joystick2.back().and(leftClimbUpTrigger).whileTrue(new InstantCommand(() -> climber2.rightClimbOveride(0.2)).repeatedly());
-        joystick2.back().and(rightClimbUpTrigger).whileTrue(new InstantCommand(() -> climber2.leftClimbOveride(0.2)).repeatedly());
-        joystick2.back().and(leftClimbDownTrigger).whileTrue(new InstantCommand(() -> climber2.rightClimbOveride(-0.2)).repeatedly());
-        joystick2.back().and(rightClimbDownTrigger).whileTrue(new InstantCommand(() -> climber2.leftClimbOveride(-0.2)).repeatedly());
-        joystick2.back().and(leftClimberStopTrigger).whileTrue(new InstantCommand(() -> climber2.rightClimbOveride(0)));
-        joystick2.back().and(rightClimberStopTrigger).whileTrue(new InstantCommand(() -> climber2.leftClimbOveride(0)));
+        // joystick2.back().and(leftClimbUpTrigger).whileTrue(new InstantCommand(() -> climber2.rightClimbOveride(0.2)).repeatedly());
+        // joystick2.back().and(rightClimbUpTrigger).whileTrue(new InstantCommand(() -> climber2.leftClimbOveride(0.2)).repeatedly());
+        // joystick2.back().and(leftClimbDownTrigger).whileTrue(new InstantCommand(() -> climber2.rightClimbOveride(-0.2)).repeatedly());
+        // joystick2.back().and(rightClimbDownTrigger).whileTrue(new InstantCommand(() -> climber2.leftClimbOveride(-0.2)).repeatedly());
+        // joystick2.back().and(leftClimberStopTrigger).whileTrue(new InstantCommand(() -> climber2.rightClimbOveride(0)));
+        // joystick2.back().and(rightClimberStopTrigger).whileTrue(new InstantCommand(() -> climber2.leftClimbOveride(0)));
+        
+        joystick.povLeft().onTrue(new InstantCommand(() -> climber2.leftClimb(-0.2)).repeatedly())
+        .onFalse(new InstantCommand(() -> climber2.stopClimb()));
+        joystick.povRight().onTrue(new InstantCommand(() -> climber2.rightClimb(0.2)).repeatedly())
+        .onFalse(new InstantCommand(() -> climber2.stopClimb()));
+        joystick.b().onTrue(new InstantCommand(() -> climber2.leftClimb(-0.2)).repeatedly())
+        .onFalse(new InstantCommand(() -> climber2.stopClimb()));
+        joystick.x().onTrue(new InstantCommand(() -> climber2.leftClimb(0.2)).repeatedly())
+        .onFalse(new InstantCommand(() -> climber2.stopClimb()));
+
+        joystick.rightBumper().and(joystick.povRight()).whileTrue(new InstantCommand(() -> climber2.rightClimbOveride(0.2)).repeatedly())
+        .onFalse(new InstantCommand(() -> climber2.stopClimb()));
+        joystick2.rightBumper().and(joystick.x()).whileTrue(new InstantCommand(() -> climber2.leftClimbOveride(0.2)).repeatedly())
+        .onFalse(new InstantCommand(() -> climber2.stopClimb()));
+        joystick2.rightBumper().and(joystick.povLeft()).whileTrue(new InstantCommand(() -> climber2.rightClimbOveride(-0.2)).repeatedly())
+        .onFalse(new InstantCommand(() -> climber2.stopClimb()));
+        joystick2.rightBumper().and(joystick.b()).whileTrue(new InstantCommand(() -> climber2.leftClimbOveride(-0.2)).repeatedly())
+        .onFalse(new InstantCommand(() -> climber2.stopClimb()));
         
 
         // *************************************************
@@ -444,11 +499,11 @@ public class RobotContainer {
         // Trigger coralIntakeTrigger = new Trigger ((joystick2.leftTrigger()));
 
         joystick2.leftTrigger()
-            .whileTrue(new InstantCommand(() -> coral.backward(0.9)))
+            .whileTrue(new InstantCommand(() -> coral.shoot(1)))
             .onFalse(new InstantCommand(() -> coral.stopMotor()));
 
         joystick2.leftBumper()
-                .whileTrue(new InstantCommand(() -> coral.forward(0.8)))
+                .whileTrue(new InstantCommand(() -> coral.intake(0.8)))
                 .onFalse(new InstantCommand(() -> coral.stopMotor())); 
 
 
@@ -457,11 +512,11 @@ public class RobotContainer {
         // *************************************************
         // Trigger algaeIntakeTrigger = new Trigger ((joystick2.rightTrigger()));
 
-        joystick2.rightTrigger()
+        joystick2.rightBumper()
             .whileTrue(new InstantCommand(() -> algae.intakeBall(1)))
             .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
 
-        joystick2.rightBumper()
+        joystick2.rightTrigger()
             .whileTrue(new InstantCommand(() -> algae.intakeBall(-0.7)))
             .onFalse(new InstantCommand(() -> algae.stopBallMotor()));
 
@@ -471,18 +526,19 @@ public class RobotContainer {
         joystick2.povDown()
             .onTrue(new InstantCommand(() -> algae.algaeLow()))
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
-        joystick2.povUpRight()
+        joystick2.povLeft()
             .onTrue(new InstantCommand(() -> algae.algaeStart()))
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
-        joystick2.povDownLeft()
-            .whileTrue(new InstantCommand(() -> algae.algaeUp(0.3)))
-            .onFalse(new InstantCommand(() -> algae.algaeStop()));  
-        joystick2.povUpLeft()
-            .whileTrue(new InstantCommand(() -> algae.algaeDown(0.3)))
-            .onFalse(new InstantCommand(() -> algae.algaeStop()));
-        joystick2.povDownRight()
+        joystick2.povRight()
             .whileTrue(new InstantCommand(() -> algae.algaeProcessor()))
             .onFalse(new InstantCommand(() -> algae.algaeStop()));
+        joystick2.povUpLeft()
+            .whileTrue(new InstantCommand(() -> algae.algaeUp(0.3)))
+            .onFalse(new InstantCommand(() -> algae.algaeStop()));  
+        joystick2.povDownLeft()
+            .whileTrue(new InstantCommand(() -> algae.algaeDown(0.3)))
+            .onFalse(new InstantCommand(() -> algae.algaeStop()));
+        
 
         // joystick2.povUp().and(joystick2.rightBumper())
         //     .whileTrue(new InstantCommand(() -> algae.releaseBall(-0.3))) 

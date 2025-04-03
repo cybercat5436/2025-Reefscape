@@ -52,7 +52,7 @@ public class AutoAlignWheelMovements extends Command {
   private Timer timer = new Timer();
   private CANdleSystem candleSystem = CANdleSystem.getInstance();
   private ReefController reefController;
-    /** Creates a new AutoAlignWithLimelight. */
+    /** Creates a new AutoAlignWheelMovements. */
     public AutoAlignWheelMovements(CommandSwerveDrivetrain commandSwerveDrivetrain, LimeLight limeLight, ReefController reefController) {
       // Use addRequirements() here to declare subsystem dependencies.
       this.addRequirements(commandSwerveDrivetrain);

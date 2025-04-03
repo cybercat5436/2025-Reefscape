@@ -22,7 +22,7 @@ public class CoralIntakeWithDetection extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    coral.backward(-1);
+    coral.shoot(-1);
 
   }
 
@@ -33,7 +33,7 @@ public class CoralIntakeWithDetection extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    coral.backward(0);
+    coral.shoot(0);
   }
 
   // Returns true when the command should end.

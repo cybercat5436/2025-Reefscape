@@ -64,8 +64,8 @@ public enum Sensors{
                 .withFOVRangeY(6.75)
             ).withProximityParams(new ProximityParamsConfigs()
                 .withProximityHysteresis(0.05)
-                .withProximityThreshold(0.45)
-                .withMinSignalStrengthForValidMeasurement(1500)
+                .withProximityThreshold(0.8)
+                .withMinSignalStrengthForValidMeasurement(3000)
             );
     }
     

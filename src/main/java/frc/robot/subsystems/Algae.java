@@ -34,12 +34,13 @@ public class Algae extends SubsystemBase {
   SparkMaxConfig armConfig;
   private SparkClosedLoopController armClosedLoopController;
   private RelativeEncoder encoder;
-  private double targetPositionHigh = -19;
+  private double targetPositionHigh = -18;
   private double targetPositionLow = -23;
   private double targetPositionProcessor = -26;
   private double targetStartPosition = 0;
   private double targetVelocity = 500;
   private double stopVelocity = 0;
+  private double algaeLowerLimit = 1;
 
   
 
@@ -156,7 +157,8 @@ public class Algae extends SubsystemBase {
       System.out.println("Algae Processor");
     }
     public void algaeStart() {
-      armClosedLoopController.setReference(targetStartPosition, ControlType.kMAXMotionPositionControl,
+     
+        armClosedLoopController.setReference(targetStartPosition, ControlType.kMAXMotionPositionControl,
       ClosedLoopSlot.kSlot0);
       System.out.println("Algae Processor");
     }
