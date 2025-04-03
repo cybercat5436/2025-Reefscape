@@ -126,15 +126,13 @@ public class RobotContainer {
 
     private SequentialCommandGroup detectReefL4Auton = 
         new InstantCommand(() -> {if(elevator.atTargetHeight()) elevator.resetEncoder();})
-        .andThen(new InstantCommand(() -> elevator.l4HasRun = false))
         .andThen(new InstantCommand(() -> elevator.raiseLevel4()))
         .andThen(Commands.waitUntil(() -> elevator.atTargetHeight()).withTimeout(1))
         .andThen(Commands.waitSeconds(0.5))
-        .andThen(new InstantCommand(() -> elevator.moveUpSlowly()).unless(() -> elevator.l4HasRun))
+        .andThen(new InstantCommand(() -> elevator.moveUpSlowly()))
         .andThen(Commands.waitUntil(() -> !reefDetector.isGamePieceClose).withTimeout(1))
         .andThen(new InstantCommand(() -> elevator.holdPosition()))
         // .andThen(new InstantCommand(() -> elevator.transferTargetHeight()))
-        .andThen(new InstantCommand(() -> elevator.l4HasRun = true))
         .andThen(new PrintCommand("This is running detectReefL4"))
         .andThen(new InstantCommand(() -> coral.shoot(1)))
         .andThen(Commands.waitSeconds(0.5)

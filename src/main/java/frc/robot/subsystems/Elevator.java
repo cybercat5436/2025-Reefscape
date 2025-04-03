@@ -125,8 +125,8 @@ public class Elevator extends SubsystemBase {
     slot1.kI = 0; // No output for integrated error
     slot1.kD = 0; // No output for error derivative
     // Peak output of 8 volts
-    cfg.Voltage.withPeakForwardVoltage(Volts.of(8))
-      .withPeakReverseVoltage(Volts.of(-8));
+    // cfg.Voltage.withPeakForwardVoltage(Volts.of(8))
+    //   .withPeakReverseVoltage(Volts.of(-8));
 
 
     StatusCode status = StatusCode.StatusCodeNotInitialized;
@@ -143,7 +143,7 @@ public class Elevator extends SubsystemBase {
     SmartDashboard.putData(this);
 
     elevator.setPosition(0);
-    SmartDashboard.putNumber("Level 4 target ehight", L4);
+    SmartDashboard.putNumber("Level 4 target height", L4);
   }
 
   
