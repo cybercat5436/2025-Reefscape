@@ -94,7 +94,7 @@ public class RobotContainer {
     private final ReefController reefController = ReefController.getInstance();
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private final LimeLight limeLightFront = new LimeLight("limelight-front", 0.02, -0.3, 0.65, -90.0, 0.0, 0.0);
-    private final LimeLight limeLightFrontRight = new LimeLight("limelight-right", 0.15, 0.15, 0.33, 0, -10.0, 30.0);
+    private final LimeLight limeLightFrontRight = new LimeLight("limelight-right", 0.162, 0.04, 0.33, -3.2, -16, 32.5);
     private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, limeLightFrontRight, drivetrain);
     private final AutoAlign autoAlign = new AutoAlign(drivetrain,limeLightFront);
     private final DriveForward driveForward = new DriveForward(drivetrain, HalfSpeed, robotCentricDrive);
@@ -395,14 +395,14 @@ public class RobotContainer {
         // *************************************************
         // Elevator Controls
         // *************************************************
-        // joystick2.x()
-        //     .onTrue(new InstantCommand(() -> elevator.raiseLevel2())
-        //     .andThen(new WaitUntilCommand(() -> elevator.atTargetHeight()))
-        //     .andThen(new InstantCommand(() -> elevator.holdPosition()).withTimeout(0.25))
-        //     .andThen(new InstantCommand(() -> elevator.stopElevator()))
-        //     .andThen(new InstantCommand(() -> elevator.elevatorLevel = 0))
-        //     .andThen(new InstantCommand(() -> {if(elevator.atTargetHeight()) elevator.resetEncoder();}))
-        //     );
+        joystick2.x()
+            .onTrue(new InstantCommand(() -> elevator.raiseLevel2())
+            .andThen(new WaitUntilCommand(() -> elevator.atTargetHeight()))
+            .andThen(new InstantCommand(() -> elevator.holdPosition()).withTimeout(0.25))
+            .andThen(new InstantCommand(() -> elevator.stopElevator()))
+            .andThen(new InstantCommand(() -> elevator.elevatorLevel = 0))
+            .andThen(new InstantCommand(() -> {if(elevator.atTargetHeight()) elevator.resetEncoder();}))
+            );
         
         // joystick2.a()
         //     .onTrue(new InstantCommand(() -> elevator.raiseLevel2()));
@@ -474,22 +474,22 @@ public class RobotContainer {
         // joystick2.back().and(leftClimberStopTrigger).whileTrue(new InstantCommand(() -> climber2.rightClimbOveride(0)));
         // joystick2.back().and(rightClimberStopTrigger).whileTrue(new InstantCommand(() -> climber2.leftClimbOveride(0)));
         
-        joystick.povLeft().onTrue(new InstantCommand(() -> climber2.leftClimb(-0.2)).repeatedly())
+        joystick.povLeft().whileTrue(new InstantCommand(() -> climber2.rightClimb(0.2)).repeatedly())
         .onFalse(new InstantCommand(() -> climber2.stopClimb()));
-        joystick.povRight().onTrue(new InstantCommand(() -> climber2.rightClimb(0.2)).repeatedly())
+        joystick.povRight().whileTrue(new InstantCommand(() -> climber2.rightClimb(-0.2)).repeatedly())
         .onFalse(new InstantCommand(() -> climber2.stopClimb()));
-        joystick.b().onTrue(new InstantCommand(() -> climber2.leftClimb(-0.2)).repeatedly())
+        joystick.b().whileTrue(new InstantCommand(() -> climber2.leftClimb(0.2)).repeatedly())
         .onFalse(new InstantCommand(() -> climber2.stopClimb()));
-        joystick.x().onTrue(new InstantCommand(() -> climber2.leftClimb(0.2)).repeatedly())
+        joystick.x().whileTrue(new InstantCommand(() -> climber2.leftClimb(-0.2)).repeatedly())
         .onFalse(new InstantCommand(() -> climber2.stopClimb()));
 
-        joystick.rightBumper().and(joystick.povRight()).whileTrue(new InstantCommand(() -> climber2.rightClimbOveride(0.2)).repeatedly())
+        joystick.rightBumper().and(joystick.povRight()).whileTrue(new InstantCommand(() -> climber2.rightClimbOveride(-0.2)).repeatedly())
         .onFalse(new InstantCommand(() -> climber2.stopClimb()));
-        joystick2.rightBumper().and(joystick.x()).whileTrue(new InstantCommand(() -> climber2.leftClimbOveride(0.2)).repeatedly())
+        joystick2.rightBumper().and(joystick.x()).whileTrue(new InstantCommand(() -> climber2.leftClimbOveride(-0.2)).repeatedly())
         .onFalse(new InstantCommand(() -> climber2.stopClimb()));
-        joystick2.rightBumper().and(joystick.povLeft()).whileTrue(new InstantCommand(() -> climber2.rightClimbOveride(-0.2)).repeatedly())
+        joystick2.rightBumper().and(joystick.povLeft()).whileTrue(new InstantCommand(() -> climber2.rightClimbOveride(0.2)).repeatedly())
         .onFalse(new InstantCommand(() -> climber2.stopClimb()));
-        joystick2.rightBumper().and(joystick.b()).whileTrue(new InstantCommand(() -> climber2.leftClimbOveride(-0.2)).repeatedly())
+        joystick2.rightBumper().and(joystick.b()).whileTrue(new InstantCommand(() -> climber2.leftClimbOveride(0.2)).repeatedly())
         .onFalse(new InstantCommand(() -> climber2.stopClimb()));
         
 

@@ -93,12 +93,12 @@ public class Elevator extends SubsystemBase {
     // motionMagicConfigs.MotionMagicJerk = 200; // 1600 rps/s^2 jerk (0.1 seconds)
 
     // elevator.getConfigurator().apply(talonFXConfigs, 0.050);
-     TalonFXConfiguration cfg = new TalonFXConfiguration()
-     .withCurrentLimits(
-            new CurrentLimitsConfigs()
-                .withStatorCurrentLimit(Amps.of(60))
-                .withStatorCurrentLimitEnable(true)
-        );
+     TalonFXConfiguration cfg = new TalonFXConfiguration();
+    //  .withCurrentLimits(
+    //         new CurrentLimitsConfigs()
+    //             .withStatorCurrentLimit(Amps.of(120))
+    //             .withStatorCurrentLimitEnable(true)
+    //     );
         
      cfg.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
      FeedbackConfigs fdb = cfg.Feedback;
@@ -106,7 +106,7 @@ public class Elevator extends SubsystemBase {
     /* Configure gear ratio */
     /* Configure Motion Magic */
     MotionMagicConfigs mm = cfg.MotionMagic;
-    mm.withMotionMagicCruiseVelocity(10) // 75 // 5 (mechanism) rotations per second cruise
+    mm.withMotionMagicCruiseVelocity(75) // 75 // 5 (mechanism) rotations per second cruise
       .withMotionMagicAcceleration(30) //30 // Take approximately 0.5 seconds to reach max vel
       // Take approximately 0.1 seconds to reach max accel 
       .withMotionMagicJerk(300);
