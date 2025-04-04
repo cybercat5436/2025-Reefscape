@@ -7,6 +7,7 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 
 import java.io.IOException;
+import java.lang.instrument.Instrumentation;
 import java.time.Instant;
 
 import org.json.simple.parser.ParseException;
@@ -125,8 +126,7 @@ public class RobotContainer {
          .andThen(new InstantCommand(() -> elevator.stopElevator()));
 
     private SequentialCommandGroup detectReefL4Auton = 
-        new InstantCommand(() -> {if(elevator.atTargetHeight()) elevator.resetEncoder();})
-        .andThen(new InstantCommand(() -> elevator.raiseLevel4()))
+        new InstantCommand(() -> elevator.raiseLevel4())
         .andThen(Commands.waitUntil(() -> elevator.atTargetHeight()).withTimeout(1))
         .andThen(Commands.waitSeconds(0.5))
         .andThen(new InstantCommand(() -> elevator.moveUpSlowly()))
@@ -177,6 +177,9 @@ public class RobotContainer {
         .andThen(new InstantCommand(() -> coral.shoot(0.50)))
         .andThen(Commands.waitSeconds(0.5)
         .andThen(new InstantCommand(() -> coral.stopMotor())));
+
+    
+       
                
            
     // private Command autoCoralHigh = Commands.sequence(
@@ -222,14 +225,15 @@ public class RobotContainer {
         NamedCommands.registerCommand("stopCoralIntake", new InstantCommand(() -> coral.intake(0)));
         NamedCommands.registerCommand("setClimberArmsToAutonStartPosition", 
         new InstantCommand(() -> climber2.climberAutonStartPosition())
-        .andThen(Commands.waitSeconds(0.5))
+        .andThen(Commands.waitSeconds(1.1))
         .andThen(new InstantCommand(() -> climber2.stopClimb())
         ));
-        NamedCommands.registerCommand("autoAlignWithLimelight", autoALignWithLimelights);
+        NamedCommands.registerCommand("autoAlignWithLimelight timeout 1.25", new AutoAlignWithLimelight(drivetrain, limeLightFront).withTimeout(1.25));
+        NamedCommands.registerCommand("autoAlignWithLimelight timeout 2", new AutoAlignWithLimelight(drivetrain, limeLightFront).withTimeout(2));
         NamedCommands.registerCommand("driveForwardFor1Second", new  DriveForward(drivetrain, 2, robotCentricDrive));
         NamedCommands.registerCommand("faceWheels-120Degrees", new InstantCommand(() -> drivetrain.applyRequest(() ->
         point.withModuleDirection(new Rotation2d(-120)))));
-        NamedCommands.registerCommand("reefDetection", reefL4);
+        NamedCommands.registerCommand("reefDetection", detectReefL4Auton);
         
 
     }
@@ -315,14 +319,14 @@ public class RobotContainer {
         // *************************************************
         // Heading-locked drive mode (for ReefController)
         // *************************************************
-        joystick.a().whileTrue(drivetrain.applyRequest(() -> {
-            double xSpeed = slewRateLimiterX.calculate(-joystick.getLeftY()* maxSpeed);             
-            double ySpeed = slewRateLimiterY.calculate(-joystick.getLeftX()* maxSpeed);          
+        // joystick.a().whileTrue(drivetrain.applyRequest(() -> {
+        //     double xSpeed = slewRateLimiterX.calculate(-joystick.getLeftY()* maxSpeed);             
+        //     double ySpeed = slewRateLimiterY.calculate(-joystick.getLeftX()* maxSpeed);          
 
-        return fieldCentricFacingAngle.withVelocityX(xSpeed * Math.abs(xSpeed)) 
-            .withVelocityY(ySpeed * Math.abs(ySpeed)) 
-            .withTargetDirection(reefController.getTargetRobotPose().getRotation());
-        }));
+        // return fieldCentricFacingAngle.withVelocityX(xSpeed * Math.abs(xSpeed)) 
+        //     .withVelocityY(ySpeed * Math.abs(ySpeed)) 
+        //     .withTargetDirection(reefController.getTargetRobotPose().getRotation());
+        // }));
         
 
         // *************************************************
@@ -407,25 +411,28 @@ public class RobotContainer {
         // joystick2.b()
         //     .onTrue(new InstantCommand(() -> elevator.raiseLevel3()));
         joystick2.a()
-            .onTrue(detectReefL2);
+            .onTrue(new InstantCommand(() -> elevator.raiseLevel2()) 
+            );
         joystick2.b()
-            .onTrue(detectReefL3);
+            .onTrue(new InstantCommand(() -> elevator.raiseLevel3()));
         joystick2.y()
-            .onTrue(detectReefL4Auton);
+            .onTrue(new InstantCommand(() -> elevator.raiseLevel4()));
         // joystick2.y().whileTrue(new InstantCommand(() -> elevator.moveUpSlowly()))
         // .onFalse(new InstantCommand(() -> elevator.stopElevator()));
-        
-        
+
         Trigger l4Trigger = new Trigger (() -> (joystick2.getLeftY() < -0.75));
         Trigger l3Trigger = new Trigger (() -> (joystick2.getLeftX() > 0.75));
         Trigger l2Trigger = new Trigger (() -> (joystick2.getLeftY() > 0.75));
         Trigger l1Trigger = new Trigger (() -> (joystick2.getLeftX() < -0.75));
         Trigger upAdjustmentTrigger = new Trigger (() -> (joystick2.getRightY() < -0.75));
         Trigger downAdjustmentTrigger = new Trigger (() -> (joystick2.getRightY() > 0.75));
+       
 
-        l4Trigger.onTrue(new InstantCommand(() -> elevator.raiseLevel4()));
-        l3Trigger.onTrue(new InstantCommand(() -> elevator.raiseLevel3()));
-        l2Trigger.onTrue(new InstantCommand(() -> elevator.raiseLevel2()));
+        upAdjustmentTrigger.onTrue(new InstantCommand(() -> elevator.incrementHeightAdjustment()));
+        downAdjustmentTrigger.onTrue(new InstantCommand(() -> elevator.decrementHeightAdjustment()));
+        l4Trigger.onTrue(detectReefL4Auton);
+        l3Trigger.onTrue(detectReefL3);
+        l2Trigger.onTrue(detectReefL2);
         
         l1Trigger.onTrue(new InstantCommand(() -> elevator.raiseLevel2())
             .andThen(new WaitUntilCommand(() -> elevator.atTargetHeight()))
@@ -434,9 +441,6 @@ public class RobotContainer {
             .andThen(new InstantCommand(() -> elevator.elevatorLevel = 0))
             .andThen(new InstantCommand(() -> {if(elevator.atTargetHeight()) elevator.resetEncoder();}))
         );
-
-        upAdjustmentTrigger.onTrue(new InstantCommand(() -> elevator.incrementHeightAdjustment()));
-        downAdjustmentTrigger.onTrue(new InstantCommand(() -> elevator.decrementHeightAdjustment()));
 
         // *************************************************
         // Climber Controls
@@ -482,14 +486,16 @@ public class RobotContainer {
         .onFalse(new InstantCommand(() -> climber2.stopClimb()));
 
         joystick.rightBumper().and(joystick.povRight()).whileTrue(new InstantCommand(() -> climber2.rightClimbOveride(-0.2)).repeatedly())
-        .onFalse(new InstantCommand(() -> climber2.stopClimb()));
-        joystick2.rightBumper().and(joystick.x()).whileTrue(new InstantCommand(() -> climber2.leftClimbOveride(-0.2)).repeatedly())
-        .onFalse(new InstantCommand(() -> climber2.stopClimb()));
-        joystick2.rightBumper().and(joystick.povLeft()).whileTrue(new InstantCommand(() -> climber2.rightClimbOveride(0.2)).repeatedly())
-        .onFalse(new InstantCommand(() -> climber2.stopClimb()));
-        joystick2.rightBumper().and(joystick.b()).whileTrue(new InstantCommand(() -> climber2.leftClimbOveride(0.2)).repeatedly())
-        .onFalse(new InstantCommand(() -> climber2.stopClimb()));
+            .onFalse(new InstantCommand(() -> climber2.stopClimb()));
+        joystick.rightBumper().and(joystick.x()).whileTrue(new InstantCommand(() -> climber2.leftClimbOveride(-0.2)).repeatedly())
+            .onFalse(new InstantCommand(() -> climber2.stopClimb()));
+        joystick.rightBumper().and(joystick.povLeft()).whileTrue(new InstantCommand(() -> climber2.rightClimbOveride(0.2)).repeatedly())
+            .onFalse(new InstantCommand(() -> climber2.stopClimb()));
+        joystick.rightBumper().and(joystick.b()).whileTrue(new InstantCommand(() -> climber2.leftClimbOveride(0.2)).repeatedly())
+            .onFalse(new InstantCommand(() -> climber2.stopClimb()));
         
+        joystick.leftBumper().whileTrue(new InstantCommand(() -> climber2.climberStartPosition(0.2)).repeatedly())
+        .onFalse(new InstantCommand(() -> climber2.stopClimb()));
 
         // *************************************************
         // Coral Controls
@@ -497,7 +503,10 @@ public class RobotContainer {
         // Trigger coralIntakeTrigger = new Trigger ((joystick2.leftTrigger()));
 
         joystick2.leftTrigger()
-            .whileTrue(new InstantCommand(() -> coral.shoot(1)))
+            .whileTrue(new InstantCommand(() -> {
+                double speed = elevator.elevatorLevel == 4? 1 : 0.5;
+                coral.shoot(speed);
+            }))
             .onFalse(new InstantCommand(() -> coral.stopMotor()));
 
         joystick2.leftBumper()
@@ -576,6 +585,29 @@ public class RobotContainer {
         calibrationJoystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
         calibrationJoystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
+        Trigger l4Trigger = new Trigger (() -> (calibrationJoystick.getLeftY() < -0.75));
+        Trigger l3Trigger = new Trigger (() -> (calibrationJoystick.getLeftX() > 0.75));
+        Trigger l2Trigger = new Trigger (() -> (calibrationJoystick.getLeftY() > 0.75));
+        Trigger l1Trigger = new Trigger (() -> (calibrationJoystick.getLeftX() < -0.75));
+        Trigger upAdjustmentTrigger = new Trigger (() -> (calibrationJoystick.getRightY() < -0.75));
+        Trigger downAdjustmentTrigger = new Trigger (() -> (calibrationJoystick.getRightY() > 0.75));
+
+        l4Trigger.onTrue(detectReefL4Auton);
+        l3Trigger.onTrue(detectReefL3);
+        l2Trigger.onTrue(detectReefL2);
+        
+        l1Trigger.onTrue(new InstantCommand(() -> elevator.raiseLevel2())
+            .andThen(new WaitUntilCommand(() -> elevator.atTargetHeight()))
+            .andThen(new InstantCommand(() -> elevator.holdPosition()).withTimeout(0.25))
+            .andThen(new InstantCommand(() -> elevator.stopElevator()))
+            .andThen(new InstantCommand(() -> elevator.elevatorLevel = 0))
+            .andThen(new InstantCommand(() -> {if(elevator.atTargetHeight()) elevator.resetEncoder();}))
+        );
+
+        calibrationJoystick.b().whileTrue(new InstantCommand(() -> coral.intake(0.8)))
+        .onFalse(new InstantCommand(() -> coral.stopMotor()));
+        
+
 
         // *************************************************
         // Camera calibration for apriltag pipeline
@@ -596,9 +628,23 @@ public class RobotContainer {
         // *************************************************
         SmartDashboard.putData(" Climber arms to auton start position",
          new InstantCommand(() -> climber2.climberAutonStartPosition())
-         .andThen(Commands.waitSeconds(0.5))
+         .andThen(Commands.waitSeconds(1.1))
          .andThen(new InstantCommand(() -> climber2.stopClimb())
          ));
+        SmartDashboard.putData(" detect reef L4", 
+        new InstantCommand(() -> elevator.raiseLevel4())
+        .andThen(Commands.waitUntil(() -> elevator.atTargetHeight()).withTimeout(1))
+        .andThen(Commands.waitSeconds(0.5))
+        .andThen(new InstantCommand(() -> elevator.moveUpSlowly()))
+        .andThen(Commands.waitUntil(() -> !reefDetector.isGamePieceClose).withTimeout(1))
+        .andThen(new InstantCommand(() -> elevator.holdPosition()))
+        // .andThen(new InstantCommand(() -> elevator.transferTargetHeight()))
+        .andThen(new PrintCommand("This is running detectReefL4"))
+        .andThen(new InstantCommand(() -> coral.shoot(1)))
+        .andThen(Commands.waitSeconds(0.5)
+        .andThen(new InstantCommand(() -> coral.stopMotor()))));
+
+         
         calibrationJoystick.x().onTrue(new AutoAlignWheelMovements(drivetrain, limeLightFront, reefController));
     }
 

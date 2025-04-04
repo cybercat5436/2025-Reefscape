@@ -26,7 +26,7 @@
         {
           "type": "named",
           "data": {
-            "name": "autoAlignWithLimelight"
+            "name": "autoAlignWithLimelight timeout 1.25"
           }
         },
         {
@@ -75,7 +75,7 @@
         {
           "type": "named",
           "data": {
-            "name": "autoAlignWithLimelight"
+            "name": "autoAlignWithLimelight timeout 2"
           }
         },
         {

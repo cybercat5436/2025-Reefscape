@@ -27,7 +27,7 @@ public class Climber2 extends SubsystemBase {
     private final DutyCycleOut rightOut = new DutyCycleOut(0);
     private double rightEncoderValue;
     private double leftEncoderValue;
-    private double climberEncoderLimitUp = 0;
+    private double climberEncoderLimitUp = -0.5;
     private double climberEncoderLimitDown = -47;
     private double climberAutonStartPosition = -7.0;
     private MotionMagicVoltage m_mmReq = new MotionMagicVoltage(0);
@@ -120,6 +120,11 @@ public class Climber2 extends SubsystemBase {
  public void climberAutonStartPosition(){
   rightClimber.set(-0.2);
   leftClimber.set(-0.2);
+ }
+
+ public void climberStartPosition(double speed) {
+  this.rightClimb(0.2);
+  this.leftClimb(0.2);
  }
 
  

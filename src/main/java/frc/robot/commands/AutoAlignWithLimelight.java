@@ -45,7 +45,6 @@ public class AutoAlignWithLimelight extends Command {
   private boolean isTimedOut;
   private double horizontalThreshold = 0.5;
   private double verticalThreshold = 0.5;
-  private double timeThreshold = 1.25;
   private double yErrorCalculated;
   private double xErrorCalculated;
   private double intergratedError = 0;
@@ -199,7 +198,6 @@ public class AutoAlignWithLimelight extends Command {
       isYAligned = false;
     }
     // isXAligned = XDistanceError < verticalThreshold;
-    isTimedOut = timer.get() > timeThreshold;
     isCropMaxed = (cropValueMin - (cropAdjustmentMin * 0.05)) < -1;
     if(isCropMaxed){
       System.out.println("Crop is Maxed");
@@ -213,7 +211,7 @@ public class AutoAlignWithLimelight extends Command {
     
     // return isTimedOut || isYAligned && isXAligned;
     // return isXAligned;
-    return isCorrect > 3 || isTimedOut;
+    return isCorrect > 3 ;
 
   }
 }
