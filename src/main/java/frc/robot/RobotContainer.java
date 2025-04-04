@@ -177,8 +177,7 @@ public class RobotContainer {
         .andThen(new InstantCommand(() -> coral.shoot(0.50)))
         .andThen(Commands.waitSeconds(0.5)
         .andThen(new InstantCommand(() -> coral.stopMotor())));
-
-    
+   
        
                
            
@@ -229,7 +228,7 @@ public class RobotContainer {
         .andThen(new InstantCommand(() -> climber2.stopClimb())
         ));
         NamedCommands.registerCommand("autoAlignWithLimelight timeout 1.25", new AutoAlignWithLimelight(drivetrain, limeLightFront).withTimeout(1.25));
-        NamedCommands.registerCommand("autoAlignWithLimelight timeout 2", new AutoAlignWithLimelight(drivetrain, limeLightFront).withTimeout(2));
+        NamedCommands.registerCommand("autoAlignWithLimelight timeout 2", new AutoAlignWithLimelight(drivetrain, limeLightFront).withTimeout(5));
         NamedCommands.registerCommand("driveForwardFor1Second", new  DriveForward(drivetrain, 2, robotCentricDrive));
         NamedCommands.registerCommand("faceWheels-120Degrees", new InstantCommand(() -> drivetrain.applyRequest(() ->
         point.withModuleDirection(new Rotation2d(-120)))));
@@ -512,7 +511,7 @@ public class RobotContainer {
         joystick2.leftBumper()
                 .whileTrue(new InstantCommand(() -> coral.intake(0.8)))
                 .onFalse(new InstantCommand(() -> coral.stopMotor())); 
-
+            // new InstantCommand(() -> {if(GamePieceDetector.isGamePieceClose()){joystick.setRumble(RumbleType.kBothRumble, 0.5);}});
 
         // *************************************************
         // Algae Controls
