@@ -31,7 +31,7 @@ public class AutoAlignWithLimelight extends Command {
   private double targettY = 1.3;
   private double tYError;
   private double kPX = 0.2;
-  private double kPY = 0.075;
+  private double kPY = 0.08;//0.075
   private double kPA = 0.2;
   private double kIY = 0.18;
   private double ySpeed;

@@ -32,7 +32,6 @@ public class Coral extends SubsystemBase {
 
   public void intake(double speed) {
     coralMotor.set(speed);
-    
   }
   
   public void shoot(double speed) {

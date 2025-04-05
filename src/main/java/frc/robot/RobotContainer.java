@@ -131,6 +131,7 @@ public class RobotContainer {
         .andThen(Commands.waitSeconds(0.5))
         .andThen(new InstantCommand(() -> elevator.moveUpSlowly()))
         .andThen(Commands.waitUntil(() -> !reefDetector.isGamePieceClose).withTimeout(1))
+        .andThen(Commands.waitSeconds(0.1))
         .andThen(new InstantCommand(() -> elevator.holdPosition()))
         // .andThen(new InstantCommand(() -> elevator.transferTargetHeight()))
         .andThen(new PrintCommand("This is running detectReefL4"))
@@ -153,6 +154,7 @@ public class RobotContainer {
         .andThen(Commands.waitSeconds(0.5))
         .andThen(new InstantCommand(() -> elevator.moveUpSlowly()))
         .andThen(Commands.waitUntil(() -> !reefDetector.isGamePieceClose).withTimeout(1))
+        // .andThen(Commands.waitSeconds(0.1))
         .andThen(new InstantCommand(() -> elevator.holdPosition()))
         // .andThen(new InstantCommand(() -> elevator.transferTargetHeight()))
         .andThen(new PrintCommand("This is running detectReefL3"))
@@ -171,6 +173,7 @@ public class RobotContainer {
         .andThen(Commands.waitSeconds(0.5))
         .andThen(new InstantCommand(() -> elevator.moveUpSlowly()))
         .andThen(Commands.waitUntil(() -> !reefDetector.isGamePieceClose).withTimeout(1))
+        .andThen(Commands.waitSeconds(0.1))
         .andThen(new InstantCommand(() -> elevator.holdPosition()))
         // .andThen(new InstantCommand(() -> elevator.transferTargetHeight()))
         .andThen(new PrintCommand("This is running detectReefL2"))
@@ -239,6 +242,8 @@ public class RobotContainer {
 
     private void bindPrimaryController(){
 
+        
+
         // *************************************************
         // Standard drive mode
         // *************************************************
@@ -269,6 +274,23 @@ public class RobotContainer {
             })
         );
 
+        // *************************************************
+        // Fastmode driving
+        // *************************************************
+        // joystick.rightTrigger().whileTrue(drivetrain.applyRequest(() ->{
+            
+        //     double xSpeed = slowModeSlewRateLimiterX.calculate(-joystick.getLeftY()* HalfSpeed);
+        //     double ySpeed = slowModeSlewRateLimiterY.calculate(-joystick.getLeftX()* HalfSpeed);
+        //     double yTurnSpeed = slowModeSlewRateLimiterTurnX.calculate(joystick.getRightX()* HalfAngularRate);
+            
+        //     // SmartDashboard.putNumber("RBySpeed",ySpeed);
+        //     // SmartDashboard.putNumber("RBxSpeed",xSpeed);
+        //     // SmartDashboard.putNumber("RByTurnSpeed",yTurnSpeed);
+
+        //     return drive.withVelocityX(xSpeed * Math.abs(xSpeed)) // Drive forward with negative Y (forward)
+        //         .withVelocityY(ySpeed * Math.abs(ySpeed)) // Drive left with negative X (left)
+        //         .withRotationalRate(-(yTurnSpeed * Math.abs(yTurnSpeed) ));
+        // }));
 
         // *************************************************
         // SloMo driving
@@ -493,8 +515,17 @@ public class RobotContainer {
         joystick.rightBumper().and(joystick.b()).whileTrue(new InstantCommand(() -> climber2.leftClimbOveride(0.2)).repeatedly())
             .onFalse(new InstantCommand(() -> climber2.stopClimb()));
         
-        joystick.leftBumper().whileTrue(new InstantCommand(() -> climber2.climberStartPosition(0.2)).repeatedly())
-        .onFalse(new InstantCommand(() -> climber2.stopClimb()));
+        Trigger climberArmsUp = new Trigger(() -> joystick2.getRightX() > 0.75);
+        // climberArmsUp.whileTrue(new InstantCommand(() -> climber2.climberStartPosition(0.2)).repeatedly()
+        // .until(climber2.climberStartPosition(0.2)))
+        // .onFalse(new InstantCommand(() -> climber2.stopClimb()));
+
+        climberArmsUp.whileTrue(Commands.waitUntil(() -> climber2.climberStartPosition(0.2))
+            //.andThen(getRumbleCommand()
+            //.andThen(getRumbleCommandJoystick2()))
+            .andThen(new InstantCommand(() -> candleSystem.showGreen())));
+        
+        
 
         // *************************************************
         // Coral Controls
@@ -511,7 +542,9 @@ public class RobotContainer {
         joystick2.leftBumper()
                 .whileTrue(new InstantCommand(() -> coral.intake(0.8)))
                 .onFalse(new InstantCommand(() -> coral.stopMotor())); 
-            // new InstantCommand(() -> {if(GamePieceDetector.isGamePieceClose()){joystick.setRumble(RumbleType.kBothRumble, 0.5);}});
+        
+        Trigger coralIsPresent = new Trigger(() -> coralSensor.isGamePieceClose);
+        coralIsPresent.onTrue(getRumbleCommand());
 
         // *************************************************
         // Algae Controls
@@ -718,15 +751,28 @@ public class RobotContainer {
 
     private Command getRumbleCommand(){
         return new InstantCommand(()-> joystick.setRumble(RumbleType.kBothRumble, 1))
-        .andThen(Commands.waitSeconds(0.15))
+        .andThen(Commands.waitSeconds(0.5))
         .andThen(new InstantCommand(()-> joystick.setRumble(RumbleType.kBothRumble, 0)));
-        
     }
+    private Command getRumbleCommandJoystick2(){
+        return new InstantCommand(()-> joystick2.setRumble(RumbleType.kBothRumble, 1))
+        .andThen(Commands.waitSeconds(0.5))
+        .andThen(new InstantCommand(()-> joystick2.setRumble(RumbleType.kBothRumble, 0)));
+    }
+    private Command getBlinkLimeLightFrontCommand() {
+        return new InstantCommand(() -> LimelightHelpers.setLEDMode_ForceBlink(limeLightFront.limelightName))
+        .andThen(Commands.waitSeconds(2))
+        .andThen(new InstantCommand(() -> LimelightHelpers.setLEDMode_ForceOff(limeLightFront.limelightName)));
+    };
 
+    public void stopElevatorOnTeleInit() {
+        elevator.stopElevator();
+    }
+       
     
     private Command getBlinkLightCommand(){
         return Commands.repeatingSequence(
-            new InstantCommand(() -> candleSystem.flashColor(AvailableColors.Red)),
+            new InstantCommand(() -> candleSystem.flashColor(AvailableColors.Green)),
             new WaitCommand(0.5),
             new InstantCommand(()->candleSystem.turnOffColors()),
             new WaitCommand(0.25)

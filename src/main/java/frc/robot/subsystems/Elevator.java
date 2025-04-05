@@ -41,7 +41,7 @@ public class Elevator extends SubsystemBase {
   private final VelocityVoltage m_velocityVoltage = new VelocityVoltage(0).withSlot(1);
   final VoltageOut m_request = new VoltageOut(0);
   private double L1 = 0;
-  private double L2 = 0.93;
+  private double L2 = 0.95;
   private double L3 = 2.89;
   private double L4 = 5.65; //5.85
  

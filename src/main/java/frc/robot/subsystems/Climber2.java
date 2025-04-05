@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import java.util.function.BooleanSupplier;
+
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.Slot1Configs;
@@ -31,6 +33,7 @@ public class Climber2 extends SubsystemBase {
     private double climberEncoderLimitDown = -47;
     private double climberAutonStartPosition = -7.0;
     private MotionMagicVoltage m_mmReq = new MotionMagicVoltage(0);
+    private boolean softStopsEngaged = false;
 
 
     /** Creates a new Climber. */
@@ -122,9 +125,14 @@ public class Climber2 extends SubsystemBase {
   leftClimber.set(-0.2);
  }
 
- public void climberStartPosition(double speed) {
+ public boolean climberStartPosition(double speed) {
   this.rightClimb(0.2);
   this.leftClimb(0.2);
+  System.out.println("*************Runing Climber Start Position*************");
+  
+  return ((rightClimber.getPosition().getValueAsDouble() >= climberEncoderLimitUp) 
+  && (leftClimber.getPosition().getValueAsDouble() >= climberEncoderLimitUp));
+   
  }
 
  

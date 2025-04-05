@@ -75,7 +75,8 @@ public class CANdleSystem extends SubsystemBase {
         configAll.vBatOutputMode = VBatOutputMode.Modulated;
         m_candle.configAllSettings(configAll, 100);
         isAligned = false;
-        showMagenta(0, LedCount);
+        // showMagenta(0, LedCount);
+        changeAnimation(AnimationTypes.Larson);
 
     }
     
@@ -290,7 +291,7 @@ public class CANdleSystem extends SubsystemBase {
                 m_toAnimate = new FireAnimation();
                 break;
             case Larson:
-                m_toAnimate = new LarsonAnimation(0, 255, 46, 0, 2, LedCount, BounceMode.Front, 20);
+                m_toAnimate = new LarsonAnimation(0, 255, 46, 0, 2, LedCount, BounceMode.Center, 40);
                 break;
             case Rainbow:
                 m_toAnimate = new RainbowAnimation(1, 0.1, LedCount);
