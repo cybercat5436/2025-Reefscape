@@ -94,8 +94,10 @@ public class RobotContainer {
 
     private final ReefController reefController = ReefController.getInstance();
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-    private final LimeLight limeLightFront = new LimeLight("limelight-front", 0.02, -0.3, 0.65, -90.0, 0.0, 0.0);
-    private final LimeLight limeLightFrontRight = new LimeLight("limelight-right", 0.162, 0.04, 0.33, -3.2, -16, 32.5);
+    // private final LimeLight limeLightFront = new LimeLight("limelight-front", 0.02, -0.3, 0.65, -90.0, 0.0, 0.0);
+    private final LimeLight limeLightFront = new LimeLight("limelight-front", 0.037, -0.236, 0.565, -91.5, -1, 2.5);
+    // private final LimeLight limeLightFrontRight = new LimeLight("limelight-right", 0.162, 0.04, 0.33, -3.2, -16, 32.5);
+    private final LimeLight limeLightFrontRight = new LimeLight("limelight-right", .127, 0.029, 0.395, 5.8, -21, 31.2);
     private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, limeLightFrontRight, drivetrain);
     private final AutoAlign autoAlign = new AutoAlign(drivetrain,limeLightFront);
     private final DriveForward driveForward = new DriveForward(drivetrain, HalfSpeed, robotCentricDrive);
