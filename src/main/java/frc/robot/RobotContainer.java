@@ -94,13 +94,13 @@ public class RobotContainer {
 
     private final ReefController reefController = ReefController.getInstance();
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-    private final LimeLight limeLightFront = new LimeLight("limelight-front", 0.02, -0.3, 0.65, -90.0, 0.0, 0.0);
-    private final LimeLight limeLightFrontRight = new LimeLight("limelight-right", 0.162, 0.04, 0.33, -3.2, -16, 32.5);
+    private final LimeLight limeLightFront = new LimeLight("limelight-front", 0.024, -0.244, 0.568, -91.16, -0.5, 4);
+    private final LimeLight limeLightFrontRight = new LimeLight("limelight-right", 0.114, 0.06, 0.378, 4.5, -19.2, 31.1);
     private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, limeLightFrontRight, drivetrain);
     private final AutoAlign autoAlign = new AutoAlign(drivetrain,limeLightFront);
     private final DriveForward driveForward = new DriveForward(drivetrain, HalfSpeed, robotCentricDrive);
     private final AutoAlignWithLimelight autoALignWithLimelights = new AutoAlignWithLimelight(drivetrain,limeLightFront);
-    private final StandardDeviation standardDeviation = new StandardDeviation(poseUpdater, drivetrain, new Pose2d(7.82,4.026,Rotation2d.k180deg),limeLightFront, limeLightFrontRight);
+    private final StandardDeviation standardDeviation = new StandardDeviation(poseUpdater, drivetrain, new Pose2d(6.305,4.290,Rotation2d.k180deg),limeLightFront, limeLightFrontRight);
     private final FlashLEDsForAutoAlign flashLEDsForAutoAlign = new FlashLEDsForAutoAlign();
     
     private SendableChooser<Command> autonChooser;
@@ -644,7 +644,7 @@ public class RobotContainer {
         // *************************************************
         // Camera calibration for apriltag pipeline
         // *************************************************
-        // calibrationJoystick.a().whileTrue(standardDeviation);
+        calibrationJoystick.a().whileTrue(standardDeviation);
 
 
         /*calibrationJoystick.a().whileTrue(

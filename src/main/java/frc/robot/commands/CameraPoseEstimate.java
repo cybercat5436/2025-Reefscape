@@ -7,6 +7,7 @@ package frc.robot.commands;
 import java.util.ArrayList;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.LimelightHelpers;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -17,7 +18,7 @@ import frc.robot.subsystems.PoseUpdater;
 //At 2.6m, the Pose is (7.82, 4.026) Standard Deviation: 0.537
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class StandardDeviation extends Command {
+public class CameraPoseEstimate extends Command {
   private PoseUpdater poseUpdater;
   private CommandSwerveDrivetrain commandSwerveDrivetrain;
   private ArrayList<Double> distances = new ArrayList();
@@ -27,7 +28,7 @@ public class StandardDeviation extends Command {
   private LimeLight limeLightRight;
   /** Creates a new StandardDeviation. */
 
-  public StandardDeviation(PoseUpdater poseUpdater, CommandSwerveDrivetrain commandSwerveDrivetrain, Pose2d robotPose, LimeLight limeLightFront, LimeLight limeLightRight) {
+  public CameraPoseEstimate(PoseUpdater poseUpdater, CommandSwerveDrivetrain commandSwerveDrivetrain, Pose2d robotPose, LimeLight limeLightFront, LimeLight limeLightRight) {
     this.poseUpdater = poseUpdater;
     this.commandSwerveDrivetrain = commandSwerveDrivetrain;
     this.robotPose = robotPose;
@@ -50,13 +51,8 @@ public class StandardDeviation extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    Pose2d visionPose = poseUpdater.visionDataCollection(limeLightFront);
-    distanceEstimate = robotPose.getTranslation().getDistance(visionPose.getTranslation());
-    distances.add(distanceEstimate);
-    System.out.println("distanceEstimate: " + distanceEstimate);
-    System.out.println(robotPose);
-    System.out.println("Vision Pose: " + visionPose);
-    System.out.println(distances.size());
+    Pose3d cameraPose = LimelightHelpers.getCameraPose3d_TargetSpace(limeLightFront.limelightName);
+    
   }
 
   // Called once the command ends or is interrupted.
