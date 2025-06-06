@@ -5,20 +5,23 @@
 package frc.robot.subsystems;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANdiConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.S1FloatStateValue;
+import com.ctre.phoenix6.signals.S1StateValue;
 import com.ctre.phoenix6.signals.S2CloseStateValue;
+import com.ctre.phoenix6.signals.S2StateValue;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class CANdiSystem extends SubsystemBase {
   /** Creates a new CANdi. */
-  private final CANBus kCANBus = new CANBus("rio");
-  private final CANdi candi = new CANdi(23, kCANBus);
+  
+  private final CANdi candi = new CANdi(23, "rio");
   public CANdiSystem() {
     var toApply = new CANdiConfiguration();
 
@@ -40,6 +43,13 @@ public class CANdiSystem extends SubsystemBase {
     var fxConfigs = new TalonFXConfiguration();
     fxConfigs.Feedback.withFusedCANdiPwm1(candi);
     fxConfigs.HardwareLimitSwitch.withReverseLimitRemoteCANdiS2(candi);
+  }
+
+  public StatusSignal<S1StateValue> getS1State(){
+    return candi.getS1State();
+  }
+  public StatusSignal<S2StateValue> getS2State(){
+    return candi.getS2State();
   }
 
   @Override
