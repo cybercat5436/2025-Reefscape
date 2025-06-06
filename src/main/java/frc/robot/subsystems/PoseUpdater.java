@@ -49,7 +49,7 @@ public class PoseUpdater extends SubsystemBase {
   public int poseCount;
   public int ambiguityCount;
   public int distanceCount;
-  public boolean isMT2 = true;
+  public boolean isMT2 = false;
 
   public PoseUpdater(LimeLight limeLightFront, LimeLight limeLightFrontRight, CommandSwerveDrivetrain swerveSubsystem) {
     this.limeLight = limeLightFront;

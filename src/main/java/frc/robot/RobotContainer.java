@@ -94,8 +94,8 @@ public class RobotContainer {
 
     private final ReefController reefController = ReefController.getInstance();
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-    private final LimeLight limeLightFront = new LimeLight("limelight-front", 0.024, -0.244, 0.568, -91.16, -0.5, 4);
-    private final LimeLight limeLightFrontRight = new LimeLight("limelight-right", 0.114, 0.06, 0.378, 4.5, -19.2, 31.1);
+    private final LimeLight limeLightFront = new LimeLight("limelight-front", 0.062, -0.25, 0.548, -91.4, -0.9, 1.8);
+    private final LimeLight limeLightFrontRight = new LimeLight("limelight-right", 0.152, -0.02, 0.388, 5, -19.4, 30);
     private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, limeLightFrontRight, drivetrain);
     private final AutoAlign autoAlign = new AutoAlign(drivetrain,limeLightFront);
     private final DriveForward driveForward = new DriveForward(drivetrain, HalfSpeed, robotCentricDrive);
@@ -203,7 +203,7 @@ public class RobotContainer {
         configureBindings();
         poseUpdater.enable();
         registerNamedCommands();
-        //testReefController();
+        testReefController();
         autonChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auton Chooser", autonChooser);
 
@@ -731,22 +731,22 @@ public class RobotContainer {
         
     }
 
-    // private void testReefController(){
-    //     reefController.setTargetReefPosition(ReefPosition.I);
-    //     System.out.println(reefController.toString());
+     private void testReefController(){
+        /* reefController.setTargetReefPosition(ReefPosition.I);
+         System.out.println(reefController.toString());
 
-    //     reefController.setTargetReefPosition(ReefPosition.K);
-    //     System.out.println(reefController.toString());
+         reefController.setTargetReefPosition(ReefPosition.K);
+         System.out.println(reefController.toString());
 
-    //     reefController.setTargetReefPosition(ReefPosition.L);
-    //     System.out.println(reefController.toString());
+        reefController.setTargetReefPosition(ReefPosition.L);
+        System.out.println(reefController.toString());*/
 
-    //     reefController.setTargetReefPosition(ReefPosition.G);
-    //     System.out.println(reefController.toString());
+        reefController.setTargetReefPosition(ReefPosition.G);
+        System.out.println(reefController.toString());
         
-    //     reefController.setTargetReefPosition(ReefPosition.H);
-    //     System.out.println(reefController.toString());        
-    // }
+        //reefController.setTargetReefPosition(ReefPosition.H);
+        //System.out.println(reefController.toString());        
+    }
 
 
     private Command getRumbleCommand(){
