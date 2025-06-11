@@ -236,8 +236,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("faceWheels-120Degrees", new InstantCommand(() -> drivetrain.applyRequest(() ->
         point.withModuleDirection(new Rotation2d(-120)))));
         NamedCommands.registerCommand("reefDetection", detectReefL4Auton);
-        
-
+        NamedCommands.registerCommand("reset Pose Count", new InstantCommand(() -> poseUpdater.resetPoseCount()));
     }
 
     private void bindPrimaryController(){

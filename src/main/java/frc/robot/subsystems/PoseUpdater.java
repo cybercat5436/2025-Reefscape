@@ -40,7 +40,7 @@ public class PoseUpdater extends SubsystemBase {
   public NetworkTableEntry taLocal;
   public double yError = 0.0;
   public double distanceEstimate = 0.0;
-  public boolean isEnabled = false;   // can be to prevent updates during certain periods in auton
+  public boolean isEnabled = true;   // can be to prevent updates during certain periods in auton
   public boolean isLockedOut = false;   // odometry updates can be locked out for a period of time after updating
   public int cyclesSinceLocked = 0;
   public final int CYCLE_LOCKOUT = 20;  // 50 cycles per second
@@ -261,7 +261,7 @@ public class PoseUpdater extends SubsystemBase {
     if(!doRejectUpdate){
       // commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,.25));
       // commandSwerveDrivetrain.resetPose(limelightMeasurement.pose);
-      commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,9999999));
+      commandSwerveDrivetrain.setVisionMeasurementStdDevs(VecBuilder.fill(0.01,0.01,9999999));
       poseCount ++;
       commandSwerveDrivetrain.addVisionMeasurement(
         limelightMeasurement.pose,
@@ -321,6 +321,8 @@ public class PoseUpdater extends SubsystemBase {
     System.out.println(String.format("Updating from: %s\nUpdating to:   %s", currentPose.toString(), newPose.toString()));
   }
 
+    
+  
   @Override
   public void initSendable(SendableBuilder builder) {
     // TODO Auto-generated method stub

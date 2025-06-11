@@ -5,6 +5,12 @@
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "reset Pose Count"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "Calibration Testing"
