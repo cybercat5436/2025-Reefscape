@@ -5,6 +5,10 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.subsystems.vision.VisionConstants.camera0Name;
+import static frc.robot.subsystems.vision.VisionConstants.camera1Name;
+import static frc.robot.subsystems.vision.VisionConstants.robotToCamera0;
+import static frc.robot.subsystems.vision.VisionConstants.robotToCamera1;
 
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
@@ -57,6 +61,10 @@ import frc.robot.subsystems.GamePieceDetector;
 
 import frc.robot.subsystems.CANdleSystem.AvailableColors;
 import frc.robot.subsystems.ReefController.ReefPosition;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIO;
+import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.LimeLight;
 import frc.robot.subsystems.PoseUpdater;
@@ -98,11 +106,11 @@ public class RobotContainer {
     private final LimeLight limeLightFront = new LimeLight("limelight-front", 0.037, -0.236, 0.565, -91.5, -1, 2.5);
     // private final LimeLight limeLightFrontRight = new LimeLight("limelight-right", 0.162, 0.04, 0.33, -3.2, -16, 32.5);
     private final LimeLight limeLightFrontRight = new LimeLight("limelight-right", .127, 0.029, 0.395, 5.8, -21, 31.2);
-    private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, limeLightFrontRight, drivetrain);
+    //private final PoseUpdater poseUpdater = new PoseUpdater(limeLightFront, limeLightFrontRight, drivetrain);
     private final AutoAlign autoAlign = new AutoAlign(drivetrain,limeLightFront);
     private final DriveForward driveForward = new DriveForward(drivetrain, HalfSpeed, robotCentricDrive);
     private final AutoAlignWithLimelight autoALignWithLimelights = new AutoAlignWithLimelight(drivetrain,limeLightFront);
-    private final StandardDeviation standardDeviation = new StandardDeviation(poseUpdater, drivetrain, new Pose2d(7.82,4.026,Rotation2d.k180deg),limeLightFront, limeLightFrontRight);
+    //private final StandardDeviation standardDeviation = new StandardDeviation(poseUpdater, drivetrain, new Pose2d(7.82,4.026,Rotation2d.k180deg),limeLightFront, limeLightFrontRight);
     private final FlashLEDsForAutoAlign flashLEDsForAutoAlign = new FlashLEDsForAutoAlign();
     
     private SendableChooser<Command> autonChooser;
@@ -117,6 +125,11 @@ public class RobotContainer {
     public final Elevator elevator = new Elevator();
     private final DetectReefWithCANrange detectReefWithCANrange = new DetectReefWithCANrange(elevator, reefDetector);
     public CANdleSystem candleSystem = CANdleSystem.getInstance();
+    
+    private final Vision vision;
+    public static String camera0Name = "limelight";
+    public static String camera1Name = "camera_1";
+
 
     private SequentialCommandGroup autoCoralHigh = new SequentialCommandGroup(
         new InstantCommand(() -> elevator.raiseLevel4())
@@ -203,7 +216,7 @@ public class RobotContainer {
     public RobotContainer(){
         // autonChooser.addOption("Complex Auto", m_complexAuto);
         configureBindings();
-        poseUpdater.enable();
+        //poseUpdater.enable();
         registerNamedCommands();
         //testReefController();
         autonChooser = AutoBuilder.buildAutoChooser();
@@ -212,6 +225,36 @@ public class RobotContainer {
         drivetrain.registerTelemetry(logger::telemeterize);
         LimelightHelpers.setPipelineIndex(limeLightFront.limelightName, 1);
         LimelightHelpers.setPipelineIndex(limeLightFrontRight.limelightName, 1);
+        switch (Constants.currentMode) {
+      case REAL:
+        // Real robot, instantiate hardware IO implementations
+        vision =
+            new Vision(
+                drivetrain::addVisionMeasurement,
+                new VisionIOLimelight(camera0Name, () -> drivetrain.getState().Pose.getRotation()),
+                new VisionIOLimelight(camera1Name, () -> drivetrain.getState().Pose.getRotation()));
+        // vision =
+        //     new Vision(
+        //         demoDrive::addVisionMeasurement,
+        //         new VisionIOPhotonVision(camera0Name, robotToCamera0),
+        //         new VisionIOPhotonVision(camera1Name, robotToCamera1));
+        break;
+
+      case SIM:
+        // Sim robot, instantiate physics sim IO implementations
+        vision =
+            new Vision(
+                drivetrain::addVisionMeasurement,
+                new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, () -> drivetrain.getState().Pose),
+                new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, () -> drivetrain.getState().Pose));
+        break;
+
+      default:
+        // Replayed robot, disable IO implementations
+        // (Use same number of dummy implementations as the real robot)
+        vision = new Vision(drivetrain::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+        break;
+    }
 
     }
 
