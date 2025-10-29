@@ -100,7 +100,7 @@ public class RobotContainer {
     private final CommandXboxController joystick = new CommandXboxController(0);
     private final CommandXboxController joystick2 = new CommandXboxController(1);
 
-    private final ReefController reefController = ReefController.getInstance();
+    // private final ReefController reefController = ReefController.getInstance();
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     // private final LimeLight limeLightFront = new LimeLight("limelight-front", 0.02, -0.3, 0.65, -90.0, 0.0, 0.0);
     private final LimeLight limeLightFront = new LimeLight("limelight-front", 0.037, -0.236, 0.565, -91.5, -1, 2.5);
@@ -223,33 +223,34 @@ public class RobotContainer {
         SmartDashboard.putData("Auton Chooser", autonChooser);
 
         drivetrain.registerTelemetry(logger::telemeterize);
-        LimelightHelpers.setPipelineIndex(limeLightFront.limelightName, 1);
-        LimelightHelpers.setPipelineIndex(limeLightFrontRight.limelightName, 1);
+        // LimelightHelpers.setPipelineIndex(limeLightFront.limelightName, 1);
+        // LimelightHelpers.setPipelineIndex(limeLightFrontRight.limelightName, 1);
         switch (Constants.currentMode) {
-      case REAL:
-        // Real robot, instantiate hardware IO implementations
-        vision =
-            new Vision(
-                drivetrain::addVisionMeasurement,
-                new VisionIOLimelight(camera0Name, () -> drivetrain.getState().Pose.getRotation()),
-                new VisionIOLimelight(camera1Name, () -> drivetrain.getState().Pose.getRotation()));
-        // vision =
-        //     new Vision(
-        //         demoDrive::addVisionMeasurement,
-        //         new VisionIOPhotonVision(camera0Name, robotToCamera0),
-        //         new VisionIOPhotonVision(camera1Name, robotToCamera1));
-        break;
-
-      case SIM:
-        // Sim robot, instantiate physics sim IO implementations
-        vision =
-            new Vision(
-                drivetrain::addVisionMeasurement,
-                new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, () -> drivetrain.getState().Pose),
-                new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, () -> drivetrain.getState().Pose));
-        break;
-
-      default:
+            case REAL:
+            System.out.println("----------||inside real");
+              // Real robot, instantiate hardware IO implementations
+              vision =
+                  new Vision(
+                      drivetrain::addVisionMeasurement,
+                      new VisionIOLimelight(camera0Name, () -> drivetrain.getState().Pose.getRotation()),
+                      new VisionIOLimelight(camera1Name, () -> drivetrain.getState().Pose.getRotation()));
+              // vision =
+              //     new Vision(
+              //         demoDrive::addVisionMeasurement,
+              //         new VisionIOPhotonVision(camera0Name, robotToCamera0),
+              //         new VisionIOPhotonVision(camera1Name, robotToCamera1));
+              break;
+                
+            case SIM:
+              // Sim robot, instantiate physics sim IO implementations
+              vision =
+                  new Vision(
+                      drivetrain::addVisionMeasurement,
+                      new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, () -> drivetrain.getState().Pose),
+                      new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, () -> drivetrain.getState().Pose));
+              break;
+                
+            default:
         // Replayed robot, disable IO implementations
         // (Use same number of dummy implementations as the real robot)
         vision = new Vision(drivetrain::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
@@ -722,47 +723,47 @@ public class RobotContainer {
         .andThen(new InstantCommand(() -> coral.stopMotor()))));
 
          
-        calibrationJoystick.x().onTrue(new AutoAlignWheelMovements(drivetrain, limeLightFront, reefController));
+        // calibrationJoystick.x().onTrue(new AutoAlignWheelMovements(drivetrain, limeLightFront, reefController));
     }
 
     private void bindReefController(){
-        Joystick reefPositionJoystick = new Joystick(2);
-        Joystick reefLevelJoystick = new Joystick(3);
+        // Joystick reefPositionJoystick = new Joystick(2);
+        // Joystick reefLevelJoystick = new Joystick(3);
 
-        Trigger button1 = new Trigger(() -> reefPositionJoystick.getRawButton(1));
-        button1.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.A)));
-        Trigger button2 = new Trigger(() -> reefPositionJoystick.getRawButton(2));
-        button2.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.B)));
-        Trigger button3 = new Trigger(() -> reefPositionJoystick.getRawButton(3));
-        button3.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.C)));
-        Trigger button4 = new Trigger(() -> reefPositionJoystick.getRawButton(4));
-        button4.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.D)));
-        Trigger button5 = new Trigger(() -> reefPositionJoystick.getRawButton(5));
-        button5.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.E)));
-        Trigger button6 = new Trigger(() -> reefPositionJoystick.getRawButton(6));
-        button6.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.F)));
-        Trigger button7 = new Trigger(() -> reefPositionJoystick.getRawButton(7));
-        button7.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.G)));
-        Trigger button8 = new Trigger(() -> reefPositionJoystick.getRawButton(8));
-        button8.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.H)));
-        Trigger button9 = new Trigger(() -> reefPositionJoystick.getRawButton(9));
-        button9.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.I)));
-        Trigger button10 = new Trigger(() -> reefPositionJoystick.getRawButton(10));
-        button10.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.J)));
-        Trigger button11 = new Trigger(() -> reefPositionJoystick.getRawButton(11));
-        button11.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.K)));
-        Trigger button12 = new Trigger(() -> reefPositionJoystick.getRawButton(12));
-        button12.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.L)));
+        // Trigger button1 = new Trigger(() -> reefPositionJoystick.getRawButton(1));
+        // button1.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.A)));
+        // Trigger button2 = new Trigger(() -> reefPositionJoystick.getRawButton(2));
+        // button2.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.B)));
+        // Trigger button3 = new Trigger(() -> reefPositionJoystick.getRawButton(3));
+        // button3.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.C)));
+        // Trigger button4 = new Trigger(() -> reefPositionJoystick.getRawButton(4));
+        // button4.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.D)));
+        // Trigger button5 = new Trigger(() -> reefPositionJoystick.getRawButton(5));
+        // button5.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.E)));
+        // Trigger button6 = new Trigger(() -> reefPositionJoystick.getRawButton(6));
+        // button6.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.F)));
+        // Trigger button7 = new Trigger(() -> reefPositionJoystick.getRawButton(7));
+        // button7.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.G)));
+        // Trigger button8 = new Trigger(() -> reefPositionJoystick.getRawButton(8));
+        // button8.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.H)));
+        // Trigger button9 = new Trigger(() -> reefPositionJoystick.getRawButton(9));
+        // button9.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.I)));
+        // Trigger button10 = new Trigger(() -> reefPositionJoystick.getRawButton(10));
+        // button10.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.J)));
+        // Trigger button11 = new Trigger(() -> reefPositionJoystick.getRawButton(11));
+        // button11.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.K)));
+        // Trigger button12 = new Trigger(() -> reefPositionJoystick.getRawButton(12));
+        // button12.onTrue(new InstantCommand(() ->reefController.setTargetReefPosition(ReefPosition.L)));
 
        
-        Trigger buttonLevel1Trigger = new Trigger(() -> reefLevelJoystick.getRawButton(1));
-        buttonLevel1Trigger.onTrue(new InstantCommand(() ->reefController.setTargetReefLevel(1)));
-        Trigger buttonLevel2Trigger = new Trigger(() -> reefLevelJoystick.getRawButton(2));
-        buttonLevel2Trigger.onTrue(new InstantCommand(() ->reefController.setTargetReefLevel(2)));
-        Trigger buttonLevel3Trigger = new Trigger(() -> reefLevelJoystick.getRawButton(3));
-        buttonLevel3Trigger.onTrue(new InstantCommand(() ->reefController.setTargetReefLevel(3)));
-        Trigger buttonLevel4Trigger = new Trigger(() -> reefLevelJoystick.getRawButton(4));
-        buttonLevel4Trigger.onTrue(new InstantCommand(() ->reefController.setTargetReefLevel(4)));
+        // Trigger buttonLevel1Trigger = new Trigger(() -> reefLevelJoystick.getRawButton(1));
+        // buttonLevel1Trigger.onTrue(new InstantCommand(() ->reefController.setTargetReefLevel(1)));
+        // Trigger buttonLevel2Trigger = new Trigger(() -> reefLevelJoystick.getRawButton(2));
+        // buttonLevel2Trigger.onTrue(new InstantCommand(() ->reefController.setTargetReefLevel(2)));
+        // Trigger buttonLevel3Trigger = new Trigger(() -> reefLevelJoystick.getRawButton(3));
+        // buttonLevel3Trigger.onTrue(new InstantCommand(() ->reefController.setTargetReefLevel(3)));
+        // Trigger buttonLevel4Trigger = new Trigger(() -> reefLevelJoystick.getRawButton(4));
+        // buttonLevel4Trigger.onTrue(new InstantCommand(() ->reefController.setTargetReefLevel(4)));
 
     }
 
