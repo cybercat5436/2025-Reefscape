@@ -160,6 +160,7 @@ public class PoseUpdater extends SubsystemBase {
 
       
       boolean doRejectUpdate = false;  // initialize rough filter
+      //doRejectUpdate should be a method that returns a boolean so we can make the code neater
 
       // Send gyro and get MT2 field estimate
       LimelightHelpers.SetRobotOrientation(limeLight.limelightName, robotYaw, 0.0, 0.0, 0.0, 0.0, 0.0);
@@ -233,6 +234,7 @@ public class PoseUpdater extends SubsystemBase {
     if (limelightMeasurement == null) return;
 
     boolean doRejectUpdate = false;
+    //Too many if statements for doRejectUpdate. Would be good to implement a bool method.
 
     //SmartDashboard.putNumber("Limelight Measured Heading", limelightMeasurement.pose.getRotation().getDegrees());
     if(limelightMeasurement.tagCount == 1 && limelightMeasurement.rawFiducials.length == 1) {
