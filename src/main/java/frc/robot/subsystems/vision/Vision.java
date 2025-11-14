@@ -181,9 +181,7 @@ public class Vision extends SubsystemBase {
 
 
       SendableRegistry.addLW(this, this.getClass().getSimpleName(), this.getClass().getSimpleName());
-      // SmartDashboard.putData("new vision", );
-      //add smart dashboard sendable
-
+      //
   }
 
   @FunctionalInterface

@@ -89,9 +89,17 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     );
 
     @Override
-    public void addVisionMeasurement(Pose2d visionRobotPoseMeters, double timestampSeconds) {
-        super.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds);
-        System.out.println("--------------------------------------------------*******************************************");
+    public void addVisionMeasurement(Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
+        super.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
+        //System.out.println("--------------------------------------------------*******************************************");
+        
+        //System.out.println("Getting visionRobotPoseMeters: " + visionRobotPoseMeters);
+        System.out.println("Getting timestampSeconds: " + timestampSeconds);
+        System.out.println("Getting visionMeasurementStdDevs: " + visionMeasurementStdDevs);
+        
+        //System.out.println("Yaw Angle: "+new Rotation2d(this.getPigeon2().getYaw().getValue()));
+
+        //System.out.println("Getting Rotation: " + this.getState().Pose.getRotation());
     }
 
     /*
