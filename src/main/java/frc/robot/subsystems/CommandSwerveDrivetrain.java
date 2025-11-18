@@ -17,6 +17,7 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -90,12 +91,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     @Override
     public void addVisionMeasurement(Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
-        super.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
+        Pose2d fakePose = new Pose2d(3.0, 3.5, Rotation2d.kZero);
+        Matrix<N3,N1> fakeStdDevs = VecBuilder.fill(0.3,0.3,0.1);
+        System.out.println("Sending pose: " + fakePose);
+        System.out.println("Getting timestampSeconds: " + timestampSeconds);
+        System.out.println("Getting visionMeasurementStdDevs: " + fakeStdDevs);
+        
+        super.addVisionMeasurement(fakePose, timestampSeconds, fakeStdDevs);
         //System.out.println("--------------------------------------------------*******************************************");
         
         //System.out.println("Getting visionRobotPoseMeters: " + visionRobotPoseMeters);
-        System.out.println("Getting timestampSeconds: " + timestampSeconds);
-        System.out.println("Getting visionMeasurementStdDevs: " + visionMeasurementStdDevs);
         
         //System.out.println("Yaw Angle: "+new Rotation2d(this.getPigeon2().getYaw().getValue()));
 
