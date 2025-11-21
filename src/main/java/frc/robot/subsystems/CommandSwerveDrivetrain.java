@@ -4,6 +4,8 @@ import static edu.wpi.first.units.Units.*;
 
 import java.util.function.Supplier;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.hardware.Pigeon2;
@@ -90,7 +92,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     @Override
     public void addVisionMeasurement(Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
-        super.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
+        double convertedTimeStamp = Utils.fpgaToCurrentTime(timestampSeconds);
+        super.addVisionMeasurement(visionRobotPoseMeters, convertedTimeStamp, visionMeasurementStdDevs);
         //System.out.println("--------------------------------------------------*******************************************");
         
         //System.out.println("Getting visionRobotPoseMeters: " + visionRobotPoseMeters);
@@ -292,6 +295,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 m_hasAppliedOperatorPerspective = true;
             });
         }
+
+            Logger.recordOutput("Robot Pose", this.getState().Pose);
+
     }
 
     private void startSimThread() {
