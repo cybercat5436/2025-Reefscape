@@ -132,9 +132,14 @@ public class Vision extends SubsystemBase {
             Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
         double linearStdDev = linearStdDevBaseline * stdDevFactor;
         double angularStdDev = angularStdDevBaseline * stdDevFactor;
+
+        Logger.recordOutput("Megatag2", observation.type());
         if (observation.type() == PoseObservationType.MEGATAG_2) {
           linearStdDev *= linearStdDevMegatag2Factor;
+          Logger.recordOutput("Megatag2", observation.pose().toPose2d());
+          System.out.println(observation.pose());
           angularStdDev *= angularStdDevMegatag2Factor;
+       
         }
         if (cameraIndex < cameraStdDevFactors.length) {
           linearStdDev *= cameraStdDevFactors[cameraIndex];
@@ -164,6 +169,7 @@ public class Vision extends SubsystemBase {
       allTagPoses.addAll(tagPoses);
       allRobotPoses.addAll(robotPoses);
       allRobotPosesAccepted.addAll(robotPosesAccepted);
+      System.out.println();
       allRobotPosesRejected.addAll(robotPosesRejected);
     }
 
