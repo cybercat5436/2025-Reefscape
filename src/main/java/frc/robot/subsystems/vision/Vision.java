@@ -20,6 +20,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.util.sendable.SendableRegistry;
@@ -27,7 +28,10 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
+
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
@@ -37,10 +41,12 @@ public class Vision extends SubsystemBase {
   private final VisionIO[] io;
   private final VisionIOInputsAutoLogged[] inputs;
   private final Alert[] disconnectedAlerts;
+  private final CommandSwerveDrivetrain drivetrain;
 
-  public Vision(VisionConsumer consumer, VisionIO... io) {
+  public Vision(VisionConsumer consumer, CommandSwerveDrivetrain drivetrain, VisionIO... io) {
     this.consumer = consumer;
     this.io = io;
+    this.drivetrain = drivetrain;
 
     // Initialize inputs
     this.inputs = new VisionIOInputsAutoLogged[io.length];
@@ -78,6 +84,7 @@ public class Vision extends SubsystemBase {
     List<Pose3d> allRobotPoses = new LinkedList<>();
     List<Pose3d> allRobotPosesAccepted = new LinkedList<>();
     List<Pose3d> allRobotPosesRejected = new LinkedList<>();
+    List<CyberVision> allCyberVisions = new LinkedList<>();
 
     // Loop over cameras
     for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
@@ -89,6 +96,8 @@ public class Vision extends SubsystemBase {
       List<Pose3d> robotPoses = new LinkedList<>();
       List<Pose3d> robotPosesAccepted = new LinkedList<>();
       List<Pose3d> robotPosesRejected = new LinkedList<>();
+      List<CyberVision> cyberVisions = new LinkedList<>();
+
 
       // Add tag poses
       for (int tagId : inputs[cameraIndex].tagIds) {
@@ -132,14 +141,11 @@ public class Vision extends SubsystemBase {
             Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
         double linearStdDev = linearStdDevBaseline * stdDevFactor;
         double angularStdDev = angularStdDevBaseline * stdDevFactor;
-
-        Logger.recordOutput("Megatag2", observation.type());
         if (observation.type() == PoseObservationType.MEGATAG_2) {
           linearStdDev *= linearStdDevMegatag2Factor;
           Logger.recordOutput("Megatag2", observation.pose().toPose2d());
           System.out.println(observation.pose());
           angularStdDev *= angularStdDevMegatag2Factor;
-       
         }
         if (cameraIndex < cameraStdDevFactors.length) {
           linearStdDev *= cameraStdDevFactors[cameraIndex];
@@ -151,7 +157,25 @@ public class Vision extends SubsystemBase {
             observation.pose().toPose2d(),
             observation.timestamp(),
             VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev));
+
+        System.out.println("TagIds: " + Arrays.toString(inputs[cameraIndex].tagIds));
+        cyberVisions.add(new CyberVision(
+          cameraIndex,
+          observation.timestamp(), 
+          observation.pose().toPose2d().getTranslation(),
+          observation.pose().toPose2d().getRotation().getDegrees(),
+          observation.ambiguity(),
+          observation.tagCount(),
+          observation.averageTagDistance(),
+          observation.type(),
+          drivetrain.getState().Pose.getTranslation().getDistance(observation.pose().toPose2d().getTranslation()),
+          linearStdDev, 
+          angularStdDev, 
+          !rejectPose,
+          Arrays.toString(inputs[cameraIndex].tagIds)
+          ));
       }
+
 
       // Log camera datadata
       Logger.recordOutput(
@@ -169,8 +193,8 @@ public class Vision extends SubsystemBase {
       allTagPoses.addAll(tagPoses);
       allRobotPoses.addAll(robotPoses);
       allRobotPosesAccepted.addAll(robotPosesAccepted);
-      System.out.println();
       allRobotPosesRejected.addAll(robotPosesRejected);
+      allCyberVisions.addAll(cyberVisions);
     }
 
     // Log summary data
@@ -185,6 +209,7 @@ public class Vision extends SubsystemBase {
         "Vision/Summary/RobotPosesRejected",
         allRobotPosesRejected.toArray(new Pose3d[allRobotPosesRejected.size()]));
 
+    Logger.recordOutput("CyberVisions", allCyberVisions.toArray(new CyberVision[allCyberVisions.size()]));
 
       SendableRegistry.addLW(this, this.getClass().getSimpleName(), this.getClass().getSimpleName());
       //

@@ -37,7 +37,9 @@ public interface VisionIO {
       double ambiguity,
       int tagCount,
       double averageTagDistance,
-      PoseObservationType type) {}
+      PoseObservationType type
+      // Rotation2d robotYaw
+      ) {}
 
   public static enum PoseObservationType {
     MEGATAG_1,

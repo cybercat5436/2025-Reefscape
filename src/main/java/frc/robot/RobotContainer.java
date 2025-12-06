@@ -232,8 +232,8 @@ public class RobotContainer {
               vision =
                   new Vision(
                       drivetrain::addVisionMeasurement,
-                      new VisionIOLimelight(camera0Name, () -> drivetrain.getState().Pose.getRotation()),
-                      new VisionIOLimelight(camera1Name, () -> drivetrain.getState().Pose.getRotation()));
+                      drivetrain,
+                      new VisionIOLimelight(camera0Name, () -> drivetrain.getState().Pose.getRotation()), new VisionIOLimelight(camera1Name, () -> drivetrain.getState().Pose.getRotation()));
               // vision =
               //     new Vision(
               //         demoDrive::addVisionMeasurement,
@@ -246,14 +246,14 @@ public class RobotContainer {
               vision =
                   new Vision(
                       drivetrain::addVisionMeasurement,
-                      new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, () -> drivetrain.getState().Pose),
-                      new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, () -> drivetrain.getState().Pose));
+                      drivetrain,
+                      new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, () -> drivetrain.getState().Pose), new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, () -> drivetrain.getState().Pose));
               break;
                 
             default:
         // Replayed robot, disable IO implementations
         // (Use same number of dummy implementations as the real robot)
-        vision = new Vision(drivetrain::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+        vision = new Vision(drivetrain::addVisionMeasurement, drivetrain, new VisionIO() {}, new VisionIO() {});
         break;
     }
 
