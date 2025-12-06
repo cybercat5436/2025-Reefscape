@@ -73,7 +73,9 @@ public class Vision extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {
+  public void periodic() {}
+
+  public void highFrequencyPeriodic() {
     for (int i = 0; i < io.length; i++) {
       io[i].updateInputs(inputs[i]);
       Logger.processInputs("Vision/Camera" + Integer.toString(i), inputs[i]);
@@ -172,7 +174,7 @@ public class Vision extends SubsystemBase {
           linearStdDev, 
           angularStdDev, 
           !rejectPose,
-          Arrays.toString(inputs[cameraIndex].tagIds)
+          "jojo"
           ));
       }
 

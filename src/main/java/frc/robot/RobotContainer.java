@@ -30,12 +30,14 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -126,9 +128,11 @@ public class RobotContainer {
     private final DetectReefWithCANrange detectReefWithCANrange = new DetectReefWithCANrange(elevator, reefDetector);
     public CANdleSystem candleSystem = CANdleSystem.getInstance();
     
-    private final Vision vision;
+    public final Vision vision;
     public static String camera0Name = "limelight";
     public static String camera1Name = "camera_1";
+
+    private final Notifier fastLoop;
 
 
     private SequentialCommandGroup autoCoralHigh = new SequentialCommandGroup(
@@ -251,11 +255,14 @@ public class RobotContainer {
               break;
                 
             default:
-        // Replayed robot, disable IO implementations
-        // (Use same number of dummy implementations as the real robot)
-        vision = new Vision(drivetrain::addVisionMeasurement, drivetrain, new VisionIO() {}, new VisionIO() {});
-        break;
-    }
+                // Replayed robot, disable IO implementations
+                // (Use same number of dummy implementations as the real robot)
+                vision = new Vision(drivetrain::addVisionMeasurement, drivetrain, new VisionIO() {}, new VisionIO() {});
+                break;
+
+            }
+        fastLoop = new Notifier(() -> vision.highFrequencyPeriodic());
+        fastLoop.startPeriodic(0.010); // 10 ms
 
     }
 
