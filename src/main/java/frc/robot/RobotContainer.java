@@ -16,6 +16,8 @@ import java.time.Instant;
 
 import org.json.simple.parser.ParseException;
 import java.util.List;
+import java.util.function.Supplier;
+
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -67,6 +69,7 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import frc.robot.subsystems.vision.VisionConstants.CameraPosition;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.LimeLight;
 import frc.robot.subsystems.PoseUpdater;
@@ -131,9 +134,6 @@ public class RobotContainer {
     public final Vision vision;
     public static String camera0Name = "limelight";
     public static String camera1Name = "camera_1";
-
-    private final Notifier fastLoop;
-
 
     private SequentialCommandGroup autoCoralHigh = new SequentialCommandGroup(
         new InstantCommand(() -> elevator.raiseLevel4())
@@ -229,6 +229,9 @@ public class RobotContainer {
         drivetrain.registerTelemetry(logger::telemeterize);
         // LimelightHelpers.setPipelineIndex(limeLightFront.limelightName, 1);
         // LimelightHelpers.setPipelineIndex(limeLightFrontRight.limelightName, 1);
+        Supplier<Rotation2d> rotFn = () -> drivetrain.getState().Pose.getRotation();
+        Supplier<Pose2d> poseFn = () -> drivetrain.getState().Pose;
+
         switch (Constants.currentMode) {
             case REAL:
             System.out.println("----------||inside real");
@@ -237,7 +240,8 @@ public class RobotContainer {
                   new Vision(
                       drivetrain::addVisionMeasurement,
                       drivetrain,
-                      new VisionIOLimelight(camera0Name, () -> drivetrain.getState().Pose.getRotation()), new VisionIOLimelight(camera1Name, () -> drivetrain.getState().Pose.getRotation()));
+                      new VisionIOLimelight(CameraPosition.FRONT_CENTER.config.name(), rotFn),
+                      new VisionIOLimelight(CameraPosition.FRONT_RIGHT.config.name(), rotFn));
               // vision =
               //     new Vision(
               //         demoDrive::addVisionMeasurement,
@@ -251,7 +255,14 @@ public class RobotContainer {
                   new Vision(
                       drivetrain::addVisionMeasurement,
                       drivetrain,
-                      new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, () -> drivetrain.getState().Pose), new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, () -> drivetrain.getState().Pose));
+                      new VisionIOPhotonVisionSim(
+                        CameraPosition.FRONT_CENTER.config.name(), 
+                        CameraPosition.FRONT_CENTER.config.robotToCamera(), 
+                        poseFn), 
+                    new VisionIOPhotonVisionSim(
+                        CameraPosition.FRONT_RIGHT.config.name(), 
+                        CameraPosition.FRONT_RIGHT.config.robotToCamera(), 
+                        poseFn));
               break;
                 
             default:
@@ -261,8 +272,7 @@ public class RobotContainer {
                 break;
 
             }
-        fastLoop = new Notifier(() -> vision.highFrequencyPeriodic());
-        fastLoop.startPeriodic(0.010); // 10 ms
+
 
     }
 

@@ -26,6 +26,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -42,6 +43,9 @@ public class Vision extends SubsystemBase {
   private final VisionIOInputsAutoLogged[] inputs;
   private final Alert[] disconnectedAlerts;
   private final CommandSwerveDrivetrain drivetrain;
+  private int periodicCount = 0;
+  private int highFrequencyPeriodicCount = 0;
+  private final Notifier fastLoop;
 
   public Vision(VisionConsumer consumer, CommandSwerveDrivetrain drivetrain, VisionIO... io) {
     this.consumer = consumer;
@@ -61,6 +65,9 @@ public class Vision extends SubsystemBase {
           new Alert(
               "Vision camera " + Integer.toString(i) + " is disconnected.", AlertType.kWarning);
     }
+    SendableRegistry.addLW(this, this.getClass().getSimpleName(), this.getClass().getSimpleName());
+    fastLoop = new Notifier(() -> this.highFrequencyPeriodic());
+    fastLoop.startPeriodic(0.010); // 10 ms
   }
 
   /**
@@ -73,9 +80,13 @@ public class Vision extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {}
+  public void periodic() {
+    Logger.recordOutput("Periodic Count", periodicCount++);
+  }
 
   public void highFrequencyPeriodic() {
+    Logger.recordOutput("Periodic Count High Freq", highFrequencyPeriodicCount++);
+
     for (int i = 0; i < io.length; i++) {
       io[i].updateInputs(inputs[i]);
       Logger.processInputs("Vision/Camera" + Integer.toString(i), inputs[i]);
@@ -174,7 +185,7 @@ public class Vision extends SubsystemBase {
           linearStdDev, 
           angularStdDev, 
           !rejectPose,
-          "jojo"
+          5436  //dummy value
           ));
       }
 
@@ -213,7 +224,7 @@ public class Vision extends SubsystemBase {
 
     Logger.recordOutput("CyberVisions", allCyberVisions.toArray(new CyberVision[allCyberVisions.size()]));
 
-      SendableRegistry.addLW(this, this.getClass().getSimpleName(), this.getClass().getSimpleName());
+      
       //
   }
 

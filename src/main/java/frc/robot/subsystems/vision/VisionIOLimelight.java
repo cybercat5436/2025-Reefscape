@@ -100,10 +100,18 @@ public class VisionIOLimelight implements VisionIO {
               rawSample.value[9],
 
               // Observation type
-              PoseObservationType.MEGATAG_1));
+              PoseObservationType.MEGATAG_1,
+              
+              // observationtagIds
+              tagIds.stream().mapToInt(Integer::intValue).toArray().toString()
+              ));
     }
     for (var rawSample : megatag2Subscriber.readQueue()) {
       if (rawSample.value.length == 0) continue;
+      
+      // Generate a clean list of tagIDs observed for MegaTag 2
+      tagIds.clear();
+
       for (int i = 11; i < rawSample.value.length; i += 7) {
         tagIds.add((int) rawSample.value[i]);
       }
@@ -125,7 +133,11 @@ public class VisionIOLimelight implements VisionIO {
               rawSample.value[9],
 
               // Observation type
-              PoseObservationType.MEGATAG_2));
+              PoseObservationType.MEGATAG_2,
+              
+              // observationtagIds
+              tagIds.stream().mapToInt(Integer::intValue).toArray().toString()
+              ));
     }
 
     // Save pose observations to inputs object

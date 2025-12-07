@@ -37,7 +37,8 @@ public interface VisionIO {
       double ambiguity,
       int tagCount,
       double averageTagDistance,
-      PoseObservationType type
+      PoseObservationType type,
+      String observationTagIds
       // Rotation2d robotYaw
       ) {}
 

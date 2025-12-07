@@ -17,7 +17,7 @@ public record CyberVision(
     double translationStdDev,
     double rotationStdDev,
     boolean accepted,
-    String tagIds
+    int tagIds
 ) {
 
 }

@@ -26,6 +26,46 @@ public class VisionConstants {
   public static AprilTagFieldLayout aprilTagLayout =
       AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 
+  public record CameraConfig(
+      String name, 
+      Transform3d robotToCamera,
+      double cameraStdDevFactor) {}
+
+  public enum CameraPosition {
+    FRONT_CENTER(new CameraConfig(
+        "limelight",
+        new Transform3d(
+            0.37,
+            -0.236,
+            0.565,
+            new Rotation3d(
+                Radians.convertFrom(-91.5, Degrees),
+                Radians.convertFrom(-1, Degrees),
+                Radians.convertFrom(2.5, Degrees))
+        ),
+        1.0
+    )),
+    FRONT_RIGHT(new CameraConfig(
+        "camera_1",
+        new Transform3d(
+            0.127,
+            0.029,
+            0.395,
+            new Rotation3d(
+                Radians.convertFrom(5.8, Degrees),
+                Radians.convertFrom(-21, Degrees),
+                Radians.convertFrom(31.2, Degrees))
+        ),
+        1.0
+    ));
+
+    public CameraConfig config;
+    
+    private CameraPosition(CameraConfig config) {
+      this.config = config;
+    }
+
+  }
   // Camera names, must match names configured on coprocessor
   public static String camera0Name = "limelight";
   public static String camera1Name = "camera_1";
@@ -39,7 +79,7 @@ public class VisionConstants {
   // private final LimeLight limeLightFrontRight = new LimeLight("limelight-right", .127, 0.029,
   // 0.395, 5.8, -21, 31.2);
 
-  //   front-left camera
+  //   front-left camera (to be replaced by enum)
   public static Transform3d robotToCamera0 =
       //   new Transform3d(0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, 0.0));
       new Transform3d(
@@ -51,7 +91,7 @@ public class VisionConstants {
               Radians.convertFrom(-1, Degrees),
               Radians.convertFrom(2.5, Degrees)));
 
-  // front-right camera
+  // front-right camera (to be replaced by enum)
   public static Transform3d robotToCamera1 =
       //   new Transform3d(-0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, Math.PI));
       new Transform3d(

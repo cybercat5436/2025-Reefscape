@@ -84,7 +84,9 @@ public class VisionIOPhotonVision implements VisionIO {
                 multitagResult.estimatedPose.ambiguity, // Ambiguity
                 multitagResult.fiducialIDsUsed.size(), // Tag count
                 totalTagDistance / result.targets.size(), // Average tag distance
-                PoseObservationType.PHOTONVISION)); // Observation type
+                PoseObservationType.PHOTONVISION,
+                multitagResult.fiducialIDsUsed.stream().mapToInt(i -> i).toArray().toString()
+                )); // Observation type
 
       } else if (!result.targets.isEmpty()) { // Single tag result
         var target = result.targets.get(0);
@@ -110,7 +112,9 @@ public class VisionIOPhotonVision implements VisionIO {
                   target.poseAmbiguity, // Ambiguity
                   1, // Tag count
                   cameraToTarget.getTranslation().getNorm(), // Average tag distance
-                  PoseObservationType.PHOTONVISION)); // Observation type
+                  PoseObservationType.PHOTONVISION,
+                  (new int[] {target.fiducialId}).toString()
+              )); // Observation type
         }
       }
     }
