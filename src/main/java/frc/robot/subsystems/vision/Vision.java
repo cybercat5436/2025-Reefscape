@@ -31,6 +31,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
+import frc.robot.subsystems.vision.VisionIO.VisionIOInputs;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -43,10 +44,17 @@ public class Vision extends SubsystemBase {
   private final VisionIOInputsAutoLogged[] inputs;
   private final Alert[] disconnectedAlerts;
   private final CommandSwerveDrivetrain drivetrain;
-  private int periodicCount = 0;
-  private int highFrequencyPeriodicCount = 0;
-  private final Notifier fastLoop;
+  private final Object lock = new Object();
 
+  // Data that highFrequencyPeriodic produces and periodic logs:
+  private Pose3d[][] latestTagPosesPerCamera;
+  private Pose3d[][] latestRobotPosesPerCamera;
+  private Pose3d[][] latestRobotPosesAcceptedPerCamera;
+  private Pose3d[][] latestRobotPosesRejectedPerCamera;
+  private CyberVision[] latestCyberVisions;
+  private long highFrequencyPeriodicCount = 0;
+  private long periodicCount = 0;
+  
   public Vision(VisionConsumer consumer, CommandSwerveDrivetrain drivetrain, VisionIO... io) {
     this.consumer = consumer;
     this.io = io;
@@ -65,9 +73,10 @@ public class Vision extends SubsystemBase {
           new Alert(
               "Vision camera " + Integer.toString(i) + " is disconnected.", AlertType.kWarning);
     }
+
     SendableRegistry.addLW(this, this.getClass().getSimpleName(), this.getClass().getSimpleName());
-    fastLoop = new Notifier(() -> this.highFrequencyPeriodic());
-    fastLoop.startPeriodic(0.010); // 10 ms
+    Notifier fastNotifier = new Notifier(this::highFrequencyPeriodic);
+    fastNotifier.startPeriodic(VisionConstants.visionProcessingPeriod); // 10 ms
   }
 
   /**
@@ -81,35 +90,119 @@ public class Vision extends SubsystemBase {
 
   @Override
   public void periodic() {
-    Logger.recordOutput("Periodic Count", periodicCount++);
-  }
 
-  public void highFrequencyPeriodic() {
-    Logger.recordOutput("Periodic Count High Freq", highFrequencyPeriodicCount++);
+    // Setup variables to copy data from highFrequencyPeriodic
+    Pose3d[][] tagPosesPerCamera;
+    Pose3d[][] robotPosesPerCamera;
+    Pose3d[][] robotPosesAcceptedPerCamera;
+    Pose3d[][] robotPosesRejectedPerCamera;
+    CyberVision[] cyberVisions;
+    long hfCount;
 
-    for (int i = 0; i < io.length; i++) {
-      io[i].updateInputs(inputs[i]);
-      Logger.processInputs("Vision/Camera" + Integer.toString(i), inputs[i]);
+    synchronized (lock) {
+      // local copies so we don't hold the lock while calling Logger
+      tagPosesPerCamera = latestTagPosesPerCamera;
+      robotPosesPerCamera = latestRobotPosesPerCamera;
+      robotPosesAcceptedPerCamera = latestRobotPosesAcceptedPerCamera;
+      robotPosesRejectedPerCamera = latestRobotPosesRejectedPerCamera;
+      cyberVisions = latestCyberVisions;
+      hfCount = highFrequencyPeriodicCount;
     }
 
-    // Initialize logging values
+    Logger.recordOutput("Periodic Count", periodicCount++);
+    Logger.recordOutput("Periodic Count High Freq", hfCount);
+
+    if (tagPosesPerCamera == null) {
+      // Notifier hasn’t populated anything yet
+      return;
+    }
+
+    // Aggregate summaries
     List<Pose3d> allTagPoses = new LinkedList<>();
     List<Pose3d> allRobotPoses = new LinkedList<>();
     List<Pose3d> allRobotPosesAccepted = new LinkedList<>();
     List<Pose3d> allRobotPosesRejected = new LinkedList<>();
-    List<CyberVision> allCyberVisions = new LinkedList<>();
 
-    // Loop over cameras
     for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
-      // Update disconnected alert
-      disconnectedAlerts[cameraIndex].set(!inputs[cameraIndex].connected);
+      // Log auto-logged inputs once per loop
+      Logger.processInputs("Vision/Camera" + Integer.toString(cameraIndex), inputs[cameraIndex]);
 
-      // Initialize logging values
+      Pose3d[] tagPoses = tagPosesPerCamera[cameraIndex];
+      Pose3d[] robotPoses = robotPosesPerCamera[cameraIndex];
+      Pose3d[] robotPosesAccepted = robotPosesAcceptedPerCamera[cameraIndex];
+      Pose3d[] robotPosesRejected = robotPosesRejectedPerCamera[cameraIndex];
+
+      if (tagPoses == null) continue; // safety
+
+      Logger.recordOutput(
+          "Vision/Camera" + cameraIndex + "/TagPoses", tagPoses);
+      Logger.recordOutput(
+          "Vision/Camera" + cameraIndex + "/RobotPoses", robotPoses);
+      Logger.recordOutput(
+          "Vision/Camera" + cameraIndex + "/RobotPosesAccepted",
+          robotPosesAccepted);
+      Logger.recordOutput(
+          "Vision/Camera" + cameraIndex + "/RobotPosesRejected",
+          robotPosesRejected);
+
+      allTagPoses.addAll(List.of(tagPoses));
+      allRobotPoses.addAll(List.of(robotPoses));
+      allRobotPosesAccepted.addAll(List.of(robotPosesAccepted));
+      allRobotPosesRejected.addAll(List.of(robotPosesRejected));
+
+    }
+
+    // Log summary data
+    Logger.recordOutput(
+        "Vision/Summary/TagPoses", allTagPoses.toArray(new Pose3d[allTagPoses.size()]));
+    Logger.recordOutput(
+        "Vision/Summary/RobotPoses", allRobotPoses.toArray(new Pose3d[allRobotPoses.size()]));
+    Logger.recordOutput(
+        "Vision/Summary/RobotPosesAccepted",
+        allRobotPosesAccepted.toArray(new Pose3d[allRobotPosesAccepted.size()]));
+    Logger.recordOutput(
+        "Vision/Summary/RobotPosesRejected",
+        allRobotPosesRejected.toArray(new Pose3d[allRobotPosesRejected.size()]));
+
+    if (cyberVisions != null){
+      Logger.recordOutput("CyberVisions", cyberVisions);
+    }
+
+  }
+
+  public void highFrequencyPeriodic() {
+    // This is built to run on a separate thread at 100 Hz.
+    // No logging calls allowed in this method, due to thread safety.
+
+
+    // Local containers built on this thread
+    Pose3d[][] tagPosesPerCamera = new Pose3d[io.length][];
+    Pose3d[][] robotPosesPerCamera = new Pose3d[io.length][];
+    Pose3d[][] robotPosesAcceptedPerCamera = new Pose3d[io.length][];
+    Pose3d[][] robotPosesRejectedPerCamera = new Pose3d[io.length][];
+    List<CyberVision> allCyberVisions = new LinkedList<>();
+    
+
+    // Update the robot pose in VisionIOInputs
+    // Pose2d currentRobotPose = drivetrain.getState().Pose; // Get the current robot pose from drivetrain
+
+    // Loop over cameras (no logging)
+    for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
+      // Update inputs
+      inputs[cameraIndex].robotPose = drivetrain.getState().Pose; // Set the current robot pose
+      inputs[cameraIndex].cycleCount = highFrequencyPeriodicCount;
+      io[cameraIndex].updateInputs(inputs[cameraIndex]);
+
+      // Initialize per-camer logging values
       List<Pose3d> tagPoses = new LinkedList<>();
       List<Pose3d> robotPoses = new LinkedList<>();
       List<Pose3d> robotPosesAccepted = new LinkedList<>();
       List<Pose3d> robotPosesRejected = new LinkedList<>();
       List<CyberVision> cyberVisions = new LinkedList<>();
+
+      // Update disconnected alert – ideally this stays on main thread,
+      // but if your alert code is simple/set-only you *can* do it here.
+      disconnectedAlerts[cameraIndex].set(!inputs[cameraIndex].connected);
 
 
       // Add tag poses
@@ -181,49 +274,32 @@ public class Vision extends SubsystemBase {
           observation.tagCount(),
           observation.averageTagDistance(),
           observation.type(),
-          drivetrain.getState().Pose.getTranslation().getDistance(observation.pose().toPose2d().getTranslation()),
+          observation.visionToRobotDistanceError(),
           linearStdDev, 
           angularStdDev, 
           !rejectPose,
-          5436  //dummy value
+          observation.cycleCount()  //dummy value
           ));
       }
 
-
-      // Log camera datadata
-      Logger.recordOutput(
-          "Vision/Camera" + Integer.toString(cameraIndex) + "/TagPoses",
-          tagPoses.toArray(new Pose3d[tagPoses.size()]));
-      Logger.recordOutput(
-          "Vision/Camera" + Integer.toString(cameraIndex) + "/RobotPoses",
-          robotPoses.toArray(new Pose3d[robotPoses.size()]));
-      Logger.recordOutput(
-          "Vision/Camera" + Integer.toString(cameraIndex) + "/RobotPosesAccepted",
-          robotPosesAccepted.toArray(new Pose3d[robotPosesAccepted.size()]));
-      Logger.recordOutput(
-          "Vision/Camera" + Integer.toString(cameraIndex) + "/RobotPosesRejected",
-          robotPosesRejected.toArray(new Pose3d[robotPosesRejected.size()]));
-      allTagPoses.addAll(tagPoses);
-      allRobotPoses.addAll(robotPoses);
-      allRobotPosesAccepted.addAll(robotPosesAccepted);
-      allRobotPosesRejected.addAll(robotPosesRejected);
+      // Convert per-camera lists to arrays for handoff
+      tagPosesPerCamera[cameraIndex] = tagPoses.toArray(new Pose3d[tagPoses.size()]);
+      robotPosesPerCamera[cameraIndex] = robotPoses.toArray(new Pose3d[robotPoses.size()]);
+      robotPosesAcceptedPerCamera[cameraIndex] = robotPosesAccepted.toArray(new Pose3d[robotPosesAccepted.size()]);
+      robotPosesRejectedPerCamera[cameraIndex] = robotPosesRejected.toArray(new Pose3d[robotPosesRejected.size()]);
       allCyberVisions.addAll(cyberVisions);
     }
 
-    // Log summary data
-    Logger.recordOutput(
-        "Vision/Summary/TagPoses", allTagPoses.toArray(new Pose3d[allTagPoses.size()]));
-    Logger.recordOutput(
-        "Vision/Summary/RobotPoses", allRobotPoses.toArray(new Pose3d[allRobotPoses.size()]));
-    Logger.recordOutput(
-        "Vision/Summary/RobotPosesAccepted",
-        allRobotPosesAccepted.toArray(new Pose3d[allRobotPosesAccepted.size()]));
-    Logger.recordOutput(
-        "Vision/Summary/RobotPosesRejected",
-        allRobotPosesRejected.toArray(new Pose3d[allRobotPosesRejected.size()]));
-
-    Logger.recordOutput("CyberVisions", allCyberVisions.toArray(new CyberVision[allCyberVisions.size()]));
-
+    // Now publish all new data atomically
+    synchronized (lock) {
+      highFrequencyPeriodicCount++;
+      latestTagPosesPerCamera = tagPosesPerCamera;
+      latestRobotPosesPerCamera = robotPosesPerCamera;
+      latestRobotPosesAcceptedPerCamera = robotPosesAcceptedPerCamera;
+      latestRobotPosesRejectedPerCamera = robotPosesRejectedPerCamera;
+      latestCyberVisions =
+          allCyberVisions.toArray(new CyberVision[allCyberVisions.size()]);
+    }
       
       //
   }

@@ -13,6 +13,7 @@
 
 package frc.robot.subsystems.vision;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -82,13 +83,15 @@ public class VisionIOLimelight implements VisionIO {
       for (int i = 11; i < rawSample.value.length; i += 7) {
         tagIds.add((int) rawSample.value[i]);
       }
+      Pose3d mt1Pose = parsePose(rawSample.value);
       poseObservations.add(
           new PoseObservation(
               // Timestamp, based on server timestamp of publish and latency
               rawSample.timestamp * 1.0e-6 - rawSample.value[6] * 1.0e-3,
 
               // 3D pose estimate
-              parsePose(rawSample.value),
+              // parsePose(rawSample.value),
+              mt1Pose,
 
               // Ambiguity, using only the first tag because ambiguity isn't applicable for multitag
               rawSample.value.length >= 18 ? rawSample.value[17] : 0.0,
@@ -102,26 +105,31 @@ public class VisionIOLimelight implements VisionIO {
               // Observation type
               PoseObservationType.MEGATAG_1,
               
-              // observationtagIds
-              tagIds.stream().mapToInt(Integer::intValue).toArray().toString()
+              // Robot yaw
+              mt1Pose.getRotation().toRotation2d().getDegrees(),
+
+              // Vision to robot distance error (not provided by Limelight, set to 0.0)
+              inputs.robotPose.getTranslation().getDistance(mt1Pose.toPose2d().getTranslation()),
+
+              inputs.robotPose,
+              inputs.cycleCount
               ));
     }
     for (var rawSample : megatag2Subscriber.readQueue()) {
       if (rawSample.value.length == 0) continue;
       
-      // Generate a clean list of tagIDs observed for MegaTag 2
-      tagIds.clear();
-
       for (int i = 11; i < rawSample.value.length; i += 7) {
         tagIds.add((int) rawSample.value[i]);
       }
+      Pose3d mt2Pose = parsePose(rawSample.value);
+
       poseObservations.add(
           new PoseObservation(
               // Timestamp, based on server timestamp of publish and latency
               rawSample.timestamp * 1.0e-6 - rawSample.value[6] * 1.0e-3,
 
               // 3D pose estimate
-              parsePose(rawSample.value),
+              mt2Pose,
 
               // Ambiguity, zeroed because the pose is already disambiguated
               0.0,
@@ -134,9 +142,15 @@ public class VisionIOLimelight implements VisionIO {
 
               // Observation type
               PoseObservationType.MEGATAG_2,
-              
-              // observationtagIds
-              tagIds.stream().mapToInt(Integer::intValue).toArray().toString()
+
+              // Robot yaw
+              mt2Pose.getRotation().toRotation2d().getDegrees(),
+
+              // Vision to robot distance error (not provided by Limelight, set to 0.0)
+              inputs.robotPose.getTranslation().getDistance(mt2Pose.toPose2d().getTranslation()),
+
+              inputs.robotPose,
+              inputs.cycleCount
               ));
     }
 

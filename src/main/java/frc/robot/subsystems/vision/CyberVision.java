@@ -17,7 +17,7 @@ public record CyberVision(
     double translationStdDev,
     double rotationStdDev,
     boolean accepted,
-    int tagIds
+    long cycleCount
 ) {
 
 }

@@ -66,6 +66,7 @@ public class VisionConstants {
     }
 
   }
+  // TODO: REFACTOR TO USE ENUM
   // Camera names, must match names configured on coprocessor
   public static String camera0Name = "limelight";
   public static String camera1Name = "camera_1";
@@ -102,6 +103,9 @@ public class VisionConstants {
               Radians.convertFrom(5.8, Degrees),
               Radians.convertFrom(-21, Degrees),
               Radians.convertFrom(31.2, Degrees)));
+
+  // Vision processing refresh period
+  public static double visionProcessingPeriod = 0.01; // Seconds
 
   // Basic filtering thresholds
   public static double maxAmbiguity = 0.3;

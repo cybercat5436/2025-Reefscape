@@ -13,6 +13,7 @@
 
 package frc.robot.subsystems.vision;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
@@ -25,6 +26,8 @@ public interface VisionIO {
         new TargetObservation(new Rotation2d(), new Rotation2d());
     public PoseObservation[] poseObservations = new PoseObservation[0];
     public int[] tagIds = new int[0];
+    public Pose2d robotPose = new Pose2d();
+    public long cycleCount = 0;
   }
 
   /** Represents the angle to a simple target, not used for pose estimation. */
@@ -38,8 +41,10 @@ public interface VisionIO {
       int tagCount,
       double averageTagDistance,
       PoseObservationType type,
-      String observationTagIds
-      // Rotation2d robotYaw
+      double robotYaw,
+      double visionToRobotDistanceError,
+      Pose2d estimatedPose2d,
+      long cycleCount
       ) {}
 
   public static enum PoseObservationType {
