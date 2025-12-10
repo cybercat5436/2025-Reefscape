@@ -139,8 +139,11 @@ public class Vision extends SubsystemBase {
           Logger.recordOutput("Megatag2", observation.pose().toPose2d());
           System.out.println(observation.pose());
           angularStdDev *= angularStdDevMegatag2Factor;
-       
-        }
+        } 
+        // else{
+          // linearStdDev *= 999999999;
+          // angularStdDev *= 99999999;
+        // }
         if (cameraIndex < cameraStdDevFactors.length) {
           linearStdDev *= cameraStdDevFactors[cameraIndex];
           angularStdDev *= cameraStdDevFactors[cameraIndex];
