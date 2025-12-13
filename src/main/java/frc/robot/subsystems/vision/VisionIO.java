@@ -26,7 +26,7 @@ public interface VisionIO {
         new TargetObservation(new Rotation2d(), new Rotation2d());
     public PoseObservation[] poseObservations = new PoseObservation[0];
     public int[] tagIds = new int[0];
-    public Pose2d robotPose = new Pose2d();
+    public Pose2d estimatedPose2d = new Pose2d();
     public long cycleCount = 0;
   }
 
@@ -41,7 +41,7 @@ public interface VisionIO {
       int tagCount,
       double averageTagDistance,
       PoseObservationType type,
-      double robotYaw,
+      double robotYawDegrees,
       double visionToRobotDistanceError,
       Pose2d estimatedPose2d,
       long cycleCount

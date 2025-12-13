@@ -86,8 +86,8 @@ public class VisionIOPhotonVision implements VisionIO {
                 totalTagDistance / result.targets.size(), // Average tag distance
                 PoseObservationType.PHOTONVISION,
                 robotPose.getRotation().toRotation2d().getDegrees(), // Robot yaw
-                inputs.robotPose.getTranslation().getDistance(robotPose.toPose2d().getTranslation()),
-                inputs.robotPose,
+                inputs.estimatedPose2d.getTranslation().getDistance(robotPose.toPose2d().getTranslation()),
+                inputs.estimatedPose2d,
                 inputs.cycleCount
                 )); // Observation type
 
@@ -117,8 +117,8 @@ public class VisionIOPhotonVision implements VisionIO {
                   cameraToTarget.getTranslation().getNorm(), // Average tag distance
                   PoseObservationType.PHOTONVISION,
                   robotPose.getRotation().toRotation2d().getDegrees(), // Robot yaw
-                  inputs.robotPose.getTranslation().getDistance(robotPose.toPose2d().getTranslation()),
-                  inputs.robotPose,
+                  inputs.estimatedPose2d.getTranslation().getDistance(robotPose.toPose2d().getTranslation()),
+                  inputs.estimatedPose2d,
                   inputs.cycleCount
               )); // Observation type
         }

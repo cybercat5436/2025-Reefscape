@@ -109,9 +109,9 @@ public class VisionIOLimelight implements VisionIO {
               mt1Pose.getRotation().toRotation2d().getDegrees(),
 
               // Vision to robot distance error (not provided by Limelight, set to 0.0)
-              inputs.robotPose.getTranslation().getDistance(mt1Pose.toPose2d().getTranslation()),
+              inputs.estimatedPose2d.getTranslation().getDistance(mt1Pose.toPose2d().getTranslation()),
 
-              inputs.robotPose,
+              inputs.estimatedPose2d,
               inputs.cycleCount
               ));
     }
@@ -147,9 +147,9 @@ public class VisionIOLimelight implements VisionIO {
               mt2Pose.getRotation().toRotation2d().getDegrees(),
 
               // Vision to robot distance error (not provided by Limelight, set to 0.0)
-              inputs.robotPose.getTranslation().getDistance(mt2Pose.toPose2d().getTranslation()),
+              inputs.estimatedPose2d.getTranslation().getDistance(mt2Pose.toPose2d().getTranslation()),
 
-              inputs.robotPose,
+              inputs.estimatedPose2d,
               inputs.cycleCount
               ));
     }

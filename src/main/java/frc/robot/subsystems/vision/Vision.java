@@ -189,7 +189,7 @@ public class Vision extends SubsystemBase {
     // Loop over cameras (no logging)
     for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
       // Update inputs
-      inputs[cameraIndex].robotPose = drivetrain.getState().Pose; // Set the current robot pose
+      inputs[cameraIndex].estimatedPose2d = drivetrain.getState().Pose; // Set the current robot pose
       inputs[cameraIndex].cycleCount = highFrequencyPeriodicCount;
       io[cameraIndex].updateInputs(inputs[cameraIndex]);
 
