@@ -16,6 +16,9 @@ package frc.robot.subsystems.vision;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+
+import java.util.List;
+
 import org.littletonrobotics.junction.AutoLog;
 
 public interface VisionIO {
@@ -25,6 +28,7 @@ public interface VisionIO {
     public TargetObservation latestTargetObservation =
         new TargetObservation(new Rotation2d(), new Rotation2d());
     public PoseObservation[] poseObservations = new PoseObservation[0];
+    public PoseObservation[] poseObservationsWithStdDev = new PoseObservation[0];
     public int[] tagIds = new int[0];
     public Pose2d estimatedPose2d = new Pose2d();
     public long cycleCount = 0;
@@ -44,8 +48,39 @@ public interface VisionIO {
       double robotYawDegrees,
       double visionToRobotDistanceError,
       Pose2d estimatedPose2d,
-      long cycleCount
-      ) {}
+      long cycleCount,
+      double stdDevTranslation,
+      double stdDevRotation
+      ) {
+
+        public PoseObservation(
+          double timestamp,
+          Pose3d pose,
+          double ambiguity,
+          int tagCount,
+          double averageTagDistance,
+          PoseObservationType type,
+          double robotYawDegrees,
+          double visionToRobotDistanceError,
+          Pose2d estimatedPose2d,
+          long cycleCount
+        ) {
+          this(
+            timestamp,
+            pose,
+            ambiguity,
+            tagCount,
+            averageTagDistance,
+            type,
+            robotYawDegrees,
+            visionToRobotDistanceError,
+            estimatedPose2d,
+            cycleCount,
+            99999,
+            99999
+          );
+        }
+      }
 
   public static enum PoseObservationType {
     MEGATAG_1,
@@ -54,4 +89,5 @@ public interface VisionIO {
   }
 
   public default void updateInputs(VisionIOInputs inputs) {}
+
 }

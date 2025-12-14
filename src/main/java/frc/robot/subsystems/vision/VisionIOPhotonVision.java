@@ -47,6 +47,7 @@ public class VisionIOPhotonVision implements VisionIO {
     // Read new camera observations
     Set<Short> tagIds = new HashSet<>();
     List<PoseObservation> poseObservations = new LinkedList<>();
+
     for (var result : camera.getAllUnreadResults()) {
       // Update latest target observation
       if (result.hasTargets()) {
@@ -85,7 +86,7 @@ public class VisionIOPhotonVision implements VisionIO {
                 multitagResult.fiducialIDsUsed.size(), // Tag count
                 totalTagDistance / result.targets.size(), // Average tag distance
                 PoseObservationType.PHOTONVISION,
-                robotPose.getRotation().toRotation2d().getDegrees(), // Robot yaw
+                robotPose.  getRotation().toRotation2d().getDegrees(), // Robot yaw
                 inputs.estimatedPose2d.getTranslation().getDistance(robotPose.toPose2d().getTranslation()),
                 inputs.estimatedPose2d,
                 inputs.cycleCount
@@ -138,4 +139,5 @@ public class VisionIOPhotonVision implements VisionIO {
       inputs.tagIds[i++] = id;
     }
   }
+
 }

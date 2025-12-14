@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.vision.VisionIO.PoseObservation;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import frc.robot.subsystems.vision.VisionIO.VisionIOInputs;
 
@@ -51,6 +52,7 @@ public class Vision extends SubsystemBase {
   private Pose3d[][] latestRobotPosesPerCamera;
   private Pose3d[][] latestRobotPosesAcceptedPerCamera;
   private Pose3d[][] latestRobotPosesRejectedPerCamera;
+  private PoseObservation[][] latestPoseObservationsWithStdDevPerCamera;
   private CyberVision[] latestCyberVisions;
   private long highFrequencyPeriodicCount = 0;
   private long periodicCount = 0;
@@ -96,6 +98,7 @@ public class Vision extends SubsystemBase {
     Pose3d[][] robotPosesPerCamera;
     Pose3d[][] robotPosesAcceptedPerCamera;
     Pose3d[][] robotPosesRejectedPerCamera;
+    PoseObservation[][] poseObservationsWithStdDevPerCamera;
     CyberVision[] cyberVisions;
     long hfCount;
 
@@ -105,6 +108,7 @@ public class Vision extends SubsystemBase {
       robotPosesPerCamera = latestRobotPosesPerCamera;
       robotPosesAcceptedPerCamera = latestRobotPosesAcceptedPerCamera;
       robotPosesRejectedPerCamera = latestRobotPosesRejectedPerCamera;
+      poseObservationsWithStdDevPerCamera = latestPoseObservationsWithStdDevPerCamera;
       cyberVisions = latestCyberVisions;
       hfCount = highFrequencyPeriodicCount;
     }
@@ -180,6 +184,7 @@ public class Vision extends SubsystemBase {
     Pose3d[][] robotPosesPerCamera = new Pose3d[io.length][];
     Pose3d[][] robotPosesAcceptedPerCamera = new Pose3d[io.length][];
     Pose3d[][] robotPosesRejectedPerCamera = new Pose3d[io.length][];
+    PoseObservation[][] poseObservationsWithStdDevPerCamera = new PoseObservation[io.length][];
     List<CyberVision> allCyberVisions = new LinkedList<>();
     
 
@@ -193,12 +198,13 @@ public class Vision extends SubsystemBase {
       inputs[cameraIndex].cycleCount = highFrequencyPeriodicCount;
       io[cameraIndex].updateInputs(inputs[cameraIndex]);
 
-      // Initialize per-camer logging values
+      // Initialize per-camera logging values
       List<Pose3d> tagPoses = new LinkedList<>();
       List<Pose3d> robotPoses = new LinkedList<>();
       List<Pose3d> robotPosesAccepted = new LinkedList<>();
       List<Pose3d> robotPosesRejected = new LinkedList<>();
       List<CyberVision> cyberVisions = new LinkedList<>();
+      List<VisionIO.PoseObservation> poseObservationsWithStdDev = new LinkedList<>();
 
       // Update disconnected alert – ideally this stays on main thread,
       // but if your alert code is simple/set-only you *can* do it here.
@@ -233,8 +239,11 @@ public class Vision extends SubsystemBase {
         robotPoses.add(observation.pose());
         if (rejectPose) {
           robotPosesRejected.add(observation.pose());
+          // this adds the pose to rejected list, having 99999 for std dev
+          poseObservationsWithStdDev.add(observation);
         } else {
           robotPosesAccepted.add(observation.pose());
+          // delay adding poseObservationwithStdDev until std dev is calculated
         }
 
         // Skip if rejected
@@ -257,6 +266,24 @@ public class Vision extends SubsystemBase {
           linearStdDev *= cameraStdDevFactors[cameraIndex];
           angularStdDev *= cameraStdDevFactors[cameraIndex];
         }
+
+        // Now add the acepted pose with std devs calculated
+        var poseObservationWithStdDev = new VisionIO.PoseObservation(
+          observation.timestamp(),
+          observation.pose(),
+          observation.ambiguity(),
+          observation.tagCount(),
+          observation.averageTagDistance(),
+          observation.type(),
+          observation.robotYawDegrees(),
+          observation.visionToRobotDistanceError(),
+          observation.estimatedPose2d(),
+          observation.cycleCount(),
+          linearStdDev,
+          angularStdDev
+        );
+        poseObservationsWithStdDev.add(poseObservationWithStdDev);
+        inputs[cameraIndex].poseObservationsWithStdDev = poseObservationsWithStdDev.toArray(new VisionIO.PoseObservation[poseObservationsWithStdDev.size()]);
 
         // Send vision observation
         consumer.accept(
@@ -287,6 +314,7 @@ public class Vision extends SubsystemBase {
       robotPosesPerCamera[cameraIndex] = robotPoses.toArray(new Pose3d[robotPoses.size()]);
       robotPosesAcceptedPerCamera[cameraIndex] = robotPosesAccepted.toArray(new Pose3d[robotPosesAccepted.size()]);
       robotPosesRejectedPerCamera[cameraIndex] = robotPosesRejected.toArray(new Pose3d[robotPosesRejected.size()]);
+      poseObservationsWithStdDevPerCamera[cameraIndex] = poseObservationsWithStdDev.toArray(new VisionIO.PoseObservation[poseObservationsWithStdDev.size()]);
       allCyberVisions.addAll(cyberVisions);
     }
 
@@ -297,6 +325,7 @@ public class Vision extends SubsystemBase {
       latestRobotPosesPerCamera = robotPosesPerCamera;
       latestRobotPosesAcceptedPerCamera = robotPosesAcceptedPerCamera;
       latestRobotPosesRejectedPerCamera = robotPosesRejectedPerCamera;
+      latestPoseObservationsWithStdDevPerCamera = poseObservationsWithStdDevPerCamera;
       latestCyberVisions =
           allCyberVisions.toArray(new CyberVision[allCyberVisions.size()]);
     }
