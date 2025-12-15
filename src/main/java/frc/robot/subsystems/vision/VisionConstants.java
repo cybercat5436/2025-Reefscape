@@ -16,15 +16,30 @@ package frc.robot.subsystems.vision;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
 
+import java.nio.file.Path;
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.wpilibj.Filesystem;
 
 public class VisionConstants {
   // AprilTag layout
-  public static AprilTagFieldLayout aprilTagLayout =
-      AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+  public static AprilTagFieldLayout aprilTagLayout;
+//   public static AprilTagFieldLayout aprilTagLayout =
+//       AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+
+
+    static {
+        try {
+        Path layoutPath = Filesystem.getDeployDirectory().toPath()
+            .resolve("apriltags/sixsevenapriltagmap.json");
+        aprilTagLayout = new AprilTagFieldLayout(layoutPath);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load AprilTag layout", e);
+        }
+  }            
 
   public record CameraConfig(
       String name, 

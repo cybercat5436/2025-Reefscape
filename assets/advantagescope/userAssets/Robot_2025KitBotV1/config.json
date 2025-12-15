@@ -1,0 +1,72 @@
+{
+  "name": "2025 Cybercats",
+  "sourceUrl": "https://cad.onshape.com/documents/d855255997cf6f19beebda70/w/f91fedea2a24ccc5a1e39d78/e/35d4d7ca5b887f2fbbeddd4d",
+  "rotations": [
+    {
+      "axis": "x",
+      "degrees": 0
+    },
+    {
+      "axis": "z",
+      "degrees": 180
+    }
+  ],
+  "position": [
+    0.90,
+    0.0,
+    0.0
+  ],
+  "cameras": [
+    {
+      "name": "Front Left",
+      "rotations": [
+        {
+          "axis": "x",
+          "degrees": -91.5
+        },
+        {
+          "axis": "y",
+          "degrees": -1
+        },
+        {
+          "axis": "y",
+          "degrees": 2.5
+        }
+      ],
+      "position": [
+        0.037, 0.236, 0.565
+      ],
+      "resolution": [
+        960,
+        720
+      ],
+      "fov": 90
+    },
+    {
+      "name": "Front Right",
+      "rotations": [
+      {
+        "axis": "x",
+        "degrees": 5.8
+      },
+      {
+        "axis": "y",
+        "degrees": 21
+      },
+        {
+          "axis": "z",
+          "degrees": 31.2
+        }
+      ],
+      "position": [
+        0.127, -0.029, 0.395
+      ],
+      "resolution": [
+        960,
+        720
+      ],
+      "fov": 90
+    }
+  ],
+  "components": []
+}
