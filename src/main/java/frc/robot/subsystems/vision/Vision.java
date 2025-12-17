@@ -141,8 +141,8 @@ public class Vision extends SubsystemBase {
           angularStdDev *= angularStdDevMegatag2Factor;
         } 
         // else{
-          // linearStdDev *= 999999999;
-          // angularStdDev *= 99999999;
+        //   linearStdDev *= 999999999;
+        //   angularStdDev *= 99999999;
         // }
         if (cameraIndex < cameraStdDevFactors.length) {
           linearStdDev *= cameraStdDevFactors[cameraIndex];
