@@ -27,6 +27,8 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.vision.VisionIO.AppliedStdDev;
+import frc.robot.subsystems.vision.VisionIO.PoseObservation;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import java.util.LinkedList;
 import java.util.List;
@@ -89,6 +91,8 @@ public class Vision extends SubsystemBase {
       List<Pose3d> robotPoses = new LinkedList<>();
       List<Pose3d> robotPosesAccepted = new LinkedList<>();
       List<Pose3d> robotPosesRejected = new LinkedList<>();
+      List<AppliedStdDev> appliedStdDevs = new LinkedList<>();
+
 
       // Add tag poses
       for (int tagId : inputs[cameraIndex].tagIds) {
@@ -140,12 +144,16 @@ public class Vision extends SubsystemBase {
           linearStdDev *= cameraStdDevFactors[cameraIndex];
           angularStdDev *= cameraStdDevFactors[cameraIndex];
         }
-
+        appliedStdDevs.add(new AppliedStdDev(linearStdDev, angularStdDev));
         // Send vision observation
         consumer.accept(
             observation.pose().toPose2d(),
             observation.timestamp(),
             VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev));
+      }
+       inputs[cameraIndex].appliedStdDevs = new AppliedStdDev[appliedStdDevs.size()];
+      for (int i = 0; i < appliedStdDevs.size(); i++) {
+        inputs[cameraIndex].appliedStdDevs[i] = appliedStdDevs.get(i);
       }
 
       // Log camera datadata

@@ -80,6 +80,8 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run(); 
+    Logger.recordOutput("Current Auton: ", m_autonomousCommand.getName());
+  
   }
 
   @Override
@@ -115,6 +117,7 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void autonomousPeriodic() {}
+    
 
   @Override
   public void autonomousExit() {
