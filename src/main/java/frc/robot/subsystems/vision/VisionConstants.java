@@ -15,6 +15,10 @@ package frc.robot.subsystems.vision;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
+import static frc.robot.subsystems.vision.VisionConstants.aprilTagLayout;
+
+import java.io.IOException;
+import java.nio.file.Path;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
@@ -23,8 +27,9 @@ import edu.wpi.first.math.geometry.Transform3d;
 
 public class VisionConstants {
   // AprilTag layout
-  public static AprilTagFieldLayout aprilTagLayout =
-      AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+  //AprilTagFieldLayout aprilTagFieldLayout = new AprilTagFieldLayout(Path.of("TestAprilTagFields.json"));
+  public static AprilTagFieldLayout aprilTagLayout;
+ 
 
   // Camera names, must match names configured on coprocessor
   public static String camera0Name = "limelight";
@@ -38,7 +43,15 @@ public class VisionConstants {
   // -91.5, -1, 2.5);
   // private final LimeLight limeLightFrontRight = new LimeLight("limelight-right", .127, 0.029,
   // 0.395, 5.8, -21, 31.2);
+    public VisionConstants(){
+        try {
+            aprilTagLayout = new AprilTagFieldLayout(Path.of("assets\\TestAprilTagFields.json"));
+        } catch (IOException e){
+            System.out.println("Failed to instantiate aprilTagLayout");
 
+        } 
+        
+    }
   //   front-left camera
   public static Transform3d robotToCamera0 =
       //   new Transform3d(0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, 0.0));

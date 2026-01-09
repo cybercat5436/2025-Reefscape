@@ -118,6 +118,9 @@ public class Vision extends SubsystemBase {
                 || observation.pose().getY() < 0.0
                 || observation.pose().getY() > aprilTagLayout.getFieldWidth();
 
+        if (observation.type() == PoseObservationType.MEGATAG_1){
+          rejectPose = true;
+        }
         // Add pose to log
         robotPoses.add(observation.pose());
         if (rejectPose) {

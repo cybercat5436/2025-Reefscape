@@ -62,6 +62,7 @@ import frc.robot.subsystems.GamePieceDetector;
 import frc.robot.subsystems.CANdleSystem.AvailableColors;
 import frc.robot.subsystems.ReefController.ReefPosition;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
@@ -81,6 +82,7 @@ public class RobotContainer {
     private double kP = 0.03;
     private double ySpeed = 0;
     private double xSpeed = 0;
+    private final VisionConstants visionConstants = new VisionConstants();
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
             .withDeadband(maxSpeed * 0.1).withRotationalDeadband(maxAngularRate * 0.1) // Add a 10% deadband
